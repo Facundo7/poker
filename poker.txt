@@ -1,0 +1,23 @@
+login obligatorio
+
+lista con torneos activos y torneos disponibles, crear torneo, ajustes.
+
+creación torneo: se eligen opciones y el torneo es creado.
+Torneo requiere registrarse en él. (se asigna asiento aleatorio)
+Una vez registrado se puede entrar en él (ruta única?).
+
+una vez que el torneo tiene jugadores registrados empieza:
+	-se asigna aleatoriamente el botón.
+	-comienza serie de rondas.
+		-ronda: se reparten cartas (jugadores si es primera ronda de apuestas, sobre la mesa dependiendo de la ronda de apuestas), empiezan los turnos 
+			(primero izquierda de BB si es primera ronda, primero izquierda de botón si es otras rondas).
+		-ronda no acaba hasta: todos los jugadores han jugado y las apuestas de todos están igualadas.
+		-en cada ronda hay acciones regidas por turnos, con temporizador.
+	-si sólo queda 1 se lleva el bote.
+	-al acabar última ronda de apuestas se calcula quiénes han ganado y se les reparte el bote.
+
+	-Si jugador no selecciona acción: check/fold
+	-Si jugador llega a 0 chips se elimina del torneo
+	-Cálculos de all in (subbote?)
+
+	

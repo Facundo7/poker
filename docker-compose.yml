@@ -38,6 +38,8 @@ services:
     volumes:
       - ./application:/var/www:cached
       - ./docker/php-fpm/scripts/app-init:/usr/local/bin/app-init
+    ports:
+      - 6001:6001
     environment:
       APP_SLUG: ${APP_SLUG}
       DB_DATABASE: ${DB_NAME}
