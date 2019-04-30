@@ -15,6 +15,15 @@ class CreatePlayersTable extends Migration
     {
         Schema::create('players', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->unsignedBigInteger('tournament_id');
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedInteger('stack');
+            $table->integer('sit');
+            $table->tinyInteger('BB');
+            $table->tinyInteger('SB');
+            $table->tinyInteger('button');
+            $table->tinyInteger('alive');
+            $table->tinyInteger('playing');
             $table->timestamps();
         });
     }

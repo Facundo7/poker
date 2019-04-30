@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateCardsTable extends Migration
+class CreateBetRoundsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,11 @@ class CreateCardsTable extends Migration
      */
     public function up()
     {
-        Schema::create('cards', function (Blueprint $table) {
+        Schema::create('bet_rounds', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('suit');
-            $table->string('value');
+            $table->unsignedBigInteger('round_id');
+            $table->integer('bet_phase');
+            $table->timestamps();
         });
     }
 
@@ -27,6 +28,6 @@ class CreateCardsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('cards');
+        Schema::dropIfExists('bet_rounds');
     }
 }
