@@ -16,11 +16,11 @@ class CreateTournamentsTable extends Migration
         Schema::create('tournaments', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('title');
-            $table->integer('BB');
-            $table->integer('BB_level');
-            $table->integer('BB_start_value');
-            $table->integer('BB_increase_time');
-            $table->integer('BB_increase_value');
+            $table->integer('bb');
+            $table->integer('bb_level')->nullable();
+            $table->integer('bb_start_value');
+            $table->integer('bb_increase_time');
+            $table->integer('bb_increase_value');
             $table->integer('initial_stack');
             $table->integer('turn_seconds');
             $table->decimal('buy_in');
