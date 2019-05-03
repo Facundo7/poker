@@ -20,4 +20,50 @@ una vez que el torneo tiene jugadores registrados empieza:
 	-Si jugador llega a 0 chips se elimina del torneo
 	-Cálculos de all in (subbote?)
 
+
+problemática de clasificación de manos 03/05/2019 4:18
+
+usar un array con 6 valores:
+valor1: mano (pareja, doble pareja, trío, etc)
+valor2: valor de esa mano (carta más alta etc)
+valor3: segundo validación de valor (ej: dobles parejas AA 77 ganarían a AA 44)
+valor4: tercer valor de validación
+valor5: cuarto valor de validación
+valor6: quinto valor de validación
+
+valor de manos:
+carta alta->1
+pareja->2
+doble pareja->3
+trío->4
+escalera->5
+color->6
+full->7
+poker->8
+escalera de color->9
+
+
+valor de cartas:
+2 -> 2
+3 -> 3
+[...]
+10 -> 10
+J -> 11
+Q -> 12
+K -> 13
+A -> 14
+
+ejemplo de manos:
+A A 7 9 10 -> array[2, 14, 10, 9, 7, 0]
+7 7 7 7 5 -> array[8, 7, 5, 0, 0] (en este caso los dos últimos valores de control quedan vacíos)
+
+
+
+problemática de evaluación de manos: 
+
+sólo se van a evaluar manos al final.
+las manos se van a evaluar de mayor a menor valor, y se parará de comprobar en cuanto se le asigne un valor.
+es decir, si una mano se ha determinado como escalera entonces no se seguirá comprobando si hay un trío, una doble pareja o una pareja.
+en cuanto se evalúe de qué mano se trata se traducirá a un array.
+
 	
