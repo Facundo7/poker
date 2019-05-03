@@ -2,10 +2,10 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-2">{{sits[0]}}</div>
-            <div class="col-2"></div>
-            <div class="col-2"></div>
-            <div class="col-2"></div>
-            <div class="col-2"></div>
+            <div class="col-2">{{sits[1]}}</div>
+            <div class="col-2">{{sits[2]}}</div>
+            <div class="col-2">{{sits[3]}}</div>
+            <div class="col-2">{{sits[4]}}</div>
         </div>
     </div>
 </template>
@@ -16,8 +16,8 @@
         data: function() {
             return {
                 sits: [],
-                user: 3,
-                length: 6
+                user: 1,
+                length: 5
             }
         },
 
@@ -32,11 +32,11 @@
                 var z=0
 
                 for(var i=this.user;i<=this.length;i++){
-                    this.sits[z]=i;
+                    Vue.set(this.sits, z, i);
                     z++;
                 }
-                for(var i=0;i<this.user;i++){
-                    this.sits[z]=i;
+                for(var i=1;i<this.user;i++){
+                    Vue.set(this.sits, z, i);
                     z++;
                 }
                 console.log(this.sits);

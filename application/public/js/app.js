@@ -1780,8 +1780,8 @@ __webpack_require__.r(__webpack_exports__);
   data: function data() {
     return {
       sits: [],
-      user: 3,
-      length: 6
+      user: 1,
+      length: 5
     };
   },
   mounted: function mounted() {
@@ -1793,12 +1793,12 @@ __webpack_require__.r(__webpack_exports__);
       var z = 0;
 
       for (var i = this.user; i <= this.length; i++) {
-        this.sits[z] = i;
+        Vue.set(this.sits, z, i);
         z++;
       }
 
-      for (var i = 0; i < this.user; i++) {
-        this.sits[z] = i;
+      for (var i = 1; i < this.user; i++) {
+        Vue.set(this.sits, z, i);
         z++;
       }
 
@@ -47251,13 +47251,13 @@ var render = function() {
     _c("div", { staticClass: "row justify-content-center" }, [
       _c("div", { staticClass: "col-2" }, [_vm._v(_vm._s(_vm.sits[0]))]),
       _vm._v(" "),
-      _c("div", { staticClass: "col-2" }),
+      _c("div", { staticClass: "col-2" }, [_vm._v(_vm._s(_vm.sits[1]))]),
       _vm._v(" "),
-      _c("div", { staticClass: "col-2" }),
+      _c("div", { staticClass: "col-2" }, [_vm._v(_vm._s(_vm.sits[2]))]),
       _vm._v(" "),
-      _c("div", { staticClass: "col-2" }),
+      _c("div", { staticClass: "col-2" }, [_vm._v(_vm._s(_vm.sits[3]))]),
       _vm._v(" "),
-      _c("div", { staticClass: "col-2" })
+      _c("div", { staticClass: "col-2" }, [_vm._v(_vm._s(_vm.sits[4]))])
     ])
   ])
 }
@@ -59592,8 +59592,8 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! C:\Users\Facundo\poker\application\resources\js\app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! C:\Users\Facundo\poker\application\resources\sass\app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! C:\Users\Facundo\Facundo\Projects\poker\application\resources\js\app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! C:\Users\Facundo\Facundo\Projects\poker\application\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })
