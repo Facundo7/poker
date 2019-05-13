@@ -15,7 +15,7 @@ class TournamentController extends Controller
      */
     public function index()
     {
-        //
+        return View::make('tournament.index');
     }
 
     /**
