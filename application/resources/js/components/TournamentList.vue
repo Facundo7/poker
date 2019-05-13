@@ -9,7 +9,7 @@
                     <td>{{tournament.initial_stack}}</td>
                     <td>{{tournament.buy_in}}</td>
                     <td>WIP</td>
-                    <td>WIP</td>
+                    <td><button @click="join(tournament.id)">Join</button></td>
                 </tr>
             </table>
         </div>
@@ -33,6 +33,9 @@
                 this.tournaments = response.data;
                 });
             },
+            join(id){
+                window.location.href=(route('tournaments.show',id));
+            }
         }
     }
 </script>

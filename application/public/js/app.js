@@ -1798,6 +1798,9 @@ __webpack_require__.r(__webpack_exports__);
       axios.get(route('api.tournaments.index')).then(function (response) {
         _this.tournaments = response.data;
       });
+    },
+    join: function join(id) {
+      window.location.href = route('tournaments.show', id);
     }
   }
 });
@@ -47268,7 +47271,19 @@ var render = function() {
               _vm._v(" "),
               _c("td", [_vm._v("WIP")]),
               _vm._v(" "),
-              _c("td", [_vm._v("WIP")])
+              _c("td", [
+                _c(
+                  "button",
+                  {
+                    on: {
+                      click: function($event) {
+                        return _vm.join(tournament.id)
+                      }
+                    }
+                  },
+                  [_vm._v("Join")]
+                )
+              ])
             ])
           })
         ],

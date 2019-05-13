@@ -22,5 +22,5 @@ Route::get('/home', 'HomeController@index')->name('home');
 Route::resource('tournaments', 'TournamentController');
 
 Route::prefix('api')->name('api.')->group(function () {
-    Route::resource('tournaments', 'Api\TournamentController');
+    Route::apiResource('tournaments', 'Api\TournamentController');
 });
