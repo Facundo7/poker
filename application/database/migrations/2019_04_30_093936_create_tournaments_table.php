@@ -22,6 +22,7 @@ class CreateTournamentsTable extends Migration
             $table->integer('bb_increase_time');
             $table->integer('bb_increase_value');
             $table->integer('initial_stack');
+            $table->integer('players_number');
             $table->integer('turn_seconds');
             $table->decimal('buy_in');
             $table->timestamps();

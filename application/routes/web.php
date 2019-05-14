@@ -23,4 +23,5 @@ Route::resource('tournaments', 'TournamentController');
 
 Route::prefix('api')->name('api.')->group(function () {
     Route::apiResource('tournaments', 'Api\TournamentController');
+    Route::apiResource('players', 'Api\PlayerController');
 });

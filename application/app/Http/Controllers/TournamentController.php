@@ -49,7 +49,7 @@ class TournamentController extends Controller
      */
     public function show(Tournament $tournament)
     {
-        //
+        return View::make('tournament.show', compact('tournament'));
     }
 
     /**

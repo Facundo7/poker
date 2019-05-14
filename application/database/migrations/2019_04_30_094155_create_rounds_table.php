@@ -17,8 +17,8 @@ class CreateRoundsTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('tournament_id');
             $table->integer('pot');
-            $table->integer('BB');
-            $table->integer('BB_level');
+            $table->integer('bb');
+            $table->integer('bb_level');
             $table->timestamps();
         });
     }
