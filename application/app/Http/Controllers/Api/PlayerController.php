@@ -6,6 +6,7 @@ use App\Models\Player;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Tournament;
 
 class PlayerController extends Controller
 {
@@ -28,9 +29,13 @@ class PlayerController extends Controller
      */
     public function store(Request $request)
     {
-        if(Player::where([['tournament_id',$request->tournament_id],['user_id',Auth::id()]])->count()==0){
+        $tournament=Tournament::find($request->tournament_id);
+        $number_of_players=Player::where('tournament_id',$request->tournament_id)->count();
+        if((Player::where([['tournament_id',$request->tournament_id],['user_id',Auth::id()]])->count()==0)&&($tournament->players_number>$number_of_players)){
         $player = new Player;
         $player->tournament_id=$request->tournament_id;
+        $player->sit=$number_of_players+1;
+        $player->stack=$tournament->initial_stack;
         $player->user_id=Auth::id();
         $player->save();
         return '200';
@@ -70,5 +75,11 @@ class PlayerController extends Controller
     public function destroy(Player $player)
     {
         //
+    }
+
+    public function logged($tournament_id){
+
+        return Player::where([['user_id',Auth::id()],['tournament_id',$tournament_id]])->get()[0];
+
     }
 }

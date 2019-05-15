@@ -37,7 +37,7 @@ class TournamentController extends Controller
      */
     public function show(Tournament $tournament)
     {
-        //
+        return $tournament->toJson();
     }
 
     /**

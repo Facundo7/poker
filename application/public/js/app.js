@@ -1787,18 +1787,34 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "game",
   props: ['tournament_id'],
   data: function data() {
     return {
       players: [],
-      player: [],
+      //nice
+      player: null,
+      //nice
+      tournament: null,
+      //nice
+      round: null,
+      //---
+      bet_round: null,
+      //---
       table_cards: [],
+      //---
       player_cards: [],
-      number_of_sits: 5,
+      //---
       pot: [],
-      sitsClass: null
+      //---
+      sitsClass: null,
+      //nice
+      status: 'stop' //---
+
     };
   },
   mounted: function mounted() {
@@ -1807,13 +1823,39 @@ __webpack_require__.r(__webpack_exports__);
   },
   methods: {
     getData: function getData() {
+      //get player logged in
+      this.getAllPlayers(this.getPlayer(this.getTournament(this.orderArray))); //get players
+      //get tournament and sits
+    },
+    getAllPlayers: function getAllPlayers(callback) {
       var _this = this;
 
       axios.get(route('api.players.index', {
         tournamentid: this.tournament_id
       })).then(function (response) {
-        console.log("all right");
         _this.players = response.data;
+        console.log("get players done");
+      });
+    },
+    getPlayer: function getPlayer(callback) {
+      var _this2 = this;
+
+      axios.get(route('api.players.logged', {
+        tournament_id: this.tournament_id
+      })).then(function (response) {
+        _this2.player = response.data;
+        console.log("get player logged done");
+      });
+    },
+    getTournament: function getTournament(callback) {
+      var _this3 = this;
+
+      axios.get(route('api.tournaments.show', {
+        tournament: this.tournament_id
+      })).then(function (response) {
+        _this3.tournament = response.data;
+        console.log("get tournament done");
+        orderArray();
       });
     },
     check: function check() {},
@@ -1858,6 +1900,35 @@ __webpack_require__.r(__webpack_exports__);
           this.sitsClass = "sits9";
           break;
       }
+    },
+    orderArray: function orderArray() {
+      console.log('starting order');
+      var z = 0;
+      var array = [];
+
+      for (var i = this.player.sit; i <= this.players.length; i++) {
+        for (var x = 0; x < this.players.length; x++) {
+          if (this.players[x].sit == i) {
+            Vue.set(array, z, this.players[x]);
+            break;
+          }
+        }
+
+        z++;
+      }
+
+      for (var i = 1; i < this.player.sit; i++) {
+        for (var x = 0; x < this.players.length; x++) {
+          if (this.players[x].sit == i) {
+            Vue.set(array, z, this.players[x]);
+            break;
+          }
+        }
+
+        z++;
+      }
+
+      this.players = array;
     }
   }
 });
@@ -47356,15 +47427,34 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", { staticClass: "container" }, [
-    _c("div", { staticClass: "poker-table", class: _vm.sitsClass }, [
-      _c("div", { staticClass: "sit" }),
-      _vm._v(" "),
-      _c("div", { staticClass: "table-info" }),
-      _vm._v(" "),
-      _c("div", { staticClass: "cards" }),
-      _vm._v(" "),
-      _c("div", { staticClass: "user-panel" })
-    ]),
+    _c(
+      "div",
+      { staticClass: "poker-table", class: _vm.sitsClass },
+      [
+        _vm.players.length > 0
+          ? [
+              _vm._l(_vm.tournament.players_number, function(index) {
+                return _c("div", { key: index, staticClass: "sit" }, [
+                  _vm._v(
+                    _vm._s(
+                      _vm.players[index - 1]
+                        ? _vm.players[index - 1].nickname
+                        : "empty"
+                    )
+                  )
+                ])
+              }),
+              _vm._v(" "),
+              _c("div", { staticClass: "table-info" }),
+              _vm._v(" "),
+              _c("div", { staticClass: "cards" }),
+              _vm._v(" "),
+              _c("div", { staticClass: "user-panel" })
+            ]
+          : _vm._e()
+      ],
+      2
+    ),
     _vm._v(" "),
     _c("div", { staticClass: "row" }, [
       _c(
@@ -47391,6 +47481,18 @@ var render = function() {
           }
         },
         [_vm._v("Join")]
+      ),
+      _vm._v(" "),
+      _c(
+        "button",
+        {
+          on: {
+            click: function($event) {
+              return _vm.orderArray()
+            }
+          }
+        },
+        [_vm._v("order")]
       )
     ])
   ])

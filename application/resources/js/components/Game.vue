@@ -2,22 +2,25 @@
     <div class="container">
 
         <div class="poker-table" :class="sitsClass">
-            <div class="sit"></div>
+            <template v-if="players.length>0">
+            <div v-for="index in tournament.players_number" :key="index" class="sit">{{players[index-1] ? players[index-1].nickname : 'empty'}}</div>
             <div class="table-info"></div>
             <div class="cards"></div>
             <div class="user-panel"></div>
+            </template>
         </div>
 
 
         <div class="row">
             <ul>
-                <li v-for="player in players" v-bind:key="player.id">
+                <li v-for="player in players" :key="player.id">
                     {{player.nickname}}
                 </li>
             </ul>
         </div>
         <div class="row">
             <button @click="sit(tournament_id)">Join</button>
+            <button @click="orderArray()">order</button>
         </div>
     </div>
 </template>
@@ -28,13 +31,16 @@
         props: ['tournament_id'],
         data: function(){
             return {
-                players:[],
-                player:[],
-                table_cards:[],
-                player_cards:[],
-                number_of_sits: 5,
-                pot:[],
-                sitsClass: null
+                players:[], //nice
+                player:null, //nice
+                tournament:null, //nice
+                round:null,//---
+                bet_round:null,//---
+                table_cards:[], //---
+                player_cards:[], //---
+                pot:[],//---
+                sitsClass: null,//nice
+                status: 'stop'//---
             }
         },
         mounted() {
@@ -43,9 +49,30 @@
         },
         methods: {
             getData(){
+                //get player logged in
+                this.getAllPlayers(this.getPlayer(this.getTournament(this.orderArray)));
+                //get players
+
+                //get tournament and sits
+
+            },
+            getAllPlayers(callback){
                 axios.get(route('api.players.index',{tournamentid: this.tournament_id})).then(response => {
-                    console.log("all right");
-                this.players = response.data;
+                    this.players = response.data;
+                    console.log("get players done");
+                });
+            },
+            getPlayer(callback){
+                axios.get(route('api.players.logged',{tournament_id: this.tournament_id})).then(response => {
+                    this.player = response.data;
+                    console.log("get player logged done");
+                });
+            },
+            getTournament(callback){
+                axios.get(route('api.tournaments.show',{tournament: this.tournament_id})).then(response => {
+                    this.tournament = response.data;
+                    console.log("get tournament done");
+                    orderArray();
                 });
             },
             check(){
@@ -92,6 +119,30 @@
                         break;
                     }
             },
+            orderArray(){
+                console.log('starting order');
+                var z=0;
+                var array=[];
+                for(var i=this.player.sit;i<=this.players.length;i++){
+                    for(var x=0;x<this.players.length;x++){
+                        if(this.players[x].sit==i){
+                        Vue.set(array, z, this.players[x]);
+                        break;
+                        }
+                     }
+                     z++;
+                 }
+                for(var i=1;i<this.player.sit;i++){
+                    for(var x=0;x<this.players.length;x++){
+                        if(this.players[x].sit==i){
+                        Vue.set(array, z, this.players[x]);
+                        break;
+                        }
+                    }
+                    z++;
+                }
+                this.players=array;
+            }
         }
     }
 </script>

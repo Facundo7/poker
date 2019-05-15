@@ -22,6 +22,10 @@ Route::get('/home', 'HomeController@index')->name('home');
 Route::resource('tournaments', 'TournamentController');
 
 Route::prefix('api')->name('api.')->group(function () {
+
+
+    Route::get('players/logged/{tournament_id}', 'Api\PlayerController@logged')->name('players.logged');
     Route::apiResource('tournaments', 'Api\TournamentController');
     Route::apiResource('players', 'Api\PlayerController');
 });
+
