@@ -1797,7 +1797,7 @@ __webpack_require__.r(__webpack_exports__);
     return {
       players: [],
       //nice
-      player: null,
+      player: 'asdf',
       //nice
       tournament: null,
       //nice
@@ -1823,39 +1823,63 @@ __webpack_require__.r(__webpack_exports__);
   },
   methods: {
     getData: function getData() {
-      //get player logged in
-      this.getAllPlayers(this.getPlayer(this.getTournament(this.orderArray))); //get players
-      //get tournament and sits
-    },
-    getAllPlayers: function getAllPlayers(callback) {
       var _this = this;
 
-      axios.get(route('api.players.index', {
-        tournamentid: this.tournament_id
-      })).then(function (response) {
-        _this.players = response.data;
-        console.log("get players done");
-      });
-    },
-    getPlayer: function getPlayer(callback) {
-      var _this2 = this;
-
-      axios.get(route('api.players.logged', {
-        tournament_id: this.tournament_id
-      })).then(function (response) {
-        _this2.player = response.data;
-        console.log("get player logged done");
-      });
-    },
-    getTournament: function getTournament(callback) {
-      var _this3 = this;
-
+      var self = this;
       axios.get(route('api.tournaments.show', {
         tournament: this.tournament_id
       })).then(function (response) {
-        _this3.tournament = response.data;
+        _this.tournament = response.data;
         console.log("get tournament done");
-        orderArray();
+        axios.get(route('api.players.index', {
+          tournamentid: _this.tournament_id
+        })).then(function (response) {
+          _this.players = response.data;
+          console.log("get players done");
+          axios.get(route('api.players.logged', {
+            tournament_id: _this.tournament_id
+          })).then(function (response) {
+            _this.player = response.data;
+            console.log("get player logged done");
+
+            if (_this.player != '') {
+              self.orderArray();
+            }
+          });
+        });
+      });
+    },
+    getAllPlayers: function getAllPlayers() {
+      var _this2 = this;
+
+      var self = this;
+      axios.get(route('api.players.index', {
+        tournamentid: this.tournament_id
+      })).then(function (response) {
+        _this2.players = response.data;
+        console.log("get players done");
+      });
+    },
+    getPlayer: function getPlayer() {
+      var _this3 = this;
+
+      var self = this;
+      axios.get(route('api.players.logged', {
+        tournament_id: this.tournament_id
+      })).then(function (response) {
+        _this3.player = response.data;
+        console.log("get player logged done");
+      });
+    },
+    getTournament: function getTournament() {
+      var _this4 = this;
+
+      var self = this;
+      axios.get(route('api.tournaments.show', {
+        tournament: this.tournament_id
+      })).then(function (response) {
+        _this4.tournament = response.data;
+        console.log("get tournament done");
       });
     },
     check: function check() {},
@@ -1903,32 +1927,35 @@ __webpack_require__.r(__webpack_exports__);
     },
     orderArray: function orderArray() {
       console.log('starting order');
-      var z = 0;
-      var array = [];
 
-      for (var i = this.player.sit; i <= this.players.length; i++) {
-        for (var x = 0; x < this.players.length; x++) {
-          if (this.players[x].sit == i) {
-            Vue.set(array, z, this.players[x]);
-            break;
+      if (this.player != null) {
+        var z = 0;
+        var array = [];
+
+        for (var i = this.player.sit; i <= this.players.length; i++) {
+          for (var x = 0; x < this.players.length; x++) {
+            if (this.players[x].sit == i) {
+              Vue.set(array, z, this.players[x]);
+              break;
+            }
           }
+
+          z++;
         }
 
-        z++;
-      }
-
-      for (var i = 1; i < this.player.sit; i++) {
-        for (var x = 0; x < this.players.length; x++) {
-          if (this.players[x].sit == i) {
-            Vue.set(array, z, this.players[x]);
-            break;
+        for (var i = 1; i < this.player.sit; i++) {
+          for (var x = 0; x < this.players.length; x++) {
+            if (this.players[x].sit == i) {
+              Vue.set(array, z, this.players[x]);
+              break;
+            }
           }
+
+          z++;
         }
 
-        z++;
+        this.players = array;
       }
-
-      this.players = array;
     }
   }
 });

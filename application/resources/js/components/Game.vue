@@ -32,7 +32,7 @@
         data: function(){
             return {
                 players:[], //nice
-                player:null, //nice
+                player:'asdf', //nice
                 tournament:null, //nice
                 round:null,//---
                 bet_round:null,//---
@@ -49,30 +49,44 @@
         },
         methods: {
             getData(){
-                //get player logged in
-                this.getAllPlayers(this.getPlayer(this.getTournament(this.orderArray)));
-                //get players
+                var self=this;
+                axios.get(route('api.tournaments.show',{tournament: this.tournament_id})).then(response => {
+                    this.tournament = response.data;
+                    console.log("get tournament done");
+                    axios.get(route('api.players.index',{tournamentid: this.tournament_id})).then(response => {
+                        this.players = response.data;
+                        console.log("get players done");
+                        axios.get(route('api.players.logged',{tournament_id: this.tournament_id})).then(response => {
+                            this.player = response.data;
+                            console.log("get player logged done");
+                            if(this.player!=''){
+                                self.orderArray();
+                            }
+                        });
+                    });
+                });
 
-                //get tournament and sits
 
             },
-            getAllPlayers(callback){
+            getAllPlayers(){
+                var self=this;
                 axios.get(route('api.players.index',{tournamentid: this.tournament_id})).then(response => {
                     this.players = response.data;
                     console.log("get players done");
                 });
             },
-            getPlayer(callback){
+            getPlayer(){
+                var self=this;
                 axios.get(route('api.players.logged',{tournament_id: this.tournament_id})).then(response => {
                     this.player = response.data;
                     console.log("get player logged done");
                 });
             },
-            getTournament(callback){
+            getTournament(){
+                var self=this;
                 axios.get(route('api.tournaments.show',{tournament: this.tournament_id})).then(response => {
                     this.tournament = response.data;
                     console.log("get tournament done");
-                    orderArray();
                 });
             },
             check(){
@@ -121,27 +135,29 @@
             },
             orderArray(){
                 console.log('starting order');
-                var z=0;
-                var array=[];
-                for(var i=this.player.sit;i<=this.players.length;i++){
-                    for(var x=0;x<this.players.length;x++){
-                        if(this.players[x].sit==i){
-                        Vue.set(array, z, this.players[x]);
-                        break;
+                if(this.player!=null){
+                    var z=0;
+                    var array=[];
+                    for(var i=this.player.sit;i<=this.players.length;i++){
+                        for(var x=0;x<this.players.length;x++){
+                            if(this.players[x].sit==i){
+                            Vue.set(array, z, this.players[x]);
+                            break;
+                            }
                         }
-                     }
-                     z++;
-                 }
-                for(var i=1;i<this.player.sit;i++){
-                    for(var x=0;x<this.players.length;x++){
-                        if(this.players[x].sit==i){
-                        Vue.set(array, z, this.players[x]);
-                        break;
-                        }
+                        z++;
                     }
-                    z++;
+                    for(var i=1;i<this.player.sit;i++){
+                        for(var x=0;x<this.players.length;x++){
+                            if(this.players[x].sit==i){
+                            Vue.set(array, z, this.players[x]);
+                            break;
+                            }
+                        }
+                        z++;
+                    }
+                    this.players=array;
                 }
-                this.players=array;
             }
         }
     }

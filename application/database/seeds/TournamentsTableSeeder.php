@@ -17,7 +17,7 @@ class TournamentsTableSeeder extends Seeder
                 'id'=>1,
                 'title'=>'torneo1',
                 'bb'=>10,
-                'bb_level'=>null,
+                'bb_level'=>1,
                 'bb_start_value'=>10,
                 'bb_increase_time'=>5,
                 'bb_increase_value'=>2,
