@@ -20,8 +20,6 @@ class CreatePlayersTable extends Migration
             $table->unsignedInteger('stack')->nullable();
             $table->unsignedInteger('betting')->nullable();
             $table->integer('sit')->nullable();
-            $table->tinyInteger('bb')->default(false);
-            $table->tinyInteger('sb')->default(false);
             $table->tinyInteger('button')->default(false);
             $table->tinyInteger('alive')->default(true);
             $table->tinyInteger('playing')->default(false);

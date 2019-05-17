@@ -10,7 +10,8 @@ use App\Models\Tournament;
 use App\Observers\RoundObserver;
 use App\Observers\PlayerObserver;
 use App\Observers\TournamentObserver;
-
+use App\Models\BetRound;
+use App\Observers\BetRoundObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -34,5 +35,6 @@ class AppServiceProvider extends ServiceProvider
         Round::observe(RoundObserver::class);
         Player::observe(PlayerObserver::class);
         Tournament::observe(TournamentObserver::class);
+        BetRound::observe(BetRoundObserver::class);
     }
 }

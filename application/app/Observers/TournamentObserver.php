@@ -15,6 +15,7 @@ class TournamentObserver
      */
     public function created(Tournament $tournament)
     {
+        //generate deck cards for this tournament
         $array=[];
         for($i=1;$i<53;$i++){
             $array[]=[
@@ -22,8 +23,7 @@ class TournamentObserver
                 'tournament_id'=>$tournament->id
             ];
         }
-
-            DB::table('deck_cards')->insert($array);
+        DB::table('deck_cards')->insert($array);
 
     }
 

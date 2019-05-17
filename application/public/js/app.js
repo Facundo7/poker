@@ -1790,12 +1790,17 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "game",
   props: ['tournament_id'],
   data: function data() {
     return {
       players: [],
+      //nice
+      players_show: [],
       //nice
       player: 'asdf',
       //nice
@@ -1954,7 +1959,7 @@ __webpack_require__.r(__webpack_exports__);
           z++;
         }
 
-        this.players = array;
+        this.players_show = array;
       }
     }
   }
@@ -47458,23 +47463,24 @@ var render = function() {
       "div",
       { staticClass: "poker-table", class: _vm.sitsClass },
       [
-        _vm.players.length > 0
+        _vm.players_show.length > 0
           ? [
               _vm._l(_vm.tournament.players_number, function(index) {
                 return _c("div", { key: index, staticClass: "sit" }, [
                   _vm._v(
-                    _vm._s(
-                      _vm.players[index - 1]
-                        ? _vm.players[index - 1].nickname
-                        : "empty"
-                    )
-                  )
+                    "\n            " +
+                      _vm._s(
+                        _vm.players_show[index - 1]
+                          ? _vm.players_show[index - 1].nickname
+                          : "empty"
+                      ) +
+                      "\n        "
+                  ),
+                  _c("div", { staticClass: "cards" })
                 ])
               }),
               _vm._v(" "),
               _c("div", { staticClass: "table-info" }),
-              _vm._v(" "),
-              _c("div", { staticClass: "cards" }),
               _vm._v(" "),
               _c("div", { staticClass: "user-panel" })
             ]
@@ -47516,6 +47522,18 @@ var render = function() {
           on: {
             click: function($event) {
               return _vm.orderArray()
+            }
+          }
+        },
+        [_vm._v("order")]
+      ),
+      _vm._v(" "),
+      _c(
+        "button",
+        {
+          on: {
+            click: function($event) {
+              return _vm.getData()
             }
           }
         },

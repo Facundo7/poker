@@ -2,10 +2,12 @@
     <div class="container">
 
         <div class="poker-table" :class="sitsClass">
-            <template v-if="players.length>0">
-            <div v-for="index in tournament.players_number" :key="index" class="sit">{{players[index-1] ? players[index-1].nickname : 'empty'}}</div>
-            <div class="table-info"></div>
+            <template v-if="players_show.length>0">
+            <div v-for="index in tournament.players_number" :key="index" class="sit">
+                {{players_show[index-1] ? players_show[index-1].nickname : 'empty'}}
             <div class="cards"></div>
+            </div>
+            <div class="table-info"></div>
             <div class="user-panel"></div>
             </template>
         </div>
@@ -21,6 +23,7 @@
         <div class="row">
             <button @click="sit(tournament_id)">Join</button>
             <button @click="orderArray()">order</button>
+            <button @click="getData()">order</button>
         </div>
     </div>
 </template>
@@ -32,6 +35,7 @@
         data: function(){
             return {
                 players:[], //nice
+                players_show:[], //nice
                 player:'asdf', //nice
                 tournament:null, //nice
                 round:null,//---
@@ -156,7 +160,7 @@
                         }
                         z++;
                     }
-                    this.players=array;
+                    this.players_show=array;
                 }
             }
         }
