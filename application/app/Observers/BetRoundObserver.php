@@ -19,14 +19,15 @@ class BetRoundObserver
         $round=Round::find($betRound->round_id);
         $tournament_id=$round->tournament_id;
 
-        //set this bet round as current
+    //set this bet round as current
         $round->current_bet_round_id=$betRound->id;
         $round->save();
 
-        //set turn
-
+    //set turn
+        //get players
         $players=Player::where([['tournament_id',$tournament_id],['playing',true]])->orderBy('sit')->get();
 
+        //get the button player index inside de $players array
         for($i=0;$i<count($players);$i++){
             if($players[$i]->button){
                 $button_player_index=$i;
@@ -34,19 +35,22 @@ class BetRoundObserver
             }
         }
 
-
+        //set the turn index to the button user index
         $turn_index=$button_player_index;
 
+        //check if its Preflop or rest of bet rounds to know who has to start playing
         if($betRound->bet_phase!=0){
-            $turn_index=$button_player_index+1;
+            $turn_index+=1;
         }else if(count($players)>2){
-            $turn_index=$button_player_index+3;
+            $turn_index+=3;
         }
 
+        //correct the index out of bounds
         if($turn_index>=count($players)){
             $turn_index-=count($players);
         }
 
+        //set as turn the id of the player
         $betRound->turn=$players[$turn_index]->id;
         $betRound->save();
 
