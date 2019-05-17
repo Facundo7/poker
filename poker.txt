@@ -2,40 +2,40 @@ login obligatorio
 
 lista con torneos activos y torneos disponibles, crear torneo, ajustes.
 
-creación torneo: se eligen opciones y el torneo es creado.
-Torneo requiere registrarse en él. (se asigna asiento aleatorio)
-Una vez registrado se puede entrar en él (ruta única?).
+creaciï¿½n torneo: se eligen opciones y el torneo es creado.
+Torneo requiere registrarse en ï¿½l. (se asigna asiento aleatorio)
+Una vez registrado se puede entrar en ï¿½l (ruta ï¿½nica?).
 
 una vez que el torneo tiene jugadores registrados empieza:
-	-se asigna aleatoriamente el botón.
+	-se asigna aleatoriamente el botï¿½n.
 	-comienza serie de rondas.
 		-ronda: se reparten cartas (jugadores si es primera ronda de apuestas, sobre la mesa dependiendo de la ronda de apuestas), empiezan los turnos 
-			(primero izquierda de BB si es primera ronda, primero izquierda de botón si es otras rondas).
-		-ronda no acaba hasta: todos los jugadores han jugado y las apuestas de todos están igualadas.
+			(primero izquierda de BB si es primera ronda, primero izquierda de botï¿½n si es otras rondas).
+		-ronda no acaba hasta: todos los jugadores han jugado y las apuestas de todos estï¿½n igualadas.
 		-en cada ronda hay acciones regidas por turnos, con temporizador.
-	-si sólo queda 1 se lleva el bote.
-	-al acabar última ronda de apuestas se calcula quiénes han ganado y se les reparte el bote.
+	-si sï¿½lo queda 1 se lleva el bote.
+	-al acabar ï¿½ltima ronda de apuestas se calcula quiï¿½nes han ganado y se les reparte el bote.
 
-	-Si jugador no selecciona acción: check/fold
+	-Si jugador no selecciona acciï¿½n: check/fold
 	-Si jugador llega a 0 chips se elimina del torneo
-	-Cálculos de all in (subbote?)
+	-Cï¿½lculos de all in (subbote?)
 
 
-problemática de clasificación de manos 03/05/2019 4:18
+problemï¿½tica de clasificaciï¿½n de manos 03/05/2019 4:18
 
 usar un array con 6 valores:
-valor1: mano (pareja, doble pareja, trío, etc)
-valor2: valor de esa mano (carta más alta etc)
-valor3: segundo validación de valor (ej: dobles parejas AA 77 ganarían a AA 44)
-valor4: tercer valor de validación
-valor5: cuarto valor de validación
-valor6: quinto valor de validación
+valor1: mano (pareja, doble pareja, trï¿½o, etc)
+valor2: valor de esa mano (carta mï¿½s alta etc)
+valor3: segundo validaciï¿½n de valor (ej: dobles parejas AA 77 ganarï¿½an a AA 44)
+valor4: tercer valor de validaciï¿½n
+valor5: cuarto valor de validaciï¿½n
+valor6: quinto valor de validaciï¿½n
 
 valor de manos:
 carta alta->1
 pareja->2
 doble pareja->3
-trío->4
+trï¿½o->4
 escalera->5
 color->6
 full->7
@@ -55,15 +55,32 @@ A -> 14
 
 ejemplo de manos:
 A A 7 9 10 -> array[2, 14, 10, 9, 7, 0]
-7 7 7 7 5 -> array[8, 7, 5, 0, 0] (en este caso los dos últimos valores de control quedan vacíos)
+7 7 7 7 5 -> array[8, 7, 5, 0, 0] (en este caso los dos ï¿½ltimos valores de control quedan vacï¿½os)
 
 
 
-problemática de evaluación de manos: 
+problemï¿½tica de evaluaciï¿½n de manos: 
 
-sólo se van a evaluar manos al final.
-las manos se van a evaluar de mayor a menor valor, y se parará de comprobar en cuanto se le asigne un valor.
-es decir, si una mano se ha determinado como escalera entonces no se seguirá comprobando si hay un trío, una doble pareja o una pareja.
-en cuanto se evalúe de qué mano se trata se traducirá a un array.
+sï¿½lo se van a evaluar manos al final.
+las manos se van a evaluar de mayor a menor valor, y se pararï¿½ de comprobar en cuanto se le asigne un valor.
+es decir, si una mano se ha determinado como escalera entonces no se seguirï¿½ comprobando si hay un trï¿½o, una doble pareja o una pareja.
+en cuanto se evalï¿½e de quï¿½ mano se trata se traducirï¿½ a un array.
+
+
+
+STEPS
+
+
+
+CREATE TOURNAMENT 
+
+JOIN USERS TO THE TOURNAMENT - CREATE PLAYERS
+
+ONCE ALL USERS HAVE JOINED THE GAME STARTS:
+
+	ROUND CREATE & CARDS TO PLAYERS $ ASSIGN BB SB AND BUTTON
+	BET_ROUND CREATE $ ASSIGN TURN TO USER
+
+
 
 	

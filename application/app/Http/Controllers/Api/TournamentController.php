@@ -19,16 +19,6 @@ class TournamentController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -47,18 +37,7 @@ class TournamentController extends Controller
      */
     public function show(Tournament $tournament)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Tournament  $tournament
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Tournament $tournament)
-    {
-        //
+        return $tournament->toJson();
     }
 
     /**

@@ -16,9 +16,8 @@ class CreateDeckCardsTable extends Migration
         Schema::create('deck_cards', function (Blueprint $table) {
             $table->unsignedBigInteger('card_id');
             $table->unsignedBigInteger('tournament_id');
-            $table->tinyInteger('available');
+            $table->tinyInteger('available')->default(true);
             $table->primary(['card_id','tournament_id']);
-            $table->timestamps();
         });
     }
 

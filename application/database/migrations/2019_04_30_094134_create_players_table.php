@@ -17,13 +17,12 @@ class CreatePlayersTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('tournament_id');
             $table->unsignedBigInteger('user_id');
-            $table->unsignedInteger('stack');
-            $table->integer('sit');
-            $table->tinyInteger('BB');
-            $table->tinyInteger('SB');
-            $table->tinyInteger('button');
-            $table->tinyInteger('alive');
-            $table->tinyInteger('playing');
+            $table->unsignedInteger('stack')->nullable();
+            $table->unsignedInteger('betting')->nullable();
+            $table->integer('sit')->nullable();
+            $table->tinyInteger('button')->default(false);
+            $table->tinyInteger('alive')->default(true);
+            $table->tinyInteger('playing')->default(false);
             $table->timestamps();
         });
     }

@@ -20,6 +20,8 @@
         <input class="form-control" type="text" name="initial_stack" value="{{ old('initial_stack') }}">
         <div class="label">turn_seconds: </div>
         <input class="form-control" type="text" name="turn_seconds" value="{{ old('turn_seconds') }}">
+        <div class="label">players_number: </div>
+        <input class="form-control" type="text" name="players_number" value="{{ old('players_number') }}">
         <div class="label">buy_in: </div>
         <input class="form-control" type="text" name="buy_in" value="{{ old('buy_in') }}">
 
