@@ -34,10 +34,13 @@ class BetRoundObserver
             }
         }
 
-        if($betRound->bet_phase==0){
-            $turn_index=$button_player_index+3;
-        }else{
+
+        $turn_index=$button_player_index;
+
+        if($betRound->bet_phase!=0){
             $turn_index=$button_player_index+1;
+        }else if(count($players)>2){
+            $turn_index=$button_player_index+3;
         }
 
         if($turn_index>=count($players)){
