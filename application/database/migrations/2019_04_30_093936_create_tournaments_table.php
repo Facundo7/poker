@@ -15,7 +15,6 @@ class CreateTournamentsTable extends Migration
     {
         Schema::create('tournaments', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('current_round_id')->nullable();
             $table->string('title');
             $table->integer('bb');
             $table->integer('bb_level')->default(1);

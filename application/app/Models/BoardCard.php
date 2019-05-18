@@ -4,16 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class BetRound extends Model
+class BoardCard extends Model
 {
-
     public function round()
     {
         return $this->belongsTo(Round::class);
     }
 
-    public function actions()
+    public function card()
     {
-        return $this->hasMany(Action::class);
+        return $this->belongsTo(Card::class);
     }
 }

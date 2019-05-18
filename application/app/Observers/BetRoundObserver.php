@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Models\BetRound;
 use App\Models\Player;
 use App\Models\Round;
+use App\Models\Tournament;
 
 class BetRoundObserver
 {
@@ -17,15 +18,11 @@ class BetRoundObserver
     public function created(BetRound $betRound)
     {
         $round=Round::find($betRound->round_id);
-        $tournament_id=$round->tournament_id;
-
-    //set this bet round as current
-        $round->current_bet_round_id=$betRound->id;
-        $round->save();
+        $tournament=Tournament::find($round->tournament_id);
 
     //set turn
         //get players
-        $players=Player::where([['tournament_id',$tournament_id],['playing',true]])->orderBy('sit')->get();
+        $players=$tournament->players()->where('playing',true)->orderBy('sit')->get();
 
         //get the button player index inside de $players array
         for($i=0;$i<count($players);$i++){

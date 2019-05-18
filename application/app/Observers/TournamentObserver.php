@@ -3,7 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Tournament;
-use Illuminate\Support\Facades\DB;
+use App\Models\DeckCard;
 
 class TournamentObserver
 {
@@ -23,7 +23,7 @@ class TournamentObserver
                 'tournament_id'=>$tournament->id
             ];
         }
-        DB::table('deck_cards')->insert($array);
+        DeckCard::insert($array);
 
     }
 

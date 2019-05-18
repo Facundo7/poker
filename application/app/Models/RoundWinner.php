@@ -4,14 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Action extends Model
+class RoundWinner extends Model
 {
     public function player()
     {
         return $this->belongsTo(Player::class);
     }
-    public function betRound()
+
+    public function round()
     {
-        return $this->belongsTo(BetRound::class);
+        return $this->belongsTo(Round::class);
     }
 }

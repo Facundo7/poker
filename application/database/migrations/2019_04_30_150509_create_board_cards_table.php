@@ -14,10 +14,10 @@ class CreateBoardCardsTable extends Migration
     public function up()
     {
         Schema::create('board_cards', function (Blueprint $table) {
+            $table->bigIncrements('id');
             $table->unsignedBigInteger('round_id');
             $table->unsignedBigInteger('card_id');
             $table->integer('position');
-            $table->primary(['round_id', 'card_id']);
             $table->timestamps();
         });
     }

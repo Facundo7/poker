@@ -14,11 +14,11 @@ class CreateActionsTable extends Migration
     public function up()
     {
         Schema::create('actions', function (Blueprint $table) {
+            $table->bigIncrements('id');
             $table->unsignedBigInteger('bet_round_id');
             $table->unsignedBigInteger('player_id');
             $table->integer('action');
             $table->integer('amount');
-            $table->primary(['bet_round_id', 'player_id']);
             $table->timestamps();
         });
     }

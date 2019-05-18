@@ -21,4 +21,24 @@ class Player extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function tournament()
+    {
+        return $this->belongsTo(Tournament::class);
+    }
+
+    public function actions()
+    {
+        return $this->hasMany(Action::class);
+    }
+
+    public function roundWinners()
+    {
+        return $this->hasMany(RoundWinner::class);
+    }
+
+    public function playerCards()
+    {
+        return $this->hasMany(PlayerCard::class);
+    }
+
 }

@@ -18,6 +18,7 @@ class CreateBetRoundsTable extends Migration
             $table->unsignedBigInteger('round_id');
             $table->integer('bet_phase');
             $table->integer('turn')->nullable();
+            $table->tinyInteger('current')->nullable();
             $table->timestamps();
         });
     }

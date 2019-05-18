@@ -16,10 +16,10 @@ class CreateRoundsTable extends Migration
         Schema::create('rounds', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('tournament_id');
-            $table->unsignedBigInteger('current_bet_round_id')->nullable();
             $table->integer('pot');
             $table->integer('bb');
             $table->integer('bb_level');
+            $table->tinyInteger('current')->nullable();
             $table->timestamps();
         });
     }
