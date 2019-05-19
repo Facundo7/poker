@@ -59,11 +59,11 @@ class RoundObserver
         $tournament->players()->update(['playing'=>true]);
 
         //create the first bet round
-        BetRound::create([
-            'round_id' => $round->id,
-            'bet_phase' => 0,
-            'current' => true,
-        ]);
+        $bet_round=new BetRound;
+            $bet_round->round_id=$round->id;
+            $bet_round->bet_phase=0;
+            $bet_round->current=true;
+            $bet_round->save();
     }
 
     /**
