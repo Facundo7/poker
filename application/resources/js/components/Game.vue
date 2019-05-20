@@ -49,6 +49,7 @@
         },
         mounted() {
             this.getData();
+            this.listen();
             this.setClass();
         },
         methods: {
@@ -109,7 +110,7 @@
                 })
                 .then(function (response) {
                 console.log(response);
-                self.getData();
+                //self.getData();
                 });
             },
             setClass(){
@@ -162,6 +163,14 @@
                     }
                     this.players_show=array;
                 }
+            },
+            listen(){
+
+                Echo.channel('tournament.'+this.tournament_id)
+                .listen('NewPlayer', ()=>{this.getData()});
+
+
+
             }
         }
     }

@@ -6,6 +6,7 @@ use App\Models\BetRound;
 use App\Models\Player;
 use App\Models\Round;
 use App\Models\Tournament;
+use App\Events\NewBetRound;
 
 class BetRoundObserver
 {
@@ -17,6 +18,7 @@ class BetRoundObserver
      */
     public function created(BetRound $betRound)
     {
+        event(new NewBetRound($betRound));
         $round=Round::find($betRound->round_id);
         $tournament=Tournament::find($round->tournament_id);
 

@@ -1824,6 +1824,7 @@ __webpack_require__.r(__webpack_exports__);
   },
   mounted: function mounted() {
     this.getData();
+    this.listen();
     this.setClass();
   },
   methods: {
@@ -1895,8 +1896,7 @@ __webpack_require__.r(__webpack_exports__);
       axios.post(route('api.players.store'), {
         tournament_id: this.tournament_id
       }).then(function (response) {
-        console.log(response);
-        self.getData();
+        console.log(response); //self.getData();
       });
     },
     setClass: function setClass() {
@@ -1961,6 +1961,13 @@ __webpack_require__.r(__webpack_exports__);
 
         this.players_show = array;
       }
+    },
+    listen: function listen() {
+      var _this5 = this;
+
+      Echo.channel('tournament.' + this.tournament_id).listen('NewPlayer', function () {
+        _this5.getData();
+      });
     }
   }
 });
@@ -59864,8 +59871,11 @@ window.Pusher = __webpack_require__(/*! pusher-js */ "./node_modules/pusher-js/d
 window.Echo = new laravel_echo__WEBPACK_IMPORTED_MODULE_0__["default"]({
   broadcaster: 'pusher',
   key: "ASDFGH",
+  wsHost: window.location.hostname,
   cluster: "mt1",
-  encrypted: true
+  wsPort: 6001,
+  disableStats: true //encrypted: true
+
 });
 
 /***/ }),
