@@ -18,7 +18,6 @@ class CreateDeckCardsTable extends Migration
             $table->unsignedBigInteger('card_id');
             $table->unsignedBigInteger('tournament_id');
             $table->tinyInteger('available')->default(true);
-            $table->timestamps();
         });
     }
 

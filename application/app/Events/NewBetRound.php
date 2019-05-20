@@ -35,6 +35,6 @@ class NewBetRound implements ShouldBroadcastNow
      */
     public function broadcastOn()
     {
-        return new Channel('tournament.'.$this->bet_round->round()->tournament_id);
+        return new Channel('tournament.'.$this->bet_round->round->tournament_id);
     }
 }

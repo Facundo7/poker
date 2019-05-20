@@ -40,7 +40,7 @@
                 tournament:null, //nice
                 round:null,//---
                 bet_round:null,//---
-                table_cards:[], //---
+                board_cards:[], //nice
                 player_cards:[], //---
                 pot:[],//---
                 sitsClass: null,//nice
@@ -92,6 +92,12 @@
                 axios.get(route('api.tournaments.show',{tournament: this.tournament_id})).then(response => {
                     this.tournament = response.data;
                     console.log("get tournament done");
+                });
+            },
+            getBoardCards(){
+                axios.get(route('api.tournaments.boardcards',{tournament_id: this.tournament_id})).then(response => {
+                    this.board_cards = response.data;
+                    console.log("get boardCards done");
                 });
             },
             check(){
@@ -165,11 +171,9 @@
                 }
             },
             listen(){
-
                 Echo.channel('tournament.'+this.tournament_id)
-                .listen('NewPlayer', ()=>{this.getData()});
-
-
+                .listen('NewPlayer', ()=>{this.getData()})
+                .listen('NewBetRound', ()=>{this.getBoardCards()});
 
             }
         }

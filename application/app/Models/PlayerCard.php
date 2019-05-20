@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class PlayerCard extends Model
 {
+    public $timestamps = false;
+
     public function round()
     {
         return $this->belongsTo(Round::class);

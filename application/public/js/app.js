@@ -1810,8 +1810,8 @@ __webpack_require__.r(__webpack_exports__);
       //---
       bet_round: null,
       //---
-      table_cards: [],
-      //---
+      board_cards: [],
+      //nice
       player_cards: [],
       //---
       pot: [],
@@ -1886,6 +1886,16 @@ __webpack_require__.r(__webpack_exports__);
       })).then(function (response) {
         _this4.tournament = response.data;
         console.log("get tournament done");
+      });
+    },
+    getBoardCards: function getBoardCards() {
+      var _this5 = this;
+
+      axios.get(route('api.tournaments.boardcards', {
+        tournament_id: this.tournament_id
+      })).then(function (response) {
+        _this5.board_cards = response.data;
+        console.log("get boardCards done");
       });
     },
     check: function check() {},
@@ -1963,10 +1973,12 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     listen: function listen() {
-      var _this5 = this;
+      var _this6 = this;
 
       Echo.channel('tournament.' + this.tournament_id).listen('NewPlayer', function () {
-        _this5.getData();
+        _this6.getData();
+      }).listen('NewBetRound', function () {
+        _this6.getBoardCards();
       });
     }
   }
@@ -60036,8 +60048,8 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! C:\Users\Facundo\Facundo\Projects\poker\application\resources\js\app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! C:\Users\Facundo\Facundo\Projects\poker\application\resources\sass\app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! C:\Users\Facundo\poker\application\resources\js\app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! C:\Users\Facundo\poker\application\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })

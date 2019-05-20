@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Models\Tournament;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Round;
 
 class TournamentController extends Controller
 {
@@ -61,5 +62,11 @@ class TournamentController extends Controller
     public function destroy(Tournament $tournament)
     {
         //
+    }
+
+    public function boardCards($tournament_id){
+
+        return Round::where([['tournament_id',$tournament_id],['current',true]])->first()->boardCards()->get();
+
     }
 }

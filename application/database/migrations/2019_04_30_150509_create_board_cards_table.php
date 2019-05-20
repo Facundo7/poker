@@ -18,7 +18,6 @@ class CreateBoardCardsTable extends Migration
             $table->unsignedBigInteger('round_id');
             $table->unsignedBigInteger('card_id');
             $table->integer('position');
-            $table->timestamps();
         });
     }
 

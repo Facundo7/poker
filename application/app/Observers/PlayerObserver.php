@@ -17,6 +17,7 @@ class PlayerObserver
      */
     public function created(Player $player)
     {
+
          event(new NewPlayer($player));
          $tournament=Tournament::find($player->tournament_id);
 

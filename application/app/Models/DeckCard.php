@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class DeckCard extends Model
 {
+    public $timestamps = false;
+
     public function card()
     {
         return $this->belongsTo(Card::class);
