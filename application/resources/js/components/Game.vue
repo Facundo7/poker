@@ -8,7 +8,12 @@
             <div class="cards"></div>
             </div>
             <div class="table-info"></div>
-            <div class="user-panel"></div>
+            <div class="user-panel">
+                <input type="text" v-model="amount">
+                <button @click="check()">Check</button>
+                <button @click="bet()">Bet</button>
+                <button @click="fold()">Fold</button>
+            </div>
             </template>
         </div>
 
@@ -38,13 +43,14 @@
                 players_show:[], //nice
                 player:'asdf', //nice
                 tournament:null, //nice
-                round:null,//---
-                bet_round:null,//---
+                round:null,//nice
+                bet_round:null,//nice
                 board_cards:[], //nice
-                player_cards:[], //---
-                pot:[],//---
+                player_cards:[], //nice
+                pot:round.pot,//nice
+                amount:15,
                 sitsClass: null,//nice
-                status: 'stop'//---
+                status: 'stop'//---?????
             }
         },
         mounted() {
@@ -94,20 +100,44 @@
                     console.log("get tournament done");
                 });
             },
+            getRound(){
+                var self=this;
+                axios.get(route('api.tournaments.round',{tournament: this.tournament_id})).then(response => {
+                    this.round = response.data;
+                    console.log("get tournament done");
+                });
+            },
+            getBetRound(){
+                var self=this;
+                axios.get(route('api.tournaments.betround',{tournament: this.tournament_id})).then(response => {
+                    this.bet_round = response.data;
+                    console.log("get tournament done");
+                });
+            },
             getBoardCards(){
-                axios.get(route('api.tournaments.boardcards',{tournament_id: this.tournament_id})).then(response => {
+                axios.get(route('api.tournaments.boardcards',{tournament: this.tournament_id})).then(response => {
                     this.board_cards = response.data;
                     console.log("get boardCards done");
                 });
             },
-            check(){
-
+            getPlayerCards(){
+                axios.get(route('api.players.loggedcards',{tournament: this.tournament_id})).then(response => {
+                    this.player_cards = response.data;
+                    console.log("get boardCards done");
+                });
             },
-            fold(){
+            act(action, amount){
+                axios.post(route('api.actions.store'), {
+                action: action,
+                bet_round_id: this.bet_round.id,
+                player_id: this.player.id,
+                amount: amount,
 
-            },
-            bet(amount){
-
+                })
+                .then(function (response) {
+                console.log(response);
+                //self.getData();
+                });
             },
             sit(id){
                 var self = this;
@@ -173,7 +203,8 @@
             listen(){
                 Echo.channel('tournament.'+this.tournament_id)
                 .listen('NewPlayer', ()=>{this.getData()})
-                .listen('NewBetRound', ()=>{this.getBoardCards()});
+                .listen('NewBetRound', ()=>{this.getBoardCards()})
+                .listen('NewRound', ()=>{this.getPlayerCards()});
 
             }
         }

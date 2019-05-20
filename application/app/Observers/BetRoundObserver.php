@@ -3,9 +3,6 @@
 namespace App\Observers;
 
 use App\Models\BetRound;
-use App\Models\Player;
-use App\Models\Round;
-use App\Models\Tournament;
 use App\Events\NewBetRound;
 
 class BetRoundObserver
@@ -18,9 +15,8 @@ class BetRoundObserver
      */
     public function created(BetRound $betRound)
     {
-        event(new NewBetRound($betRound));
-        $round=Round::find($betRound->round_id);
-        $tournament=Tournament::find($round->tournament_id);
+
+        $tournament=$betRound->round->tournament;
 
     //set turn
         //get players
@@ -34,24 +30,21 @@ class BetRoundObserver
             }
         }
 
-        //set the turn index to the button user index
-        $turn_index=$button_player_index;
 
         //check if its Preflop or rest of bet rounds to know who has to start playing
+        $turn_index=$button_player_index;
         if($betRound->bet_phase!=0){
             $turn_index+=1;
         }else if(count($players)>2){
             $turn_index+=3;
         }
 
-        //correct the index out of bounds
-        if($turn_index>=count($players)){
-            $turn_index-=count($players);
-        }
-
         //set as turn the id of the player
         $betRound->turn=$players[$turn_index]->id;
         $betRound->save();
+
+        event(new NewBetRound($betRound));
+
 
     }
 

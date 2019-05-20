@@ -8,6 +8,7 @@ use App\Models\BetRound;
 use App\Models\DeckCard;
 use App\Models\PlayerCard;
 use App\Models\Tournament;
+use App\Events\NewRound;
 
 class RoundObserver
 {
@@ -20,7 +21,7 @@ class RoundObserver
     public function created(Round $round)
     {
 
-        $tournament=Tournament::find($round->tournament_id);
+        $tournament=$round->tournament;
 
          //set all deck cards available
          $tournament->deckCards()->update(['available' => true]);
@@ -31,9 +32,13 @@ class RoundObserver
             $cards[]=$i;
          }
          //get players of the round
-         $players=$tournament->players()->where('alive', true)->get();
+         $players=$tournament->players()->where('alive', true)->orderBy('sit')->get();
+
+         //$players_array=$tournament->players()->where('alive', true)->orderBy('sit')->get();
+
 
          $remove=[]; //this array will contain the id of the cards that have been dealt so they can not be available again until next round
+
          //for each player deal 2 cards and store it in "player_cards" table
          for($i=0;$i<count($players);$i++){
             for($j=1;$j<3;$j++){
@@ -49,14 +54,49 @@ class RoundObserver
                 $remove[]=$cards[$index];
                 array_splice($cards, $index, 1);
             }
+            //getting the button index
+            if($players[$i]->button){
+                $button_player_index=$i;
+            }
         }
+
+        event(new NewRound($round));
+
         //set as unavailable those cards that have been dealt.
         $tournament->deckCards()
             ->whereIn('card_id', $remove)
             ->update(['available' => false]);
 
-        //set as playing all the players
-        $tournament->players()->update(['playing'=>true]);
+        //set as playing all the players and remove bb and sb
+        $players->update(['playing'=>true, 'sb'=>false, 'bb'=>false]);
+
+        //set bb, sb
+        //check if this is heads up (2 players)
+        if($players->count()==2){
+
+            $bb_index=$button_player_index+1;
+            $sb_index=$button_player_index;
+
+        }else{
+
+            $bb_index=$button_player_index+2;
+            $sb_index=$button_player_index+1;
+
+        }
+
+        //correct the sb and bb index if they are out of the bounds
+        if($bb_index>=count($players)){
+            $bb_index-=count($players);
+        }
+
+        if($sb_index>=count($players)){
+            $sb_index-=count($players);
+        }
+
+        //set bb and sb
+        $players[$sb_index]->sb=true;
+        $players[$bb_index]->bb=true;
+
 
         //create the first bet round
         $bet_round=new BetRound;

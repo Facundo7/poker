@@ -1793,6 +1793,11 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "game",
   props: ['tournament_id'],
@@ -1807,18 +1812,19 @@ __webpack_require__.r(__webpack_exports__);
       tournament: null,
       //nice
       round: null,
-      //---
+      //nice
       bet_round: null,
-      //---
+      //nice
       board_cards: [],
       //nice
       player_cards: [],
-      //---
-      pot: [],
-      //---
+      //nice
+      pot: round.pot,
+      //nice
+      amount: 15,
       sitsClass: null,
       //nice
-      status: 'stop' //---
+      status: 'stop' //---?????
 
     };
   },
@@ -1888,19 +1894,58 @@ __webpack_require__.r(__webpack_exports__);
         console.log("get tournament done");
       });
     },
-    getBoardCards: function getBoardCards() {
+    getRound: function getRound() {
       var _this5 = this;
 
-      axios.get(route('api.tournaments.boardcards', {
-        tournament_id: this.tournament_id
+      var self = this;
+      axios.get(route('api.tournaments.round', {
+        tournament: this.tournament_id
       })).then(function (response) {
-        _this5.board_cards = response.data;
+        _this5.round = response.data;
+        console.log("get tournament done");
+      });
+    },
+    getBetRound: function getBetRound() {
+      var _this6 = this;
+
+      var self = this;
+      axios.get(route('api.tournaments.betround', {
+        tournament: this.tournament_id
+      })).then(function (response) {
+        _this6.bet_round = response.data;
+        console.log("get tournament done");
+      });
+    },
+    getBoardCards: function getBoardCards() {
+      var _this7 = this;
+
+      axios.get(route('api.tournaments.boardcards', {
+        tournament: this.tournament_id
+      })).then(function (response) {
+        _this7.board_cards = response.data;
         console.log("get boardCards done");
       });
     },
-    check: function check() {},
-    fold: function fold() {},
-    bet: function bet(amount) {},
+    getPlayerCards: function getPlayerCards() {
+      var _this8 = this;
+
+      axios.get(route('api.players.loggedcards', {
+        tournament: this.tournament_id
+      })).then(function (response) {
+        _this8.player_cards = response.data;
+        console.log("get boardCards done");
+      });
+    },
+    act: function act(action, amount) {
+      axios.post(route('api.actions.store'), {
+        action: action,
+        bet_round_id: this.bet_round.id,
+        player_id: this.player.id,
+        amount: amount
+      }).then(function (response) {
+        console.log(response); //self.getData();
+      });
+    },
     sit: function sit(id) {
       var self = this;
       axios.post(route('api.players.store'), {
@@ -1973,12 +2018,14 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     listen: function listen() {
-      var _this6 = this;
+      var _this9 = this;
 
       Echo.channel('tournament.' + this.tournament_id).listen('NewPlayer', function () {
-        _this6.getData();
+        _this9.getData();
       }).listen('NewBetRound', function () {
-        _this6.getBoardCards();
+        _this9.getBoardCards();
+      }).listen('NewRound', function () {
+        _this9.getPlayerCards();
       });
     }
   }
@@ -47501,7 +47548,64 @@ var render = function() {
               _vm._v(" "),
               _c("div", { staticClass: "table-info" }),
               _vm._v(" "),
-              _c("div", { staticClass: "user-panel" })
+              _c("div", { staticClass: "user-panel" }, [
+                _c("input", {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.amount,
+                      expression: "amount"
+                    }
+                  ],
+                  attrs: { type: "text" },
+                  domProps: { value: _vm.amount },
+                  on: {
+                    input: function($event) {
+                      if ($event.target.composing) {
+                        return
+                      }
+                      _vm.amount = $event.target.value
+                    }
+                  }
+                }),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    on: {
+                      click: function($event) {
+                        return _vm.check()
+                      }
+                    }
+                  },
+                  [_vm._v("Check")]
+                ),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    on: {
+                      click: function($event) {
+                        return _vm.bet()
+                      }
+                    }
+                  },
+                  [_vm._v("Bet")]
+                ),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    on: {
+                      click: function($event) {
+                        return _vm.fold()
+                      }
+                    }
+                  },
+                  [_vm._v("Fold")]
+                )
+              ])
             ]
           : _vm._e()
       ],

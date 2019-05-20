@@ -3,7 +3,6 @@
 namespace App\Observers;
 
 use App\Models\Player;
-use App\Models\Tournament;
 use App\Models\Round;
 use App\Events\NewPlayer;
 
@@ -19,7 +18,7 @@ class PlayerObserver
     {
 
          event(new NewPlayer($player));
-         $tournament=Tournament::find($player->tournament_id);
+         $tournament=$player->tournament;
 
          //check if this player completes the table so the game starts
          if($tournament->players()->count()==$tournament->players_number){

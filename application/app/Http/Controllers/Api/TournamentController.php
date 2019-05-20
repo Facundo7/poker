@@ -64,9 +64,20 @@ class TournamentController extends Controller
         //
     }
 
-    public function boardCards($tournament_id){
+    public function boardCards(Tournament $tournament){
 
-        return Round::where([['tournament_id',$tournament_id],['current',true]])->first()->boardCards()->get();
+        return $tournament->rounds()->where('current',true)->first()->boardCards()->get();
 
+    }
+
+    public function currentRound(Tournament $tournament){
+
+        return $tournament->rounds()->where('current',true)->first();
+
+    }
+
+    public function currentBetRound(Tournament $tournament){
+
+        return $tournament->rounds()->where('current',true)->first()->betRounds()->where('current',true)->first();
     }
 }

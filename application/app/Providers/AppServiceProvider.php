@@ -3,15 +3,16 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use App\Models\User;
 use App\Models\Round;
-use App\Models\Player;
-use App\Models\Tournament;
 use App\Observers\RoundObserver;
+use App\Models\Player;
 use App\Observers\PlayerObserver;
+use App\Models\Tournament;
 use App\Observers\TournamentObserver;
 use App\Models\BetRound;
 use App\Observers\BetRoundObserver;
+use App\Models\Action;
+use App\Observers\ActionObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -36,5 +37,6 @@ class AppServiceProvider extends ServiceProvider
         Player::observe(PlayerObserver::class);
         Tournament::observe(TournamentObserver::class);
         BetRound::observe(BetRoundObserver::class);
+        Action::observe(ActionObserver::class);
     }
 }
