@@ -19,7 +19,6 @@ class CreatePlayerCardsTable extends Migration
             $table->unsignedBigInteger('player_id');
             $table->unsignedBigInteger('card_id');
             $table->integer('position');
-            $table->timestamps();
         });
     }
 

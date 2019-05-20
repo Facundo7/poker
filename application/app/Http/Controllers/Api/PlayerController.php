@@ -40,7 +40,6 @@ class PlayerController extends Controller
          $player->save();
          return '200';
          }else return '500';
-
     }
 
     /**
@@ -81,5 +80,13 @@ class PlayerController extends Controller
 
         return Player::where([['user_id',Auth::id()],['tournament_id',$tournament_id]])->first();
 
+    }
+
+    public function loggedCards($tournament_id){
+
+        $player = Player::where([['user_id',Auth::id()],['tournament_id',$tournament_id]])->first();
+        $current_round = Tournament::find($tournament_id)->rounds()->where('current',true)->first();
+        $cards = $player->playerCards()->where('round_id',$current_round->id)->with('card')->get();
+        return $cards;
     }
 }
