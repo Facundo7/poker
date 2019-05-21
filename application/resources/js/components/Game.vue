@@ -2,9 +2,9 @@
     <div class="container">
 
         <div class="poker-table" :class="sitsClass">
-            <template v-if="players_show.length>0">
+          <template v-if="players_show">
             <div v-for="index in tournament.players_number" :key="index" class="sit">
-                {{players_show[index-1] ? players_show[index-1].nickname : 'empty'}}
+                {{players_show[index-1] ? players_show[index-1].user.nickname : 'empty'}}
             <div class="cards"></div>
             </div>
             <div class="table-info"></div>
@@ -21,7 +21,7 @@
         <div class="row">
             <ul>
                 <li v-for="player in players" :key="player.id">
-                    {{player.nickname}}
+                    {{player.user.nickname}}
                 </li>
             </ul>
         </div>
@@ -29,6 +29,20 @@
             <button @click="sit(tournament_id)">Join</button>
             <button @click="orderArray()">order</button>
             <button @click="getData()">order</button>
+        </div>
+        <div class="row">
+            <ul>
+                <li>players: {{players}}</li>
+                <li>players_show: {{players_show}}</li>
+                <li>player: {{player}}</li>
+                <li>tournament: {{tournament}}</li>
+                <li>round: {{round}}</li>
+                <li>betround: {{bet_round}}</li>
+                <li>board cards: {{board_cards}}</li>
+                <li>player cards:  {{player_cards}}</li>
+                <li>pot: {{pot}}</li>
+                <li>amount: {{amount}}</li>
+            </ul>
         </div>
     </div>
 </template>
@@ -39,19 +53,32 @@
         props: ['tournament_id'],
         data: function(){
             return {
-                players:[], //nice
-                players_show:[], //nice
-                player:'asdf', //nice
-                tournament:null, //nice
-                round:null,//nice
-                bet_round:null,//nice
-                board_cards:[], //nice
-                player_cards:[], //nice
-                pot:round.pot,//nice
+                players:'', //nice
+                player:'', //nice
+                tournament:'', //nice
+                round:'',//nice
+                bet_round:'',//nice
                 amount:15,
-                sitsClass: null,//nice
-                status: 'stop'//---?????
+                sitsClass: '',//nice
+                status: 'stop',//---?????
             }
+        },
+        computed: {
+            pot: function() {
+                return this.round.pot;
+            },
+            player_cards: function() {
+                return this.player.cards;
+            },
+            board_cards: function() {
+                return this.round.board_cards;
+            },
+            players_show: function(){
+                 if(this.player!='' && this.players!=''){
+                     return this.orderArray(this.player, this.players);
+            };
+            }
+
         },
         mounted() {
             this.getData();
@@ -60,35 +87,41 @@
         },
         methods: {
             getData(){
-                var self=this;
-                axios.get(route('api.tournaments.show',{tournament: this.tournament_id})).then(response => {
-                    this.tournament = response.data;
-                    console.log("get tournament done");
-                    axios.get(route('api.players.index',{tournamentid: this.tournament_id})).then(response => {
-                        this.players = response.data;
-                        console.log("get players done");
-                        axios.get(route('api.players.logged',{tournament_id: this.tournament_id})).then(response => {
-                            this.player = response.data;
-                            console.log("get player logged done");
-                            if(this.player!=''){
-                                self.orderArray();
-                            }
-                        });
-                    });
-                });
+                // var self=this;
+                // axios.get(route('api.tournaments.show',{tournament: this.tournament_id})).then(response => {
+                //     this.tournament = response.data;
+                //     console.log("get tournament done");
+                //     axios.get(route('api.tournaments.players',{tournament: this.tournament_id})).then(response => {
+                //         this.players = response.data;
+                //         console.log("get players done");
+                //         axios.get(route('api.tournaments.playerlogged',{tournament: this.tournament_id})).then(response => {
+                //             this.player = response.data;
+                //             console.log("get player logged done");
+                //             if(this.player!=''){
+                //                 self.orderArray();
+                //             }
+                //         });
+                //     });
+                // });
+                this.getTournament();
+                this.getAllPlayers();
+                this.getPlayer();
+                this.getRound();
+                this.getBetRound();
+
 
 
             },
             getAllPlayers(){
                 var self=this;
-                axios.get(route('api.players.index',{tournamentid: this.tournament_id})).then(response => {
+                axios.get(route('api.tournaments.players',{tournament: this.tournament_id})).then(response => {
                     this.players = response.data;
                     console.log("get players done");
                 });
             },
             getPlayer(){
                 var self=this;
-                axios.get(route('api.players.logged',{tournament_id: this.tournament_id})).then(response => {
+                axios.get(route('api.tournaments.playerlogged',{tournament: this.tournament_id})).then(response => {
                     this.player = response.data;
                     console.log("get player logged done");
                 });
@@ -104,26 +137,14 @@
                 var self=this;
                 axios.get(route('api.tournaments.round',{tournament: this.tournament_id})).then(response => {
                     this.round = response.data;
-                    console.log("get tournament done");
+                    console.log("get round done");
                 });
             },
             getBetRound(){
                 var self=this;
                 axios.get(route('api.tournaments.betround',{tournament: this.tournament_id})).then(response => {
                     this.bet_round = response.data;
-                    console.log("get tournament done");
-                });
-            },
-            getBoardCards(){
-                axios.get(route('api.tournaments.boardcards',{tournament: this.tournament_id})).then(response => {
-                    this.board_cards = response.data;
-                    console.log("get boardCards done");
-                });
-            },
-            getPlayerCards(){
-                axios.get(route('api.players.loggedcards',{tournament: this.tournament_id})).then(response => {
-                    this.player_cards = response.data;
-                    console.log("get boardCards done");
+                    console.log("get betRound done");
                 });
             },
             act(action, amount){
@@ -174,31 +195,31 @@
                         break;
                     }
             },
-            orderArray(){
+            orderArray(player, players){
                 console.log('starting order');
-                if(this.player!=null){
+
                     var z=0;
                     var array=[];
-                    for(var i=this.player.sit;i<=this.players.length;i++){
-                        for(var x=0;x<this.players.length;x++){
-                            if(this.players[x].sit==i){
-                            Vue.set(array, z, this.players[x]);
+                    for(var i=player.sit;i<=players.length;i++){
+                        for(var x=0;x<players.length;x++){
+                            if(players[x].sit==i){
+                            Vue.set(array, z, players[x]);
                             break;
                             }
                         }
                         z++;
                     }
-                    for(var i=1;i<this.player.sit;i++){
-                        for(var x=0;x<this.players.length;x++){
-                            if(this.players[x].sit==i){
-                            Vue.set(array, z, this.players[x]);
+                    for(var i=1;i<player.sit;i++){
+                        for(var x=0;x<players.length;x++){
+                            if(players[x].sit==i){
+                            Vue.set(array, z, players[x]);
                             break;
                             }
                         }
                         z++;
                     }
-                    this.players_show=array;
-                }
+                    return array;
+
             },
             listen(){
                 Echo.channel('tournament.'+this.tournament_id)

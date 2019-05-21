@@ -32,7 +32,7 @@ class RoundObserver
             $cards[]=$i;
          }
          //get players of the round
-         $players=$tournament->players()->where('alive', true)->orderBy('sit')->get();
+         $players=$tournament->alivePlayers()->orderBy('sit')->get();
 
          //$players_array=$tournament->players()->where('alive', true)->orderBy('sit')->get();
 
@@ -68,7 +68,8 @@ class RoundObserver
             ->update(['available' => false]);
 
         //set as playing all the players and remove bb and sb
-        $players->update(['playing'=>true, 'sb'=>false, 'bb'=>false]);
+
+        $tournament->alivePlayers()->update(['playing'=>true, 'sb'=>false, 'bb'=>false]);
 
         //set bb, sb
         //check if this is heads up (2 players)
@@ -95,7 +96,11 @@ class RoundObserver
 
         //set bb and sb
         $players[$sb_index]->sb=true;
+        $players[$sb_index]->save();
         $players[$bb_index]->bb=true;
+        $players[$bb_index]->save();
+
+
 
 
         //create the first bet round

@@ -1798,35 +1798,59 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "game",
   props: ['tournament_id'],
   data: function data() {
     return {
-      players: [],
+      players: '',
       //nice
-      players_show: [],
+      player: '',
       //nice
-      player: 'asdf',
+      tournament: '',
       //nice
-      tournament: null,
+      round: '',
       //nice
-      round: null,
-      //nice
-      bet_round: null,
-      //nice
-      board_cards: [],
-      //nice
-      player_cards: [],
-      //nice
-      pot: round.pot,
+      bet_round: '',
       //nice
       amount: 15,
-      sitsClass: null,
+      sitsClass: '',
       //nice
       status: 'stop' //---?????
 
     };
+  },
+  computed: {
+    pot: function pot() {
+      return this.round.pot;
+    },
+    player_cards: function player_cards() {
+      return this.player.cards;
+    },
+    board_cards: function board_cards() {
+      return this.round.board_cards;
+    },
+    players_show: function players_show() {
+      if (this.player != '' && this.players != '') {
+        return this.orderArray(this.player, this.players);
+      }
+
+      ;
+    }
   },
   mounted: function mounted() {
     this.getData();
@@ -1835,105 +1859,81 @@ __webpack_require__.r(__webpack_exports__);
   },
   methods: {
     getData: function getData() {
+      // var self=this;
+      // axios.get(route('api.tournaments.show',{tournament: this.tournament_id})).then(response => {
+      //     this.tournament = response.data;
+      //     console.log("get tournament done");
+      //     axios.get(route('api.tournaments.players',{tournament: this.tournament_id})).then(response => {
+      //         this.players = response.data;
+      //         console.log("get players done");
+      //         axios.get(route('api.tournaments.playerlogged',{tournament: this.tournament_id})).then(response => {
+      //             this.player = response.data;
+      //             console.log("get player logged done");
+      //             if(this.player!=''){
+      //                 self.orderArray();
+      //             }
+      //         });
+      //     });
+      // });
+      this.getTournament();
+      this.getAllPlayers();
+      this.getPlayer();
+      this.getRound();
+      this.getBetRound();
+    },
+    getAllPlayers: function getAllPlayers() {
       var _this = this;
 
       var self = this;
-      axios.get(route('api.tournaments.show', {
+      axios.get(route('api.tournaments.players', {
         tournament: this.tournament_id
       })).then(function (response) {
-        _this.tournament = response.data;
-        console.log("get tournament done");
-        axios.get(route('api.players.index', {
-          tournamentid: _this.tournament_id
-        })).then(function (response) {
-          _this.players = response.data;
-          console.log("get players done");
-          axios.get(route('api.players.logged', {
-            tournament_id: _this.tournament_id
-          })).then(function (response) {
-            _this.player = response.data;
-            console.log("get player logged done");
-
-            if (_this.player != '') {
-              self.orderArray();
-            }
-          });
-        });
-      });
-    },
-    getAllPlayers: function getAllPlayers() {
-      var _this2 = this;
-
-      var self = this;
-      axios.get(route('api.players.index', {
-        tournamentid: this.tournament_id
-      })).then(function (response) {
-        _this2.players = response.data;
+        _this.players = response.data;
         console.log("get players done");
       });
     },
     getPlayer: function getPlayer() {
-      var _this3 = this;
+      var _this2 = this;
 
       var self = this;
-      axios.get(route('api.players.logged', {
-        tournament_id: this.tournament_id
+      axios.get(route('api.tournaments.playerlogged', {
+        tournament: this.tournament_id
       })).then(function (response) {
-        _this3.player = response.data;
+        _this2.player = response.data;
         console.log("get player logged done");
       });
     },
     getTournament: function getTournament() {
-      var _this4 = this;
+      var _this3 = this;
 
       var self = this;
       axios.get(route('api.tournaments.show', {
         tournament: this.tournament_id
       })).then(function (response) {
-        _this4.tournament = response.data;
+        _this3.tournament = response.data;
         console.log("get tournament done");
       });
     },
     getRound: function getRound() {
-      var _this5 = this;
+      var _this4 = this;
 
       var self = this;
       axios.get(route('api.tournaments.round', {
         tournament: this.tournament_id
       })).then(function (response) {
-        _this5.round = response.data;
-        console.log("get tournament done");
+        _this4.round = response.data;
+        console.log("get round done");
       });
     },
     getBetRound: function getBetRound() {
-      var _this6 = this;
+      var _this5 = this;
 
       var self = this;
       axios.get(route('api.tournaments.betround', {
         tournament: this.tournament_id
       })).then(function (response) {
-        _this6.bet_round = response.data;
-        console.log("get tournament done");
-      });
-    },
-    getBoardCards: function getBoardCards() {
-      var _this7 = this;
-
-      axios.get(route('api.tournaments.boardcards', {
-        tournament: this.tournament_id
-      })).then(function (response) {
-        _this7.board_cards = response.data;
-        console.log("get boardCards done");
-      });
-    },
-    getPlayerCards: function getPlayerCards() {
-      var _this8 = this;
-
-      axios.get(route('api.players.loggedcards', {
-        tournament: this.tournament_id
-      })).then(function (response) {
-        _this8.player_cards = response.data;
-        console.log("get boardCards done");
+        _this5.bet_round = response.data;
+        console.log("get betRound done");
       });
     },
     act: function act(action, amount) {
@@ -1985,47 +1985,44 @@ __webpack_require__.r(__webpack_exports__);
           break;
       }
     },
-    orderArray: function orderArray() {
+    orderArray: function orderArray(player, players) {
       console.log('starting order');
+      var z = 0;
+      var array = [];
 
-      if (this.player != null) {
-        var z = 0;
-        var array = [];
-
-        for (var i = this.player.sit; i <= this.players.length; i++) {
-          for (var x = 0; x < this.players.length; x++) {
-            if (this.players[x].sit == i) {
-              Vue.set(array, z, this.players[x]);
-              break;
-            }
+      for (var i = player.sit; i <= players.length; i++) {
+        for (var x = 0; x < players.length; x++) {
+          if (players[x].sit == i) {
+            Vue.set(array, z, players[x]);
+            break;
           }
-
-          z++;
         }
 
-        for (var i = 1; i < this.player.sit; i++) {
-          for (var x = 0; x < this.players.length; x++) {
-            if (this.players[x].sit == i) {
-              Vue.set(array, z, this.players[x]);
-              break;
-            }
-          }
-
-          z++;
-        }
-
-        this.players_show = array;
+        z++;
       }
+
+      for (var i = 1; i < player.sit; i++) {
+        for (var x = 0; x < players.length; x++) {
+          if (players[x].sit == i) {
+            Vue.set(array, z, players[x]);
+            break;
+          }
+        }
+
+        z++;
+      }
+
+      return array;
     },
     listen: function listen() {
-      var _this9 = this;
+      var _this6 = this;
 
       Echo.channel('tournament.' + this.tournament_id).listen('NewPlayer', function () {
-        _this9.getData();
+        _this6.getData();
       }).listen('NewBetRound', function () {
-        _this9.getBoardCards();
+        _this6.getBoardCards();
       }).listen('NewRound', function () {
-        _this9.getPlayerCards();
+        _this6.getPlayerCards();
       });
     }
   }
@@ -47529,7 +47526,7 @@ var render = function() {
       "div",
       { staticClass: "poker-table", class: _vm.sitsClass },
       [
-        _vm.players_show.length > 0
+        _vm.players_show
           ? [
               _vm._l(_vm.tournament.players_number, function(index) {
                 return _c("div", { key: index, staticClass: "sit" }, [
@@ -47537,7 +47534,7 @@ var render = function() {
                     "\n            " +
                       _vm._s(
                         _vm.players_show[index - 1]
-                          ? _vm.players_show[index - 1].nickname
+                          ? _vm.players_show[index - 1].user.nickname
                           : "empty"
                       ) +
                       "\n        "
@@ -47618,7 +47615,9 @@ var render = function() {
         _vm._l(_vm.players, function(player) {
           return _c("li", { key: player.id }, [
             _vm._v(
-              "\n                " + _vm._s(player.nickname) + "\n            "
+              "\n                " +
+                _vm._s(player.user.nickname) +
+                "\n            "
             )
           ])
         }),
@@ -47662,6 +47661,30 @@ var render = function() {
         },
         [_vm._v("order")]
       )
+    ]),
+    _vm._v(" "),
+    _c("div", { staticClass: "row" }, [
+      _c("ul", [
+        _c("li", [_vm._v("players: " + _vm._s(_vm.players))]),
+        _vm._v(" "),
+        _c("li", [_vm._v("players_show: " + _vm._s(_vm.players_show))]),
+        _vm._v(" "),
+        _c("li", [_vm._v("player: " + _vm._s(_vm.player))]),
+        _vm._v(" "),
+        _c("li", [_vm._v("tournament: " + _vm._s(_vm.tournament))]),
+        _vm._v(" "),
+        _c("li", [_vm._v("round: " + _vm._s(_vm.round))]),
+        _vm._v(" "),
+        _c("li", [_vm._v("betround: " + _vm._s(_vm.bet_round))]),
+        _vm._v(" "),
+        _c("li", [_vm._v("board cards: " + _vm._s(_vm.board_cards))]),
+        _vm._v(" "),
+        _c("li", [_vm._v("player cards:  " + _vm._s(_vm.player_cards))]),
+        _vm._v(" "),
+        _c("li", [_vm._v("pot: " + _vm._s(_vm.pot))]),
+        _vm._v(" "),
+        _c("li", [_vm._v("amount: " + _vm._s(_vm.amount))])
+      ])
     ])
   ])
 }

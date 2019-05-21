@@ -60,7 +60,11 @@ class ActionObserver
             }
 
             if($bet_round->actions()->where('user_id',$check_id)->count()>0&&$tournament->players()->where('playing',true)->distinct('betting')>1){
-                //round finished
+
+                //bet round finished
+
+                //
+
 
 
             }else{
@@ -72,7 +76,6 @@ class ActionObserver
                 }
                 $round->save();
                 $player->save();
-
 
 
 

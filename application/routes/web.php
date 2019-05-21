@@ -24,13 +24,23 @@ Route::resource('tournaments', 'TournamentController');
 Route::prefix('api')->name('api.')->group(function () {
 
 
-    Route::get('players/logged/{tournament_id}', 'Api\PlayerController@logged')->name('players.logged');
-    Route::get('players/loggedcards/{tournament_id}', 'Api\PlayerController@loggedCards')->name('players.loggedcards');
-    Route::get('tournaments/{tournament}/boardcards', 'Api\TournamentController@boardCards')->name('tournaments.boardcards');
-    Route::get('tournaments/{tournament}/round', 'Api\TournamentController@currentRound')->name('tournaments.round');
-    Route::get('tournaments/{tournament}/betround', 'Api\TournamentController@currentBetRound')->name('tournaments.betround');
-    Route::apiResource('tournaments', 'Api\TournamentController');
-    Route::apiResource('players', 'Api\PlayerController');
-    Route::apiResource('actions', 'Api\ActionController');
+    Route::prefix('tournaments')->name('tournaments.')->group(function () {
+
+        Route::get('{tournament}/round', 'Api\TournamentController@currentRound')->name('round');
+        Route::get('{tournament}/betround', 'Api\TournamentController@currentBetRound')->name('betround');
+        Route::get('{tournament}/playerlogged', 'Api\TournamentController@playerLogged')->name('playerlogged');
+        Route::get('{tournament}/players', 'Api\TournamentController@players')->name('players');
+
+    });
+
+    Route::apiResource('tournaments', 'Api\TournamentController')->only([
+        'index', 'show'
+    ]);
+    Route::apiResource('players', 'Api\PlayerController')->only([
+        'index', 'store'
+    ]);
+    Route::apiResource('actions', 'Api\ActionController')->only([
+        'store'
+    ]);
 });
 
