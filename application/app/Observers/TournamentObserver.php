@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Models\Tournament;
 use App\Models\DeckCard;
+use App\Facades\Game;
 
 class TournamentObserver
 {
@@ -15,15 +16,10 @@ class TournamentObserver
      */
     public function created(Tournament $tournament)
     {
-        //generate deck cards for this tournament
-        $array=[];
-        for($i=1;$i<53;$i++){
-            $array[]=[
-                'card_id'=>$i,
-                'tournament_id'=>$tournament->id
-            ];
-        }
-        DeckCard::insert($array);
+
+
+        Game::createDeck();
+
 
     }
 

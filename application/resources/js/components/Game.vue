@@ -224,8 +224,8 @@
             listen(){
                 Echo.channel('tournament.'+this.tournament_id)
                 .listen('NewPlayer', ()=>{this.getData()})
-                .listen('NewBetRound', ()=>{this.getBoardCards()})
-                .listen('NewRound', ()=>{this.getPlayerCards()});
+                .listen('NewBetRound', ()=>{this.getData()})
+                .listen('NewRound', ()=>{this.getData()});
 
             }
         }

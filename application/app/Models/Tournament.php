@@ -25,17 +25,30 @@ class Tournament extends Model
     {
         return $this->hasMany(Player::class)->with('user');
     }
-
+    public function button()
+    {
+        return $this->hasOne(Player::class)->where('button',true)->with('user');
+    }
+    public function bb()
+    {
+        return $this->hasOne(Player::class)->where('button',true)->with('user');
+    }
+    public function sb()
+    {
+        return $this->hasOne(Player::class)->where('button',true)->with('user');
+    }
+    public function turnPlayer($bet_round)
+    {
+        return $this->hasOne(Player::class)->where('id',$bet_round->turn)->with('user');
+    }
     public function playerLogged()
     {
         return $this->hasOne(Player::class)->where('user_id',Auth::id())->with('cards');
     }
-
     public function alivePlayers()
     {
         return $this->hasMany(Player::class)->where('alive',true);
     }
-
     public function playingPlayers()
     {
         return $this->hasMany(Player::class)->where('playing',true);

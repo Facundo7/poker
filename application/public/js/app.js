@@ -2020,9 +2020,9 @@ __webpack_require__.r(__webpack_exports__);
       Echo.channel('tournament.' + this.tournament_id).listen('NewPlayer', function () {
         _this6.getData();
       }).listen('NewBetRound', function () {
-        _this6.getBoardCards();
+        _this6.getData();
       }).listen('NewRound', function () {
-        _this6.getPlayerCards();
+        _this6.getData();
       });
     }
   }
