@@ -18,7 +18,7 @@ class TournamentObserver
     {
 
 
-        Game::createDeck();
+        Game::createDeck($tournament);
 
 
     }

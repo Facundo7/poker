@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Models\BetRound;
 use App\Events\NewBetRound;
+use App\Facades\Game;
 
 class BetRoundObserver
 {
@@ -15,6 +16,8 @@ class BetRoundObserver
      */
     public function created(BetRound $betRound)
     {
+
+        Game::setFirstTurn($betRound);
 
         event(new NewBetRound($betRound));
 

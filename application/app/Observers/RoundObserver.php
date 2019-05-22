@@ -9,6 +9,7 @@ use App\Models\DeckCard;
 use App\Models\PlayerCard;
 use App\Models\Tournament;
 use App\Events\NewRound;
+use App\Facades\Game;
 
 class RoundObserver
 {
@@ -20,10 +21,12 @@ class RoundObserver
      */
     public function created(Round $round)
     {
+        Game::dealPlayerCards($round);
+        Game::setBlinds($round->tournament);
+        Game::createBetRound($round, 0);
 
 
         event(new NewRound($round));
-
 
     }
 

@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Models\Action;
 use App\Events\NewAction;
+use App\Facades\Game;
 
 class ActionObserver
 {
@@ -17,7 +18,12 @@ class ActionObserver
     {
         //0-Check, 1-call, 2-raise, 3-reraise, 4-fold
 
+        Game::updatePlayers($action);
+
         event(new NewAction($action));
+
+
+
 
         //check if bet round finished
 

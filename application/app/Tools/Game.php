@@ -8,6 +8,7 @@ use App\Models\DeckCard;
 use App\Models\BetRound;
 use App\Models\Round;
 use App\Models\Action;
+use App\Models\PlayerCard;
 
 class Game
 {
@@ -45,7 +46,7 @@ class Game
     }
 
 
-    public function dealPlayerCards(Tournament $tournament)
+    public function dealPlayerCards(Round $round)
     {
         //create an array with all cards id (1 to 52)
         $cards=[];
@@ -54,7 +55,7 @@ class Game
          }
 
          //get players of the round
-         $players=$tournament->alivePlayers()->orderBy('sit')->get();
+         $players=$round->tournament->alivePlayers()->orderBy('sit')->get();
 
          $remove=[]; //this array will contain the id of the cards that have been dealt so they can not be available again until next round
 
@@ -64,7 +65,7 @@ class Game
                 $index=rand(0,count($cards)-1);
                 PlayerCard::insert(
                     [
-                        'round_id'=>$tournament->currentRound->id,
+                        'round_id'=>$round->id,
                         'player_id'=>$players[$i]->id,
                         'card_id'=>$cards[$index],
                         'position'=>$j,
@@ -75,7 +76,7 @@ class Game
             }
         }
         //set dealt cards as unavailable
-        $tournament->deckCards()
+        $round->tournament->deckCards()
             ->whereIn('card_id', $remove)
             ->update(['available' => false]);
 
@@ -144,7 +145,6 @@ class Game
             }
         }
 
-
         //check if its Preflop or rest of bet rounds to know who has to start playing
         $turn_index=$button_player_index;
         if($betRound->bet_phase!=0){
@@ -156,8 +156,6 @@ class Game
         //set as turn the id of the player
         $betRound->turn=$players[$turn_index]->id;
         $betRound->save();
-
-
     }
 
     public function createBetRound(Round $round, $bet_phase){

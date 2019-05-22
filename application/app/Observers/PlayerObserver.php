@@ -5,7 +5,7 @@ namespace App\Observers;
 use App\Models\Player;
 use App\Models\Round;
 use App\Events\NewPlayer;
-use App\Tools\Game;
+use App\Facades\Game;
 
 class PlayerObserver
 {
@@ -23,6 +23,7 @@ class PlayerObserver
         $tournament=$player->tournament;
          //check if this player completes the table so the game starts
         if($tournament->players()->count()==$tournament->players_number){
+            $tournament->players()->where('sit',1)->update(['button'=>true]);
             Game::createRound($tournament);
         }
     }
