@@ -5,6 +5,9 @@ namespace App\Observers;
 use App\Models\Tournament;
 use App\Models\DeckCard;
 use App\Facades\Game;
+use App\Events\RoundFinished;
+use App\Models\BetRound;
+use App\Events\BetRoundFinished;
 
 class TournamentObserver
 {
@@ -17,7 +20,7 @@ class TournamentObserver
     public function created(Tournament $tournament)
     {
 
-
+        event(new BetRoundFinished(BetRound::find(1)));
         Game::createDeck($tournament);
 
 

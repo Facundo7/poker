@@ -3,7 +3,6 @@
 namespace App\Observers;
 
 use App\Models\Player;
-use App\Models\Round;
 use App\Events\NewPlayer;
 use App\Facades\Game;
 
