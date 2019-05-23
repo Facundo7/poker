@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Models\Action;
 use App\Events\NewAction;
 use App\Facades\Game;
+use App\Events\BetRoundFinished;
 
 class ActionObserver
 {
@@ -16,28 +17,31 @@ class ActionObserver
      */
     public function created(Action $action)
     {
-        //0-Check, 1-call, 2-raise, 3-reraise, 4-fold
 
-        Game::updatePlayers($action);
+        Game::updatePlayer($action);
 
         event(new NewAction($action));
 
-
-
-
         //check if bet round finished
+        $bet_round=$action->betRound;
+        $tournament=$bet_round->round->tournament;
 
-        // if($bet_round->bet_phase==0){
-        //         //this is preflop
-        //     $check_id=$bb_id;
-        // }else{
-        //         //not preflop
-        //     $check_id=$button_id;
-        // }
+        if($tournament->playingPlayers>1){
 
-        //     if($bet_round->actions()->where('user_id',$check_id)->count()>0&&$tournament->players()->where('playing',true)->distinct('betting')>1){
 
-        // }
+            if($bet_round->players==$bet_round->actions()->count()&&$tournament->playingPlayers()->distinct('betting')->count()==1){
+
+                event(new BetRoundFinished($bet_round));
+            }else{
+
+                Game::nextTurn($tournament);
+            }
+
+        }else {
+
+            event(new BetRoundFinished($bet_round));
+        }
+
 
 
     }

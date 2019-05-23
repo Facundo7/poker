@@ -53,13 +53,11 @@ class Tournament extends Model
     {
         return $this->hasMany(Player::class)->where('playing',true);
     }
-
     public function deckCards()
     {
         return $this->hasMany(DeckCard::class);
     }
-
-    public function AvailableDeckCards()
+    public function availableDeckCards()
     {
         return $this->hasMany(DeckCard::class)->where('available',true);
     }

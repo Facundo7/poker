@@ -17,7 +17,9 @@ class BetRoundObserver
     public function created(BetRound $betRound)
     {
 
+        Game::dealBoardCards($betRound);
         Game::setFirstTurn($betRound);
+
 
         event(new NewBetRound($betRound));
 

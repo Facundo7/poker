@@ -2,13 +2,14 @@
 
 namespace App\Tools;
 
-use App\Models\Player;
 use App\Models\Tournament;
 use App\Models\DeckCard;
 use App\Models\BetRound;
 use App\Models\Round;
 use App\Models\Action;
 use App\Models\PlayerCard;
+use App\Models\BoardCard;
+use App\Models\RoundWinner;
 
 class Game
 {
@@ -164,6 +165,7 @@ class Game
         $bet_round->round_id=$round->id;
         $bet_round->bet_phase=$bet_phase;
         $bet_round->current=true;
+        $bet_round->players=$round->tournament->playingPlayers()->count();
         $bet_round->save();
 
         return $bet_round;
@@ -179,19 +181,11 @@ class Game
             $player->update(["playing"=>false]);
             $player->save();
 
-            if($action->betRound->round->tournament->playingPlayers()->count()==1){
-                //round stops
-                //1 player left event
-            }else{
-
-            }
-
         }else if($action->action!=0){
             //call, raise, reraise
             $player->update(["betting"=>$action->amount]);
             $player->save();
 
-                //
         }
 
     }
@@ -236,7 +230,6 @@ class Game
         }
 
         //set the next player turn to the bet round
-
         $next_turn_index=$current_turn_index+1;
         if($next_turn_index>=$players->count()){
             $next_turn_index-=$players->count();
@@ -260,4 +253,483 @@ class Game
         $players->save();
     }
 
-}
+    public function dealBoardCards(BetRound $bet_round){
+
+        $tournament=$bet_round->round->tournament;
+
+        switch ($bet_round->bet_phase) {
+            case 1:
+                //Flop
+                $i=1;
+                $max=3;
+                break;
+            case 2:
+                //Turn
+                $i=4;
+                $max=4;
+                break;
+            case 3:
+                //River
+                $i=5;
+                $max=5;
+                break;
+            default:
+                //is preflop
+                break;
+        }
+
+
+        //create an array with available cards)
+        $cards=$tournament->availableDeckCards()->select('id')->get()->toArray();
+
+
+         $remove=[]; //this array will contain the id of the cards that have been dealt so they can not be available again until next round
+
+         //
+         for($i;$i<=$max;$i++){
+
+                $index=rand(0,count($cards)-1);
+                BoardCard::insert(
+                    [
+                        'round_id'=>$bet_round->round->id,
+                        'card_id'=>$cards[$index],
+                        'position'=>$i,
+                    ]
+                );
+                $remove[]=$cards[$index];
+                array_splice($cards, $index, 1);
+            }
+
+        //set dealt cards as unavailable
+        $tournament->deckCards()
+            ->whereIn('card_id', $remove)
+            ->update(['available' => false]);
+
+    }
+
+    public function evaluateCards($players, $board_cards, $round){
+
+        $hands=[];
+        $evaluated_hands=[];
+
+        //store cards in hands
+        for($i=0;$i<$players->length;$i++)
+        {
+            $hands[]=array(players[$i]->cards[0]->card,
+            $players[$i]->cards[1]->card,
+            $board_cards[0]->card,
+            $board_cards[1]->card,
+            $board_cards[2]->card,
+            $board_cards[3]->card,
+            $board_cards[4]->card
+            );
+        }
+
+        //evaluate every hand and fill evaluated hand array
+        for($i=0;$i<$hands->length;$i++)
+        {
+            $hand=$hands[$i];
+
+            //order by value
+            for($j=0;$j<=6;$j++){
+
+                $aux=$hand[$j];
+                $k=$j-1;
+                while ($k >= 0 && $hand[$k]->value>$aux->value) {
+
+                    $hand[$k+1]=$hand[$k];
+                    $k--;
+
+                }
+                $hand[$k+1]=$aux;
+            }
+
+
+
+            $evaluated_hands[$i]=checkStraightFlush($hand);
+
+            if($evaluated_hands[$i]==false){
+
+                $evaluated_hands[$i]=checkPoker($hand);
+
+                if($evaluated_hands[$i]==false){
+
+                    $evaluated_hands[$i]=checkFullHouse($hand);
+
+                    if($evaluated_hands[$i]==false){
+
+                        $evaluated_hands[$i]=checkFlush($hand);
+
+                        if($evaluated_hands[$i]==false){
+
+                            $evaluated_hands[$i]=checkStraight($hand);
+
+                            if($evaluated_hands[$i]==false){
+
+                                $evaluated_hands[$i]=checkThree($hand);
+
+                                if($evaluated_hands[$i]==false){
+
+                                    $evaluated_hands[$i]=checkTwoPair($hand);
+
+                                    if($evaluated_hands[$i]==false){
+
+                                        $evaluated_hands[$i]=checkPair($hand);
+
+                                        if($evaluated_hands[$i]==false){
+
+                                            $evaluated_hands[$i]=array(
+                                                1,
+                                                $hand[6]->value,
+                                                $hand[5]->value,
+                                                $hand[4]->value,
+                                                $hand[3]->value,
+                                                $hand[2]->value,
+                                            );
+
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            $evaluated_hands[$i][6]=$players[$i]->id;
+
+            }
+
+            $winners=getWinners($evaluated_hands);
+
+            for ($i=0; $i < $winners->length; $i++) {
+                $winner= new RoundWinner;
+                $winner->player_id=$winners[$i][6];
+                $winner->round_id=$round->id;
+                $winner->amount=$round->pot;
+                $winner->save();
+            }
+
+
+            }
+            public function checkStraightFlush($hand){
+
+
+
+                for ($i=0; $i <= 6; $i++) {
+                    switch ($hand[$i]->value) {
+                        case 1:
+                            $spades[]=$hand[$i];
+                            break;
+                        case 2:
+                            $hearts[]=$hand[$i];
+                            break;
+                        case 3:
+                            $clubs[]=$hand[$i];
+                            break;
+                        case 4:
+                            $diamonds[]=$hand[$i];
+                            break;
+                    }
+                }
+
+
+                if($clubs->length>=5)
+                {
+                    $hand=$clubs;
+                } else if($spades->length>=5)
+                {
+                    $hand=$spades;
+                } if($hearts->length>=5)
+                {
+                    $hand=$hearts;
+                } if($diamonds->length>=5)
+                {
+                    $hand=$diamonds;
+                } else {
+                    return false;
+                }
+
+                //check straight in the hand
+
+                if($hand[$hand->length-1]->value==14&&
+                $hand[0]->value==2&&
+                $hand[1]->value==3&&
+                $hand[2]->value==4&&
+                $hand[3]->value==5
+                ){
+                    return array(
+                        9,
+                        5,
+                        0,
+                        0,
+                        0,
+                        0
+                    );
+                }else{
+
+                    for ($i=$hand->length-1; $i > 3 ; $i--) {
+
+                        if($hand[$i]->value==$hand[$i-1]->value+1&&
+                        $hand[$i]->value==$hand[$i-2]->value+2&&
+                        $hand[$i]->value==$hand[$i-3]->value+3&&
+                        $hand[$i]->value==$hand[$i-4]->value+4
+                        ){
+                            return array(
+                                9,
+                                $hand[$i]->value,
+                                0,
+                                0,
+                                0,
+                                0
+                            );
+                        }
+
+                    }
+
+                    return false;
+
+                }
+
+
+            }
+
+            public function checkPoker($hand){
+
+                for ($i=$hand->length-1; $i > 2 ; $i--) {
+
+                    if($hand[$i]->value==$hand[$i-1]->value&&
+                    $hand[$i]->value==$hand[$i-2]->value&&
+                    $hand[$i]->value==$hand[$i-3]->value
+                    ){
+
+                        $hand2=$hand;
+                        array_splice($hand2,$i-3,4);
+                        return array(
+                            8,
+                            $hand[$i]->value,
+                            $hand2[$hand2->length-1]->value,
+                            0,
+                            0,
+                            0
+                        );
+                    }
+
+                }
+                return false;
+
+
+            }
+
+            public function checkFullHouse($hand){
+
+                for ($i=$hand->length-1; $i > 1 ; $i--) {
+
+                    if($hand[$i]->value==$hand[$i-1]->value&&
+                    $hand[$i]->value==$hand[$i-2]->value
+                    ){
+
+                        // for ($j=0; $j < $hand->length; $j++) {
+
+                        //     if (!in_array($j, array($i,$i-1,$i-2))) {
+                        //         $hand2[]=$hand[$j];
+                        //     }
+                        // }
+
+                        $hand2=$hand;
+                        array_splice($hand2,$i-2,3);
+
+                         //check couple in hand2
+                         for ($k=$hand2->length-1; $k > 0 ; $k--) {
+
+                            if($hand2[$k]->value==$hand2[$k-1]->value){
+                                return array(
+                                    7,
+                                    $hand[$i]->value,
+                                    $hand2[$k]->value,
+                                    0,
+                                    0,
+                                    0
+                                );
+                            }
+
+                        }
+                        return false;
+
+                    }
+
+                }
+                return false;
+
+            }
+
+            public function checkFlush($hand){
+
+                for ($i=0; $i <= 6; $i++) {
+                    switch ($hand[$i]->value) {
+                        case 1:
+                            $spades[]=$hand[$i];
+                            break;
+                        case 2:
+                            $hearts[]=$hand[$i];
+                            break;
+                        case 3:
+                            $clubs[]=$hand[$i];
+                            break;
+                        case 4:
+                            $diamonds[]=$hand[$i];
+                            break;
+                    }
+                }
+
+
+                if($clubs->length>=5)
+                {
+                    $hand=$clubs;
+                } else if($spades->length>=5)
+                {
+                    $hand=$spades;
+                } if($hearts->length>=5)
+                {
+                    $hand=$hearts;
+                } if($diamonds->length>=5)
+                {
+                    $hand=$diamonds;
+                } else {
+                    return false;
+                }
+
+                return array(
+                    6,
+                    $hand[$hand->length-1]->value,
+                    0,
+                    0,
+                    0,
+                    0
+                );
+
+            }
+
+            public function checkStraight($hand){}
+
+            public function checkThree($hand){
+
+                for ($i=$hand->length-1; $i > 1 ; $i--) {
+
+                    if($hand[$i]->value==$hand[$i-1]->value&&
+                    $hand[$i]->value==$hand[$i-2]->value
+                    ){
+                        $hand2=$hand;
+                        array_splice($hand2,$i-2,3);
+                        return array(
+                            4,
+                            $hand[$i]->value,
+                            $hand2[$hand2->length-1]->value,
+                            $hand2[$hand2->length-2]->value,
+                            0,
+                            0
+                        );
+                    }
+
+                }
+                return false;
+
+
+            }
+
+            public function checkTwoPair($hand){
+
+                for ($i=$hand->length-1; $i > 0 ; $i--) {
+
+                    if($hand[$i]->value==$hand[$i-1]->value
+                    ){
+                        $hand2=$hand;
+                        array_splice($hand2,$i-1,2);
+
+                        for ($j=$hand2->length-1; $j > 0 ; $j--) {
+
+                            if($hand2[$j]->value==$hand2[$j-1]->value
+                            ){
+                                $hand3=$hand2;
+                                array_splice($hand3,$i-1,2);
+                                return array(
+                                    3,
+                                    $hand[$i]->value,
+                                    $hand2[$j]->value,
+                                    $hand3[$hand2->length-1],
+                                    0,
+                                    0
+                                );
+                            }
+
+                        }
+                        return false;
+
+                    }
+
+                }
+                return false;
+
+
+            }
+
+            public function checkPair($hand){
+
+                for ($i=$hand->length-1; $i > 0 ; $i--) {
+
+                    if($hand[$i]->value==$hand[$i-1]->value
+                    ){
+                        $hand2=$hand;
+                        array_splice($hand2,$i-1,2);
+                        return array(
+                            3,
+                            $hand[$i]->value,
+                            $hand2[$hand2->length-1]->value,
+                            $hand2[$hand2->length-2]->value,
+                            $hand2[$hand2->length-3]->value,
+                            0
+                        );
+                    }
+                }
+                return false;
+
+            }
+
+
+            public function getWinners($evaluations){
+
+
+                for($i=0;$i<6;$i++)
+                {
+
+                    $values=[];
+
+                    for($j=0;$j<$evaluations->length;$j++)
+                    {
+                        $values[]=$evaluations[$j][$i];
+                    }
+
+                    $winners=[];
+
+                    for($j=0;$j<$evaluations->length;$j++)
+                    {
+                        if($evaluations[$j][$i]==max($values))
+                        {
+                            $winners[]=$evaluations[$j];
+                        }
+                    }
+
+                    if($winners->length==1)
+                    {
+                        break;
+                    }
+
+                }
+
+                return $winners;
+
+            }
+
+
+        }
+

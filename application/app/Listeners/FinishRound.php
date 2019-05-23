@@ -5,6 +5,7 @@ namespace App\Listeners;
 use App\Events\RoundFinished;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use App\Facades\Game;
 
 class FinishRound
 {
@@ -26,6 +27,21 @@ class FinishRound
      */
     public function handle(RoundFinished $event)
     {
-        echo $event;
+
+        $tournament=$event->round->tournament;
+        $event->round->current=false;
+        $event->round->save();
+
+        if($tournament->playingPlayers==1)
+        {
+            //give pot to the player left
+        }else {
+
+            Game::evaluateCards($tournament->playingPlayers()->with('cards')->get(), $event->round->boardCards, $event->round);
+        }
+
+        //kill players
+        Game::changeButton($tournament);
+        Game::createRound($tournament);
     }
 }

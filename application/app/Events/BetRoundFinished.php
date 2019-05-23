@@ -15,7 +15,7 @@ class BetRoundFinished
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    //public $bet_round;
+    public $bet_round;
 
     /**
      * Create a new event instance.
@@ -24,7 +24,7 @@ class BetRoundFinished
      */
     public function __construct(BetRound $bet_round)
     {
-       // $this->bet_round=$bet_round;
+        $this->bet_round=$bet_round;
     }
 
     /**
