@@ -610,7 +610,65 @@ class Game
 
             }
 
-            public function checkStraight($hand){}
+            public function checkStraight($hand){
+
+
+                if($hand[$hand->length-1]->value==14&&$hand[0]->value==2){
+
+                    if (in_array(3, array($hand[1]->value,
+                                        $hand[2]->value,
+                                        $hand[3]->value,
+                                        $hand[4]->value,
+                                        $hand[5]->value))&&
+                        in_array(4, array($hand[1]->value,
+                                        $hand[2]->value,
+                                        $hand[3]->value,
+                                        $hand[4]->value,
+                                        $hand[5]->value))&&
+                        in_array(5, array($hand[1]->value,
+                                        $hand[2]->value,
+                                        $hand[3]->value,
+                                        $hand[4]->value,
+                                        $hand[5]->value))
+
+                    ){
+
+                        return array(
+                            5,
+                            5,
+                            0,
+                            0,
+                            0,
+                            0
+                        );
+                    }
+                }
+
+
+
+                for ($i=$hand->length-1; $i > 3 ; $i--) {
+
+                    if($hand[$i]->value==$hand[$i-1]->value+1&&
+                    $hand[$i]->value==$hand[$i-2]->value+2&&
+                    $hand[$i]->value==$hand[$i-3]->value+3&&
+                    $hand[$i]->value==$hand[$i-4]->value+4
+                    ){
+                        return array(
+                            9,
+                            $hand[$i]->value,
+                            0,
+                            0,
+                            0,
+                            0
+                            );
+                    }
+                }
+
+                return false;
+
+            }
+
+
 
             public function checkThree($hand){
 
