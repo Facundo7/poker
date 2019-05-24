@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class Tournament extends Model
 {
@@ -15,13 +16,49 @@ class Tournament extends Model
         return $this->hasMany(Round::class);
     }
 
-    public function players()
+    public function currentRound()
     {
-        return $this->hasMany(Player::class);
+        return $this->hasOne(Round::class)->where('current',true)->with('boardCards');
     }
 
+    public function players()
+    {
+        return $this->hasMany(Player::class)->with('user');
+    }
+    public function button()
+    {
+        return $this->hasOne(Player::class)->where('button',true)->with('user');
+    }
+    public function bb()
+    {
+        return $this->hasOne(Player::class)->where('button',true)->with('user');
+    }
+    public function sb()
+    {
+        return $this->hasOne(Player::class)->where('button',true)->with('user');
+    }
+    public function turnPlayer($bet_round)
+    {
+        return $this->hasOne(Player::class)->where('id',$bet_round->turn)->with('user');
+    }
+    public function playerLogged()
+    {
+        return $this->hasOne(Player::class)->where('user_id',Auth::id())->with('cards');
+    }
+    public function alivePlayers()
+    {
+        return $this->hasMany(Player::class)->where('alive',true);
+    }
+    public function playingPlayers()
+    {
+        return $this->hasMany(Player::class)->where('playing',true);
+    }
     public function deckCards()
     {
         return $this->hasMany(DeckCard::class);
+    }
+    public function availableDeckCards()
+    {
+        return $this->hasMany(DeckCard::class)->where('available',true);
     }
 }

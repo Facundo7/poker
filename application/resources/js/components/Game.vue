@@ -2,17 +2,32 @@
     <div class="container">
 
         <div class="poker-table" :class="sitsClass">
-            <template v-if="players_show.length>0">
-            <div v-for="index in tournament.players_number" :key="index" class="sit">
-                {{players_show[index-1] ? players_show[index-1].nickname : 'empty'}}
-            <div class="cards"></div>
+          <template v-if="players_show">
+            <div v-for="index in players_show.length" :key="index" class="sit">
+                {{players_show[index-1].user.nickname}}
+                {{players_show[index-1].stack-players_show[index-1].betting}}
+                {{players_show[index-1].betting}}
+            <div class="cards">
             </div>
-            <div class="table-info"></div>
+            </div>
+            <div class="table-infor">
+                <br>my cards<br>
+                {{player.cards[0].card.value}} of {{player.cards[0].card.suit}}<br>
+                {{player.cards[1].card.value}} of {{player.cards[1].card.suit}}
+                <br>
+                <br>
+                board cards <br>
+                <span v-for="index in round.board_cards.length" :key="index">
+                    {{board_cards[index-1]}}<br>
+                </span>
+            </div>
             <div class="user-panel">
                 <input type="text" v-model="amount">
-                <button @click="check()">Check</button>
-                <button @click="bet()">Bet</button>
-                <button @click="fold()">Fold</button>
+                <button @click="act(0,amount)">Check</button>
+                <button @click="act(1,amount)">call</button>
+                <button @click="act(2,amount)">raise</button>
+                <button @click="act(3,amount)">reraise</button>
+                <button @click="act(4,amount)">Fold</button>
             </div>
             </template>
         </div>
@@ -21,7 +36,7 @@
         <div class="row">
             <ul>
                 <li v-for="player in players" :key="player.id">
-                    {{player.nickname}}
+                    {{player.user.nickname}}
                 </li>
             </ul>
         </div>
@@ -29,6 +44,20 @@
             <button @click="sit(tournament_id)">Join</button>
             <button @click="orderArray()">order</button>
             <button @click="getData()">order</button>
+        </div>
+        <div class="row">
+            <ul>
+                <li>players: {{players}}</li>
+                <li>players_show: {{players_show}}</li>
+                <li>player: {{player}}</li>
+                <li>tournament: {{tournament}}</li>
+                <li>round: {{round}}</li>
+                <li>betround: {{bet_round}}</li>
+                <li>board cards: {{board_cards}}</li>
+                <li>player cards:  {{player_cards}}</li>
+                <li>pot: {{pot}}</li>
+                <li>amount: {{amount}}</li>
+            </ul>
         </div>
     </div>
 </template>
@@ -39,19 +68,32 @@
         props: ['tournament_id'],
         data: function(){
             return {
-                players:[], //nice
-                players_show:[], //nice
-                player:'asdf', //nice
-                tournament:null, //nice
-                round:null,//nice
-                bet_round:null,//nice
-                board_cards:[], //nice
-                player_cards:[], //nice
-                pot:round.pot,//nice
+                players:'', //nice
+                player:'', //nice
+                tournament:'', //nice
+                round:'',//nice
+                bet_round:'',//nice
                 amount:15,
-                sitsClass: null,//nice
-                status: 'stop'//---?????
+                sitsClass: '',//nice
+                status: 'stop',//---?????
             }
+        },
+        computed: {
+            pot: function() {
+                return this.round.pot;
+            },
+            player_cards: function() {
+                return this.player.cards;
+            },
+            board_cards: function() {
+                return this.round.board_cards;
+            },
+            players_show: function(){
+                 if(this.player!='' && this.players!=''){
+                     return this.orderArray(this.player, this.players);
+            };
+            }
+
         },
         mounted() {
             this.getData();
@@ -60,35 +102,23 @@
         },
         methods: {
             getData(){
-                var self=this;
-                axios.get(route('api.tournaments.show',{tournament: this.tournament_id})).then(response => {
-                    this.tournament = response.data;
-                    console.log("get tournament done");
-                    axios.get(route('api.players.index',{tournamentid: this.tournament_id})).then(response => {
-                        this.players = response.data;
-                        console.log("get players done");
-                        axios.get(route('api.players.logged',{tournament_id: this.tournament_id})).then(response => {
-                            this.player = response.data;
-                            console.log("get player logged done");
-                            if(this.player!=''){
-                                self.orderArray();
-                            }
-                        });
-                    });
-                });
-
+                this.getTournament();
+                this.getAllPlayers();
+                this.getPlayer();
+                this.getRound();
+                this.getBetRound();
 
             },
             getAllPlayers(){
                 var self=this;
-                axios.get(route('api.players.index',{tournamentid: this.tournament_id})).then(response => {
+                axios.get(route('api.tournaments.players',{tournament: this.tournament_id})).then(response => {
                     this.players = response.data;
                     console.log("get players done");
                 });
             },
             getPlayer(){
                 var self=this;
-                axios.get(route('api.players.logged',{tournament_id: this.tournament_id})).then(response => {
+                axios.get(route('api.tournaments.playerlogged',{tournament: this.tournament_id})).then(response => {
                     this.player = response.data;
                     console.log("get player logged done");
                 });
@@ -104,26 +134,14 @@
                 var self=this;
                 axios.get(route('api.tournaments.round',{tournament: this.tournament_id})).then(response => {
                     this.round = response.data;
-                    console.log("get tournament done");
+                    console.log("get round done");
                 });
             },
             getBetRound(){
                 var self=this;
                 axios.get(route('api.tournaments.betround',{tournament: this.tournament_id})).then(response => {
                     this.bet_round = response.data;
-                    console.log("get tournament done");
-                });
-            },
-            getBoardCards(){
-                axios.get(route('api.tournaments.boardcards',{tournament: this.tournament_id})).then(response => {
-                    this.board_cards = response.data;
-                    console.log("get boardCards done");
-                });
-            },
-            getPlayerCards(){
-                axios.get(route('api.players.loggedcards',{tournament: this.tournament_id})).then(response => {
-                    this.player_cards = response.data;
-                    console.log("get boardCards done");
+                    console.log("get betRound done");
                 });
             },
             act(action, amount){
@@ -135,8 +153,7 @@
 
                 })
                 .then(function (response) {
-                console.log(response);
-                //self.getData();
+                console.log("action done");
                 });
             },
             sit(id){
@@ -174,37 +191,38 @@
                         break;
                     }
             },
-            orderArray(){
+            orderArray(player, players){
                 console.log('starting order');
-                if(this.player!=null){
+
                     var z=0;
                     var array=[];
-                    for(var i=this.player.sit;i<=this.players.length;i++){
-                        for(var x=0;x<this.players.length;x++){
-                            if(this.players[x].sit==i){
-                            Vue.set(array, z, this.players[x]);
+                    for(var i=player.sit;i<=players.length;i++){
+                        for(var x=0;x<players.length;x++){
+                            if(players[x].sit==i){
+                            Vue.set(array, z, players[x]);
                             break;
                             }
                         }
                         z++;
                     }
-                    for(var i=1;i<this.player.sit;i++){
-                        for(var x=0;x<this.players.length;x++){
-                            if(this.players[x].sit==i){
-                            Vue.set(array, z, this.players[x]);
+                    for(var i=1;i<player.sit;i++){
+                        for(var x=0;x<players.length;x++){
+                            if(players[x].sit==i){
+                            Vue.set(array, z, players[x]);
                             break;
                             }
                         }
                         z++;
                     }
-                    this.players_show=array;
-                }
+                    return array;
+
             },
             listen(){
                 Echo.channel('tournament.'+this.tournament_id)
                 .listen('NewPlayer', ()=>{this.getData()})
-                .listen('NewBetRound', ()=>{this.getBoardCards()})
-                .listen('NewRound', ()=>{this.getPlayerCards()});
+                .listen('NewBetRound', ()=>{this.getData()})
+                .listen('NewRound', ()=>{this.getData()})
+                .listen('NewAction', ()=>{this.getData()});
 
             }
         }

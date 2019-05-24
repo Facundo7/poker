@@ -1798,35 +1798,74 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "game",
   props: ['tournament_id'],
   data: function data() {
     return {
-      players: [],
+      players: '',
       //nice
-      players_show: [],
+      player: '',
       //nice
-      player: 'asdf',
+      tournament: '',
       //nice
-      tournament: null,
+      round: '',
       //nice
-      round: null,
-      //nice
-      bet_round: null,
-      //nice
-      board_cards: [],
-      //nice
-      player_cards: [],
-      //nice
-      pot: round.pot,
+      bet_round: '',
       //nice
       amount: 15,
-      sitsClass: null,
+      sitsClass: '',
       //nice
       status: 'stop' //---?????
 
     };
+  },
+  computed: {
+    pot: function pot() {
+      return this.round.pot;
+    },
+    player_cards: function player_cards() {
+      return this.player.cards;
+    },
+    board_cards: function board_cards() {
+      return this.round.board_cards;
+    },
+    players_show: function players_show() {
+      if (this.player != '' && this.players != '') {
+        return this.orderArray(this.player, this.players);
+      }
+
+      ;
+    }
   },
   mounted: function mounted() {
     this.getData();
@@ -1835,105 +1874,65 @@ __webpack_require__.r(__webpack_exports__);
   },
   methods: {
     getData: function getData() {
+      this.getTournament();
+      this.getAllPlayers();
+      this.getPlayer();
+      this.getRound();
+      this.getBetRound();
+    },
+    getAllPlayers: function getAllPlayers() {
       var _this = this;
 
       var self = this;
-      axios.get(route('api.tournaments.show', {
+      axios.get(route('api.tournaments.players', {
         tournament: this.tournament_id
       })).then(function (response) {
-        _this.tournament = response.data;
-        console.log("get tournament done");
-        axios.get(route('api.players.index', {
-          tournamentid: _this.tournament_id
-        })).then(function (response) {
-          _this.players = response.data;
-          console.log("get players done");
-          axios.get(route('api.players.logged', {
-            tournament_id: _this.tournament_id
-          })).then(function (response) {
-            _this.player = response.data;
-            console.log("get player logged done");
-
-            if (_this.player != '') {
-              self.orderArray();
-            }
-          });
-        });
-      });
-    },
-    getAllPlayers: function getAllPlayers() {
-      var _this2 = this;
-
-      var self = this;
-      axios.get(route('api.players.index', {
-        tournamentid: this.tournament_id
-      })).then(function (response) {
-        _this2.players = response.data;
+        _this.players = response.data;
         console.log("get players done");
       });
     },
     getPlayer: function getPlayer() {
-      var _this3 = this;
+      var _this2 = this;
 
       var self = this;
-      axios.get(route('api.players.logged', {
-        tournament_id: this.tournament_id
+      axios.get(route('api.tournaments.playerlogged', {
+        tournament: this.tournament_id
       })).then(function (response) {
-        _this3.player = response.data;
+        _this2.player = response.data;
         console.log("get player logged done");
       });
     },
     getTournament: function getTournament() {
-      var _this4 = this;
+      var _this3 = this;
 
       var self = this;
       axios.get(route('api.tournaments.show', {
         tournament: this.tournament_id
       })).then(function (response) {
-        _this4.tournament = response.data;
+        _this3.tournament = response.data;
         console.log("get tournament done");
       });
     },
     getRound: function getRound() {
-      var _this5 = this;
+      var _this4 = this;
 
       var self = this;
       axios.get(route('api.tournaments.round', {
         tournament: this.tournament_id
       })).then(function (response) {
-        _this5.round = response.data;
-        console.log("get tournament done");
+        _this4.round = response.data;
+        console.log("get round done");
       });
     },
     getBetRound: function getBetRound() {
-      var _this6 = this;
+      var _this5 = this;
 
       var self = this;
       axios.get(route('api.tournaments.betround', {
         tournament: this.tournament_id
       })).then(function (response) {
-        _this6.bet_round = response.data;
-        console.log("get tournament done");
-      });
-    },
-    getBoardCards: function getBoardCards() {
-      var _this7 = this;
-
-      axios.get(route('api.tournaments.boardcards', {
-        tournament: this.tournament_id
-      })).then(function (response) {
-        _this7.board_cards = response.data;
-        console.log("get boardCards done");
-      });
-    },
-    getPlayerCards: function getPlayerCards() {
-      var _this8 = this;
-
-      axios.get(route('api.players.loggedcards', {
-        tournament: this.tournament_id
-      })).then(function (response) {
-        _this8.player_cards = response.data;
-        console.log("get boardCards done");
+        _this5.bet_round = response.data;
+        console.log("get betRound done");
       });
     },
     act: function act(action, amount) {
@@ -1943,7 +1942,7 @@ __webpack_require__.r(__webpack_exports__);
         player_id: this.player.id,
         amount: amount
       }).then(function (response) {
-        console.log(response); //self.getData();
+        console.log("action done");
       });
     },
     sit: function sit(id) {
@@ -1985,47 +1984,46 @@ __webpack_require__.r(__webpack_exports__);
           break;
       }
     },
-    orderArray: function orderArray() {
+    orderArray: function orderArray(player, players) {
       console.log('starting order');
+      var z = 0;
+      var array = [];
 
-      if (this.player != null) {
-        var z = 0;
-        var array = [];
-
-        for (var i = this.player.sit; i <= this.players.length; i++) {
-          for (var x = 0; x < this.players.length; x++) {
-            if (this.players[x].sit == i) {
-              Vue.set(array, z, this.players[x]);
-              break;
-            }
+      for (var i = player.sit; i <= players.length; i++) {
+        for (var x = 0; x < players.length; x++) {
+          if (players[x].sit == i) {
+            Vue.set(array, z, players[x]);
+            break;
           }
-
-          z++;
         }
 
-        for (var i = 1; i < this.player.sit; i++) {
-          for (var x = 0; x < this.players.length; x++) {
-            if (this.players[x].sit == i) {
-              Vue.set(array, z, this.players[x]);
-              break;
-            }
-          }
-
-          z++;
-        }
-
-        this.players_show = array;
+        z++;
       }
+
+      for (var i = 1; i < player.sit; i++) {
+        for (var x = 0; x < players.length; x++) {
+          if (players[x].sit == i) {
+            Vue.set(array, z, players[x]);
+            break;
+          }
+        }
+
+        z++;
+      }
+
+      return array;
     },
     listen: function listen() {
-      var _this9 = this;
+      var _this6 = this;
 
       Echo.channel('tournament.' + this.tournament_id).listen('NewPlayer', function () {
-        _this9.getData();
+        _this6.getData();
       }).listen('NewBetRound', function () {
-        _this9.getBoardCards();
+        _this6.getData();
       }).listen('NewRound', function () {
-        _this9.getPlayerCards();
+        _this6.getData();
+      }).listen('NewAction', function () {
+        _this6.getData();
       });
     }
   }
@@ -47529,24 +47527,65 @@ var render = function() {
       "div",
       { staticClass: "poker-table", class: _vm.sitsClass },
       [
-        _vm.players_show.length > 0
+        _vm.players_show
           ? [
-              _vm._l(_vm.tournament.players_number, function(index) {
+              _vm._l(_vm.players_show.length, function(index) {
                 return _c("div", { key: index, staticClass: "sit" }, [
                   _vm._v(
                     "\n            " +
+                      _vm._s(_vm.players_show[index - 1].user.nickname) +
+                      "\n            " +
                       _vm._s(
-                        _vm.players_show[index - 1]
-                          ? _vm.players_show[index - 1].nickname
-                          : "empty"
+                        _vm.players_show[index - 1].stack -
+                          _vm.players_show[index - 1].betting
                       ) +
+                      "\n            " +
+                      _vm._s(_vm.players_show[index - 1].betting) +
                       "\n        "
                   ),
                   _c("div", { staticClass: "cards" })
                 ])
               }),
               _vm._v(" "),
-              _c("div", { staticClass: "table-info" }),
+              _c(
+                "div",
+                { staticClass: "table-infor" },
+                [
+                  _c("br"),
+                  _vm._v("my cards"),
+                  _c("br"),
+                  _vm._v(
+                    "\n            " +
+                      _vm._s(_vm.player.cards[0].card.value) +
+                      " of " +
+                      _vm._s(_vm.player.cards[0].card.suit)
+                  ),
+                  _c("br"),
+                  _vm._v(
+                    "\n            " +
+                      _vm._s(_vm.player.cards[1].card.value) +
+                      " of " +
+                      _vm._s(_vm.player.cards[1].card.suit) +
+                      "\n            "
+                  ),
+                  _c("br"),
+                  _vm._v(" "),
+                  _c("br"),
+                  _vm._v("\n            board cards "),
+                  _c("br"),
+                  _vm._v(" "),
+                  _vm._l(_vm.round.board_cards.length, function(index) {
+                    return _c("span", { key: index }, [
+                      _vm._v(
+                        "\n                " +
+                          _vm._s(_vm.board_cards[index - 1])
+                      ),
+                      _c("br")
+                    ])
+                  })
+                ],
+                2
+              ),
               _vm._v(" "),
               _c("div", { staticClass: "user-panel" }, [
                 _c("input", {
@@ -47575,7 +47614,7 @@ var render = function() {
                   {
                     on: {
                       click: function($event) {
-                        return _vm.check()
+                        return _vm.act(0, _vm.amount)
                       }
                     }
                   },
@@ -47587,11 +47626,11 @@ var render = function() {
                   {
                     on: {
                       click: function($event) {
-                        return _vm.bet()
+                        return _vm.act(1, _vm.amount)
                       }
                     }
                   },
-                  [_vm._v("Bet")]
+                  [_vm._v("call")]
                 ),
                 _vm._v(" "),
                 _c(
@@ -47599,7 +47638,31 @@ var render = function() {
                   {
                     on: {
                       click: function($event) {
-                        return _vm.fold()
+                        return _vm.act(2, _vm.amount)
+                      }
+                    }
+                  },
+                  [_vm._v("raise")]
+                ),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    on: {
+                      click: function($event) {
+                        return _vm.act(3, _vm.amount)
+                      }
+                    }
+                  },
+                  [_vm._v("reraise")]
+                ),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    on: {
+                      click: function($event) {
+                        return _vm.act(4, _vm.amount)
                       }
                     }
                   },
@@ -47618,7 +47681,9 @@ var render = function() {
         _vm._l(_vm.players, function(player) {
           return _c("li", { key: player.id }, [
             _vm._v(
-              "\n                " + _vm._s(player.nickname) + "\n            "
+              "\n                " +
+                _vm._s(player.user.nickname) +
+                "\n            "
             )
           ])
         }),
@@ -47662,6 +47727,30 @@ var render = function() {
         },
         [_vm._v("order")]
       )
+    ]),
+    _vm._v(" "),
+    _c("div", { staticClass: "row" }, [
+      _c("ul", [
+        _c("li", [_vm._v("players: " + _vm._s(_vm.players))]),
+        _vm._v(" "),
+        _c("li", [_vm._v("players_show: " + _vm._s(_vm.players_show))]),
+        _vm._v(" "),
+        _c("li", [_vm._v("player: " + _vm._s(_vm.player))]),
+        _vm._v(" "),
+        _c("li", [_vm._v("tournament: " + _vm._s(_vm.tournament))]),
+        _vm._v(" "),
+        _c("li", [_vm._v("round: " + _vm._s(_vm.round))]),
+        _vm._v(" "),
+        _c("li", [_vm._v("betround: " + _vm._s(_vm.bet_round))]),
+        _vm._v(" "),
+        _c("li", [_vm._v("board cards: " + _vm._s(_vm.board_cards))]),
+        _vm._v(" "),
+        _c("li", [_vm._v("player cards:  " + _vm._s(_vm.player_cards))]),
+        _vm._v(" "),
+        _c("li", [_vm._v("pot: " + _vm._s(_vm.pot))]),
+        _vm._v(" "),
+        _c("li", [_vm._v("amount: " + _vm._s(_vm.amount))])
+      ])
     ])
   ])
 }
@@ -60152,8 +60241,8 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! C:\Users\Facundo\poker\application\resources\js\app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! C:\Users\Facundo\poker\application\resources\sass\app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! C:\Users\Facundo\Facundo\Projects\poker\application\resources\js\app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! C:\Users\Facundo\Facundo\Projects\poker\application\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })

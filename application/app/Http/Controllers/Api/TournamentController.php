@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Models\Tournament;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\Round;
 
 class TournamentController extends Controller
 {
@@ -66,18 +65,32 @@ class TournamentController extends Controller
 
     public function boardCards(Tournament $tournament){
 
-        return $tournament->rounds()->where('current',true)->first()->boardCards()->get();
+        return $tournament->currentRound->boardCards;
 
     }
 
     public function currentRound(Tournament $tournament){
 
-        return $tournament->rounds()->where('current',true)->first();
+        return $tournament->currentRound;
 
     }
 
     public function currentBetRound(Tournament $tournament){
 
-        return $tournament->rounds()->where('current',true)->first()->betRounds()->where('current',true)->first();
+        $bet_round=$tournament->currentRound;
+        if($bet_round)
+        return $bet_round->currentBetRound;
+    }
+
+    public function playerLogged(Tournament $tournament){
+
+        return $tournament->playerLogged;
+
+    }
+
+    public function players(Tournament $tournament){
+
+        return $tournament->players;
+
     }
 }

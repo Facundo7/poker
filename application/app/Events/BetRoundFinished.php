@@ -9,23 +9,22 @@ use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
-use App\Models\Action;
+use App\Models\BetRound;
 
-class NewAction implements ShouldBroadcastNow
+class BetRoundFinished
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $action;
+    public $bet_round;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(Action $action)
+    public function __construct(BetRound $bet_round)
     {
-        $this->action=$action;
+        $this->bet_round=$bet_round;
     }
 
     /**
@@ -35,6 +34,6 @@ class NewAction implements ShouldBroadcastNow
      */
     public function broadcastOn()
     {
-        return new Channel('tournament.'.$this->action->player->tournament_id);
+        return new PrivateChannel('channel-name');
     }
 }

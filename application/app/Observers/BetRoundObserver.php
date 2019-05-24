@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Models\BetRound;
 use App\Events\NewBetRound;
+use App\Facades\Game;
 
 class BetRoundObserver
 {
@@ -16,35 +17,11 @@ class BetRoundObserver
     public function created(BetRound $betRound)
     {
 
-        $tournament=$betRound->round->tournament;
+        Game::dealBoardCards($betRound);
+        Game::setFirstTurn($betRound);
 
-    //set turn
-        //get players
-        $players=$tournament->players()->where('playing',true)->orderBy('sit')->get();
-
-        //get the button player index inside de $players array
-        for($i=0;$i<count($players);$i++){
-            if($players[$i]->button){
-                $button_player_index=$i;
-                break;
-            }
-        }
-
-
-        //check if its Preflop or rest of bet rounds to know who has to start playing
-        $turn_index=$button_player_index;
-        if($betRound->bet_phase!=0){
-            $turn_index+=1;
-        }else if(count($players)>2){
-            $turn_index+=3;
-        }
-
-        //set as turn the id of the player
-        $betRound->turn=$players[$turn_index]->id;
-        $betRound->save();
 
         event(new NewBetRound($betRound));
-
 
     }
 

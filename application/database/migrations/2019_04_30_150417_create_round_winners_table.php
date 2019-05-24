@@ -14,10 +14,10 @@ class CreateRoundWinnersTable extends Migration
     public function up()
     {
         Schema::create('round_winners', function (Blueprint $table) {
+            $table->bigIncrements('id');
             $table->unsignedBigInteger('round_id');
             $table->unsignedBigInteger('player_id');
             $table->integer('amount');
-            $table->primary(['round_id','player_id']);
             $table->timestamps();
         });
     }

@@ -3,8 +3,8 @@
 namespace App\Observers;
 
 use App\Models\Player;
-use App\Models\Round;
 use App\Events\NewPlayer;
+use App\Facades\Game;
 
 class PlayerObserver
 {
@@ -17,25 +17,14 @@ class PlayerObserver
     public function created(Player $player)
     {
 
-         event(new NewPlayer($player));
-         $tournament=$player->tournament;
+        event(new NewPlayer($player));
 
+        $tournament=$player->tournament;
          //check if this player completes the table so the game starts
-         if($tournament->players()->count()==$tournament->players_number){
-
-            //set the button to the first player
-            $tournament->players()->where('sit', 1)->update(['button' => true]);
-
-             //create the first round
-             $round=new Round;
-             $round->tournament_id=$tournament->id;
-             $round->pot=0;
-             $round->bb=$tournament->bb_start_value;
-             $round->bb_level=$tournament->bb_level;
-             $round->current=true;
-             $round->save();
-
-         }
+        if($tournament->players()->count()==$tournament->players_number){
+            $tournament->players()->where('sit',1)->update(['button'=>true]);
+            Game::createRound($tournament);
+        }
     }
 
     /**
