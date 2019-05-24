@@ -1,37 +1,41 @@
 <template>
-    <div class="container">
+    <div class="container-fluid">
+        <div class="poker-table">
+            <!--:class="sitsClass"-->
 
-        <div class="poker-table" :class="sitsClass">
-          <template v-if="players_show">
-            <div v-for="index in players_show.length" :key="index" class="sit">
-                {{players_show[index-1].user.nickname}}
-                {{players_show[index-1].stack-players_show[index-1].betting}}
-                {{players_show[index-1].betting}}
-            <div class="cards">
+            <div class="table">
+
+                <div class="sits2">
+
+
+
+
+                <div class="player-info sit">
+                    <div class="text-center">10</div>
+                    <div class="text-center">120000</div>
+                    <div class="text-center">500</div>
+                </div>
+                <div class="player-info sit">
+                    <div class="text-center">11</div>
+                    <div class="text-center">120000</div>
+                    <div class="text-center">500</div>
+                </div>
+                </div>
+
+                <div class="round-info">POT: 300</div>
+                <div class="board-cards d-flex justify-content-around">
+                    <div class="card"></div>
+                    <div class="card"></div>
+                    <div class="card"></div>
+                    <div class="card"></div>
+                    <div class="card"></div>
+                </div>
+                <div class="player-cards d-flex justify-content-around">
+                    <div class="card"></div>
+                    <div class="card"></div>
+                </div>
             </div>
-            </div>
-            <div class="table-infor">
-                <br>my cards<br>
-                {{player.cards[0].card.value}} of {{player.cards[0].card.suit}}<br>
-                {{player.cards[1].card.value}} of {{player.cards[1].card.suit}}
-                <br>
-                <br>
-                board cards <br>
-                <span v-for="index in round.board_cards.length" :key="index">
-                    {{board_cards[index-1]}}<br>
-                </span>
-            </div>
-            <div class="user-panel">
-                <input type="text" v-model="amount">
-                <button @click="act(0,amount)">Check</button>
-                <button @click="act(1,amount)">call</button>
-                <button @click="act(2,amount)">raise</button>
-                <button @click="act(3,amount)">reraise</button>
-                <button @click="act(4,amount)">Fold</button>
-            </div>
-            </template>
         </div>
-
 
         <div class="row">
             <ul>
@@ -60,7 +64,46 @@
             </ul>
         </div>
     </div>
+
+<!--
+<template v-if="players_show">
+            <div v-for="index in players_show.length" :key="index" class="sit">
+                {{players_show[index-1].user.nickname}}
+                {{players_show[index-1].stack-players_show[index-1].betting}}
+                {{players_show[index-1].betting}}
+            <div class="cards">
+
+            </div>
+            </div>
+            <div class="table-infor">
+                <br>my cards<br>
+                {{player.cards[0].card.value}} of {{player.cards[0].card.suit}}<br>
+                {{player.cards[1].card.value}} of {{player.cards[1].card.suit}}
+                <br>
+                <br>
+                board cards <br>
+                <span v-for="index in round.board_cards.length" :key="index">
+                    {{board_cards[index-1]}}<br>
+                </span>
+            </div>
+
+            </template>
+
+
+<div class="user-panel">
+                <input type="text" v-model="amount">
+                <button @click="act(0,amount)">Check</button>
+                <button @click="act(1,amount)">call</button>
+                <button @click="act(2,amount)">raise</button>
+                <button @click="act(3,amount)">reraise</button>
+                <button @click="act(4,amount)">Fold</button>
+        </div>
+
+    -->
+
 </template>
+
+
 
 <script>
     export default {
@@ -74,7 +117,7 @@
                 round:'',//nice
                 bet_round:'',//nice
                 amount:15,
-                sitsClass: '',//nice
+                sitsClass:'xd',//nice
                 status: 'stop',//---?????
             }
         },
@@ -98,7 +141,6 @@
         mounted() {
             this.getData();
             this.listen();
-            this.setClass();
         },
         methods: {
             getData(){
@@ -128,6 +170,7 @@
                 axios.get(route('api.tournaments.show',{tournament: this.tournament_id})).then(response => {
                     this.tournament = response.data;
                     console.log("get tournament done");
+                    this.setClass();
                 });
             },
             getRound(){
@@ -167,29 +210,8 @@
                 });
             },
             setClass(){
-                switch(this.number_of_sits) {
-                    case 3:
-                        this.sitsClass="sits3";
-                        break;
-                    case 4:
-                        this.sitsClass="sits4";
-                        break;
-                    case 5:
-                        this.sitsClass="sits5";
-                        break;
-                    case 6:
-                        this.sitsClass="sits6";
-                        break;
-                    case 7:
-                        this.sitsClass="sits7";
-                        break;
-                    case 8:
-                        this.sitsClass="sits8";
-                        break;
-                    case 9:
-                        this.sitsClass="sits9";
-                        break;
-                    }
+
+                this.sitsClass='sits'+this.tournament.players_number;
             },
             orderArray(player, players){
                 console.log('starting order');

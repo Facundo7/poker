@@ -10662,6 +10662,213 @@ a.text-dark:focus {
   }
 }
 
+.poker-table {
+  border: 1px solid black;
+  width: 1300px;
+  min-width: 1300px;
+  height: 800px;
+  margin: 100px auto;
+}
+
+.table {
+  width: 800px;
+  min-width: 800px;
+  height: 400px;
+  border: 3px solid black;
+  position: relative;
+  top: 50px;
+  left: 50px;
+  border-radius: 100%;
+  background-image: url("/images/mat2.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.board-cards {
+  position: absolute;
+  left: 200px;
+  top: 150px;
+  width: 400px;
+  height: 100px;
+  margin: auto;
+  background-color: red;
+}
+
+.card {
+  display: inline-block;
+  width: 70px;
+  height: 100px;
+  box-sizing: border-box;
+  background-color: white;
+  border: 1px solid black;
+}
+
+.player-cards {
+  position: absolute;
+  bottom: -25px;
+  left: 320px;
+  background-color: blue;
+  width: 160px;
+  height: 100px;
+}
+
+.round-info {
+  position: absolute;
+  text-align: center;
+  width: 150px;
+  height: 50px;
+  top: 100px;
+  left: 325px;
+  color: white;
+}
+
+.player-info {
+  color: white;
+  background-color: black;
+  width: 130px;
+  height: 80px;
+  position: absolute;
+}
+
+div[class^=sits] {
+  width: 800px;
+  min-width: 800px;
+  height: 400px;
+  border: 3px solid red;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: 3;
+}
+
+.sit:first-child {
+  left: 335px;
+  bottom: -105px;
+}
+
+.sits12 .sit:nth-child(2),
+.sits11 .sit:nth-child(2),
+.sits8 .sit:nth-child(2),
+.sits7 .sit:nth-child(2) {
+  left: 155px;
+  bottom: -20px;
+}
+
+.sits12 .sit:nth-child(3),
+.sits11 .sit:nth-child(3),
+.sits10 .sit:nth-child(2),
+.sits9 .sit:nth-child(2),
+.sits6 .sit:nth-child(2),
+.sits5 .sit:nth-child(2) {
+  left: 15px;
+  bottom: 60px;
+}
+
+.sits12 .sit:nth-child(4),
+.sits11 .sit:nth-child(4),
+.sits10 .sit:nth-child(3),
+.sits9 .sit:nth-child(3),
+.sits8 .sit:nth-child(3),
+.sits7 .sit:nth-child(3),
+.sits4 .sit:nth-child(2) {
+  left: -70px;
+  top: 160px;
+}
+
+.sits12 .sit:nth-child(5),
+.sits11 .sit:nth-child(5),
+.sits10 .sit:nth-child(4),
+.sits9 .sit:nth-child(4),
+.sits6 .sit:nth-child(3),
+.sits3 .sit:nth-child(2) {
+  left: 15px;
+  top: 60px;
+}
+
+.sits12 .sit:nth-child(6),
+.sits11 .sit:nth-child(6),
+.sits10 .sit:nth-child(5),
+.sits9 .sit:nth-child(5),
+.sits8 .sit:nth-child(4),
+.sits7 .sit:nth-child(4),
+.sits5 .sit:nth-child(3) {
+  left: 155px;
+  top: -20px;
+}
+
+.sits12 .sit:nth-child(7),
+.sits10 .sit:nth-child(6),
+.sits8 .sit:nth-child(5),
+.sits6 .sit:nth-child(4),
+.sits4 .sit:nth-child(3),
+.sits2 .sit:nth-child(2) {
+  left: 335px;
+  top: -50px;
+}
+
+.sits12 .sit:nth-child(8),
+.sits11 .sit:nth-child(7),
+.sits10 .sit:nth-child(7),
+.sits9 .sit:nth-child(6),
+.sits8 .sit:nth-child(6),
+.sits7 .sit:nth-child(5),
+.sits5 .sit:nth-child(4) {
+  right: 155px;
+  top: -20px;
+}
+
+.sits12 .sit:nth-child(9),
+.sits11 .sit:nth-child(8),
+.sits10 .sit:nth-child(8),
+.sits9 .sit:nth-child(7),
+.sits6 .sit:nth-child(5),
+.sits3 .sit:nth-child(3) {
+  right: 15px;
+  top: 60px;
+}
+
+.sits12 .sit:nth-child(10),
+.sits11 .sit:nth-child(9),
+.sits10 .sit:nth-child(9),
+.sits9 .sit:nth-child(8),
+.sits8 .sit:nth-child(7),
+.sits7 .sit:nth-child(6),
+.sits4 .sit:nth-child(4) {
+  right: -50px;
+  top: 160px;
+}
+
+.sits12 .sit:nth-child(11),
+.sits11 .sit:nth-child(10),
+.sits10 .sit:nth-child(10),
+.sits9 .sit:nth-child(9),
+.sits6 .sit:nth-child(6),
+.sits5 .sit:nth-child(5) {
+  right: 15px;
+  bottom: 60px;
+}
+
+.sits12 .sit:nth-child(12),
+.sits11 .sit:nth-child(11),
+.sits8 .sit:nth-child(8),
+.sits7 .sit:nth-child(7) {
+  right: 155px;
+  bottom: -20px;
+}
+
+/*
+.sits3{}
+.sits4{}
+.sits5{}
+.sits6{}
+.sits7{}
+.sits8{}
+.sits9{}
+.sits10{}
+.sits11{}
+.sits12{}
+*/
+
 .navbar-laravel {
   background-color: #fff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);

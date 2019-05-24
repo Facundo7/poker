@@ -1827,6 +1827,49 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "game",
   props: ['tournament_id'],
@@ -1843,7 +1886,7 @@ __webpack_require__.r(__webpack_exports__);
       bet_round: '',
       //nice
       amount: 15,
-      sitsClass: '',
+      sitsClass: 'xd',
       //nice
       status: 'stop' //---?????
 
@@ -1870,7 +1913,6 @@ __webpack_require__.r(__webpack_exports__);
   mounted: function mounted() {
     this.getData();
     this.listen();
-    this.setClass();
   },
   methods: {
     getData: function getData() {
@@ -1911,6 +1953,8 @@ __webpack_require__.r(__webpack_exports__);
       })).then(function (response) {
         _this3.tournament = response.data;
         console.log("get tournament done");
+
+        _this3.setClass();
       });
     },
     getRound: function getRound() {
@@ -1954,35 +1998,7 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     setClass: function setClass() {
-      switch (this.number_of_sits) {
-        case 3:
-          this.sitsClass = "sits3";
-          break;
-
-        case 4:
-          this.sitsClass = "sits4";
-          break;
-
-        case 5:
-          this.sitsClass = "sits5";
-          break;
-
-        case 6:
-          this.sitsClass = "sits6";
-          break;
-
-        case 7:
-          this.sitsClass = "sits7";
-          break;
-
-        case 8:
-          this.sitsClass = "sits8";
-          break;
-
-        case 9:
-          this.sitsClass = "sits9";
-          break;
-      }
+      this.sitsClass = 'sits' + this.tournament.players_number;
     },
     orderArray: function orderArray(player, players) {
       console.log('starting order');
@@ -47522,158 +47538,8 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "container" }, [
-    _c(
-      "div",
-      { staticClass: "poker-table", class: _vm.sitsClass },
-      [
-        _vm.players_show
-          ? [
-              _vm._l(_vm.players_show.length, function(index) {
-                return _c("div", { key: index, staticClass: "sit" }, [
-                  _vm._v(
-                    "\n            " +
-                      _vm._s(_vm.players_show[index - 1].user.nickname) +
-                      "\n            " +
-                      _vm._s(
-                        _vm.players_show[index - 1].stack -
-                          _vm.players_show[index - 1].betting
-                      ) +
-                      "\n            " +
-                      _vm._s(_vm.players_show[index - 1].betting) +
-                      "\n        "
-                  ),
-                  _c("div", { staticClass: "cards" })
-                ])
-              }),
-              _vm._v(" "),
-              _c(
-                "div",
-                { staticClass: "table-infor" },
-                [
-                  _c("br"),
-                  _vm._v("my cards"),
-                  _c("br"),
-                  _vm._v(
-                    "\n            " +
-                      _vm._s(_vm.player.cards[0].card.value) +
-                      " of " +
-                      _vm._s(_vm.player.cards[0].card.suit)
-                  ),
-                  _c("br"),
-                  _vm._v(
-                    "\n            " +
-                      _vm._s(_vm.player.cards[1].card.value) +
-                      " of " +
-                      _vm._s(_vm.player.cards[1].card.suit) +
-                      "\n            "
-                  ),
-                  _c("br"),
-                  _vm._v(" "),
-                  _c("br"),
-                  _vm._v("\n            board cards "),
-                  _c("br"),
-                  _vm._v(" "),
-                  _vm._l(_vm.round.board_cards.length, function(index) {
-                    return _c("span", { key: index }, [
-                      _vm._v(
-                        "\n                " +
-                          _vm._s(_vm.board_cards[index - 1])
-                      ),
-                      _c("br")
-                    ])
-                  })
-                ],
-                2
-              ),
-              _vm._v(" "),
-              _c("div", { staticClass: "user-panel" }, [
-                _c("input", {
-                  directives: [
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.amount,
-                      expression: "amount"
-                    }
-                  ],
-                  attrs: { type: "text" },
-                  domProps: { value: _vm.amount },
-                  on: {
-                    input: function($event) {
-                      if ($event.target.composing) {
-                        return
-                      }
-                      _vm.amount = $event.target.value
-                    }
-                  }
-                }),
-                _vm._v(" "),
-                _c(
-                  "button",
-                  {
-                    on: {
-                      click: function($event) {
-                        return _vm.act(0, _vm.amount)
-                      }
-                    }
-                  },
-                  [_vm._v("Check")]
-                ),
-                _vm._v(" "),
-                _c(
-                  "button",
-                  {
-                    on: {
-                      click: function($event) {
-                        return _vm.act(1, _vm.amount)
-                      }
-                    }
-                  },
-                  [_vm._v("call")]
-                ),
-                _vm._v(" "),
-                _c(
-                  "button",
-                  {
-                    on: {
-                      click: function($event) {
-                        return _vm.act(2, _vm.amount)
-                      }
-                    }
-                  },
-                  [_vm._v("raise")]
-                ),
-                _vm._v(" "),
-                _c(
-                  "button",
-                  {
-                    on: {
-                      click: function($event) {
-                        return _vm.act(3, _vm.amount)
-                      }
-                    }
-                  },
-                  [_vm._v("reraise")]
-                ),
-                _vm._v(" "),
-                _c(
-                  "button",
-                  {
-                    on: {
-                      click: function($event) {
-                        return _vm.act(4, _vm.amount)
-                      }
-                    }
-                  },
-                  [_vm._v("Fold")]
-                )
-              ])
-            ]
-          : _vm._e()
-      ],
-      2
-    ),
+  return _c("div", { staticClass: "container-fluid" }, [
+    _vm._m(0),
     _vm._v(" "),
     _c("div", { staticClass: "row" }, [
       _c(
@@ -47681,9 +47547,9 @@ var render = function() {
         _vm._l(_vm.players, function(player) {
           return _c("li", { key: player.id }, [
             _vm._v(
-              "\n                " +
+              "\n                    " +
                 _vm._s(player.user.nickname) +
-                "\n            "
+                "\n                "
             )
           ])
         }),
@@ -47754,7 +47620,62 @@ var render = function() {
     ])
   ])
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "poker-table" }, [
+      _c("div", { staticClass: "table" }, [
+        _c("div", { staticClass: "sits2" }, [
+          _c("div", { staticClass: "player-info sit" }, [
+            _c("div", { staticClass: "text-center" }, [_vm._v("10")]),
+            _vm._v(" "),
+            _c("div", { staticClass: "text-center" }, [_vm._v("120000")]),
+            _vm._v(" "),
+            _c("div", { staticClass: "text-center" }, [_vm._v("500")])
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "player-info sit" }, [
+            _c("div", { staticClass: "text-center" }, [_vm._v("11")]),
+            _vm._v(" "),
+            _c("div", { staticClass: "text-center" }, [_vm._v("120000")]),
+            _vm._v(" "),
+            _c("div", { staticClass: "text-center" }, [_vm._v("500")])
+          ])
+        ]),
+        _vm._v(" "),
+        _c("div", { staticClass: "round-info" }, [_vm._v("POT: 300")]),
+        _vm._v(" "),
+        _c(
+          "div",
+          { staticClass: "board-cards d-flex justify-content-around" },
+          [
+            _c("div", { staticClass: "card" }),
+            _vm._v(" "),
+            _c("div", { staticClass: "card" }),
+            _vm._v(" "),
+            _c("div", { staticClass: "card" }),
+            _vm._v(" "),
+            _c("div", { staticClass: "card" }),
+            _vm._v(" "),
+            _c("div", { staticClass: "card" })
+          ]
+        ),
+        _vm._v(" "),
+        _c(
+          "div",
+          { staticClass: "player-cards d-flex justify-content-around" },
+          [
+            _c("div", { staticClass: "card" }),
+            _vm._v(" "),
+            _c("div", { staticClass: "card" })
+          ]
+        )
+      ])
+    ])
+  }
+]
 render._withStripped = true
 
 
@@ -60241,8 +60162,8 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! C:\Users\Facundo\Facundo\Projects\poker\application\resources\js\app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! C:\Users\Facundo\Facundo\Projects\poker\application\resources\sass\app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! C:\Users\Facundo\poker\application\resources\js\app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! C:\Users\Facundo\poker\application\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })
