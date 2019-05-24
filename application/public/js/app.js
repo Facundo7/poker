@@ -47529,7 +47529,7 @@ var render = function() {
       [
         _vm.players_show
           ? [
-              _vm._l(_vm.players.length, function(index) {
+              _vm._l(_vm.players_show.length, function(index) {
                 return _c("div", { key: index, staticClass: "sit" }, [
                   _vm._v(
                     "\n            " +

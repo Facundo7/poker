@@ -3,7 +3,7 @@
 
         <div class="poker-table" :class="sitsClass">
           <template v-if="players_show">
-            <div v-for="index in players.length" :key="index" class="sit">
+            <div v-for="index in players_show.length" :key="index" class="sit">
                 {{players_show[index-1].user.nickname}}
                 {{players_show[index-1].stack-players_show[index-1].betting}}
                 {{players_show[index-1].betting}}

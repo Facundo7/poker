@@ -31,7 +31,10 @@ class Game
     public function createRound(Tournament $tournament)
     {
 
-        //create the first round
+        //set deck cards available
+        $tournament->deckCards()->update(['available' => true]);
+
+        //create round
         $round=new Round;
         $round->tournament_id=$tournament->id;
         $round->pot=0;
@@ -39,9 +42,6 @@ class Game
         $round->bb_level=$tournament->bb_level;
         $round->current=true;
         $round->save();
-
-        //set deck cards available
-        $tournament->deckCards()->update(['available' => true]);
 
 
     }
