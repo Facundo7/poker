@@ -40,7 +40,7 @@ class FinishRound
             Game::evaluateCards($tournament->playingPlayers()->with('cards')->get(), $event->round->boardCards, $event->round);
         }
 
-        //kill players
+        Game::killPlayers($tournament);
         Game::changeButton($tournament);
         Game::createRound($tournament);
     }

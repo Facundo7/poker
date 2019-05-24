@@ -121,16 +121,24 @@ class Game
 
         $tournament->alivePlayers()->update(['playing'=>true, 'sb'=>false, 'bb'=>false]);
 
-        //set button bb and sb
+        //set bb and sb
         $players[$sb_index]->sb=true;
-        $players[$sb_index]->save();
+        $players[$sb_index]->betting=$tournament->currentRound->bb/2;
+
         $players[$bb_index]->bb=true;
+        $players[$bb_index]->betting=$tournament->currentRound->bb;
+
         $players[$bb_index]->save();
         $players[$sb_index]->save();
 
 
     }
 
+    public function killPlayers(Tournament $tournament){
+
+        $tournament->alivePlayers()->where('stack'==0)->update(['alive'=>false, 'sb'=>false, 'bb'=>false]);
+
+    }
 
     public function setFirstTurn(BetRound $betRound){
 
@@ -418,13 +426,14 @@ class Game
             }
             public function checkStraightFlush($hand){
 
+
                 $spades=[];
                 $clubs=[];
                 $hearts=[];
                 $diamonds=[];
 
                 for ($i=0; $i <= 6; $i++) {
-                    switch ($hand[$i]->value) {
+                    switch ($hand[$i]->suit) {
                         case 1:
                             $spades[]=$hand[$i];
                             break;
@@ -447,17 +456,21 @@ class Game
                 } else if(count($spades)>=5)
                 {
                     $hand=$spades;
-                } if(count($hearts)>=5)
+                }else if(count($hearts)>=5)
                 {
                     $hand=$hearts;
-                } if(count($diamonds)>=5)
+                }else if(count($diamonds)>=5)
                 {
                     $hand=$diamonds;
-                } else {
+                }else {
                     return false;
                 }
 
+
                 //check straight in the hand
+
+
+
 
                 if($hand[count($hand)-1]->value==14&&
                 $hand[0]->value==2&&
@@ -536,13 +549,6 @@ class Game
                     $hand[$i]->value==$hand[$i-2]->value
                     ){
 
-                        // for ($j=0; $j < $hand->length; $j++) {
-
-                        //     if (!in_array($j, array($i,$i-1,$i-2))) {
-                        //         $hand2[]=$hand[$j];
-                        //     }
-                        // }
-
                         $hand2=$hand;
                         array_splice($hand2,$i-2,3);
 
@@ -578,7 +584,7 @@ class Game
                 $diamonds=[];
 
                 for ($i=0; $i <= 6; $i++) {
-                    switch ($hand[$i]->value) {
+                    switch ($hand[$i]->suit) {
                         case 1:
                             $spades[]=$hand[$i];
                             break;
@@ -601,10 +607,10 @@ class Game
                 } else if(count($spades)>=5)
                 {
                     $hand=$spades;
-                } if(count($hearts)>=5)
+                } else if(count($hearts)>=5)
                 {
                     $hand=$hearts;
-                } if(count($diamonds)>=5)
+                } else if(count($diamonds)>=5)
                 {
                     $hand=$diamonds;
                 } else {
@@ -721,12 +727,12 @@ class Game
                             if($hand2[$j]->value==$hand2[$j-1]->value
                             ){
                                 $hand3=$hand2;
-                                array_splice($hand3,$i-1,2);
+                                array_splice($hand3,$j-1,2);
                                 return array(
                                     3,
                                     $hand[$i]->value,
                                     $hand2[$j]->value,
-                                    $hand3[count($hand2)-1],
+                                    $hand3[count($hand3)-1]->value,
                                     0,
                                     0
                                 );
@@ -769,8 +775,11 @@ class Game
             public function getWinners($evaluations){
 
 
+                $all=$evaluations;
+
                 for($i=0;$i<6;$i++)
                 {
+
 
                     $values=[];
 
@@ -779,25 +788,33 @@ class Game
                         $values[]=$evaluations[$j][$i];
                     }
 
-                    $winners=[];
 
-                    for($j=0;$j<count($evaluations);$j++)
+                    $x=count($evaluations);
+
+                    for($j=0;$j<$x;$j++)
                     {
-                        if($evaluations[$j][$i]==max($values))
+
+                        $arrays[]=$evaluations;
+                        if($evaluations[$j][$i]!=max($values))
                         {
-                            $winners[]=$evaluations[$j];
+                            unset($evaluations[$j]);
                         }
+
                     }
 
-                    if(count($winners)==1)
+                    $evaluations=array_values($evaluations);
+
+
+                    if(count($evaluations)==1)
                     {
                         break;
                     }
 
                 }
 
-                return $winners;
 
+                dd($all, $evaluations);
+                return $evaluations;
             }
 
 
