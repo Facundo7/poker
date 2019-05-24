@@ -30,11 +30,11 @@ class FinishBetRound
     {
         $bet_round=$event->bet_round;
         $tournament=$bet_round->round->tournament;
-        Game::updatePotStack();
+        Game::updatePotStack($tournament);
         $event->bet_round->current=false;
         $event->bet_round->save();
 
-        if($tournament->playingPlayers==1)
+        if($tournament->playingPlayers()->count()==1)
         {
 
             event(new RoundFinished($tournament->currentRound));

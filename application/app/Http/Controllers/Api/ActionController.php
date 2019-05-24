@@ -33,6 +33,7 @@ class ActionController extends Controller
         $action->fill($request->toArray());
         $action->player_id=$request->player_id;
         $action->bet_round_id=$request->bet_round_id;
+        $action->save();
     }
 
     /**

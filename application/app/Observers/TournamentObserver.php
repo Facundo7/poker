@@ -20,7 +20,7 @@ class TournamentObserver
     public function created(Tournament $tournament)
     {
 
-        event(new BetRoundFinished(BetRound::find(1)));
+
         Game::createDeck($tournament);
 
 

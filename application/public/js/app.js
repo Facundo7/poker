@@ -1812,6 +1812,21 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "game",
   props: ['tournament_id'],
@@ -1859,22 +1874,6 @@ __webpack_require__.r(__webpack_exports__);
   },
   methods: {
     getData: function getData() {
-      // var self=this;
-      // axios.get(route('api.tournaments.show',{tournament: this.tournament_id})).then(response => {
-      //     this.tournament = response.data;
-      //     console.log("get tournament done");
-      //     axios.get(route('api.tournaments.players',{tournament: this.tournament_id})).then(response => {
-      //         this.players = response.data;
-      //         console.log("get players done");
-      //         axios.get(route('api.tournaments.playerlogged',{tournament: this.tournament_id})).then(response => {
-      //             this.player = response.data;
-      //             console.log("get player logged done");
-      //             if(this.player!=''){
-      //                 self.orderArray();
-      //             }
-      //         });
-      //     });
-      // });
       this.getTournament();
       this.getAllPlayers();
       this.getPlayer();
@@ -1943,7 +1942,7 @@ __webpack_require__.r(__webpack_exports__);
         player_id: this.player.id,
         amount: amount
       }).then(function (response) {
-        console.log(response); //self.getData();
+        console.log("action done");
       });
     },
     sit: function sit(id) {
@@ -2022,6 +2021,8 @@ __webpack_require__.r(__webpack_exports__);
       }).listen('NewBetRound', function () {
         _this6.getData();
       }).listen('NewRound', function () {
+        _this6.getData();
+      }).listen('NewAction', function () {
         _this6.getData();
       });
     }
@@ -47528,22 +47529,63 @@ var render = function() {
       [
         _vm.players_show
           ? [
-              _vm._l(_vm.tournament.players_number, function(index) {
+              _vm._l(_vm.players.length, function(index) {
                 return _c("div", { key: index, staticClass: "sit" }, [
                   _vm._v(
                     "\n            " +
+                      _vm._s(_vm.players_show[index - 1].user.nickname) +
+                      "\n            " +
                       _vm._s(
-                        _vm.players_show[index - 1]
-                          ? _vm.players_show[index - 1].user.nickname
-                          : "empty"
+                        _vm.players_show[index - 1].stack -
+                          _vm.players_show[index - 1].betting
                       ) +
+                      "\n            " +
+                      _vm._s(_vm.players_show[index - 1].betting) +
                       "\n        "
                   ),
                   _c("div", { staticClass: "cards" })
                 ])
               }),
               _vm._v(" "),
-              _c("div", { staticClass: "table-info" }),
+              _c(
+                "div",
+                { staticClass: "table-infor" },
+                [
+                  _c("br"),
+                  _vm._v("my cards"),
+                  _c("br"),
+                  _vm._v(
+                    "\n            " +
+                      _vm._s(_vm.player.cards[0].card.value) +
+                      " of " +
+                      _vm._s(_vm.player.cards[0].card.suit)
+                  ),
+                  _c("br"),
+                  _vm._v(
+                    "\n            " +
+                      _vm._s(_vm.player.cards[1].card.value) +
+                      " of " +
+                      _vm._s(_vm.player.cards[1].card.suit) +
+                      "\n            "
+                  ),
+                  _c("br"),
+                  _vm._v(" "),
+                  _c("br"),
+                  _vm._v("\n            board cards "),
+                  _c("br"),
+                  _vm._v(" "),
+                  _vm._l(_vm.round.board_cards.length, function(index) {
+                    return _c("span", { key: index }, [
+                      _vm._v(
+                        "\n                " +
+                          _vm._s(_vm.board_cards[index - 1])
+                      ),
+                      _c("br")
+                    ])
+                  })
+                ],
+                2
+              ),
               _vm._v(" "),
               _c("div", { staticClass: "user-panel" }, [
                 _c("input", {
@@ -47572,7 +47614,7 @@ var render = function() {
                   {
                     on: {
                       click: function($event) {
-                        return _vm.check()
+                        return _vm.act(0, _vm.amount)
                       }
                     }
                   },
@@ -47584,11 +47626,11 @@ var render = function() {
                   {
                     on: {
                       click: function($event) {
-                        return _vm.bet()
+                        return _vm.act(1, _vm.amount)
                       }
                     }
                   },
-                  [_vm._v("Bet")]
+                  [_vm._v("call")]
                 ),
                 _vm._v(" "),
                 _c(
@@ -47596,7 +47638,31 @@ var render = function() {
                   {
                     on: {
                       click: function($event) {
-                        return _vm.fold()
+                        return _vm.act(2, _vm.amount)
+                      }
+                    }
+                  },
+                  [_vm._v("raise")]
+                ),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    on: {
+                      click: function($event) {
+                        return _vm.act(3, _vm.amount)
+                      }
+                    }
+                  },
+                  [_vm._v("reraise")]
+                ),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    on: {
+                      click: function($event) {
+                        return _vm.act(4, _vm.amount)
                       }
                     }
                   },
@@ -60175,8 +60241,8 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! C:\Users\Facundo\poker\application\resources\js\app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! C:\Users\Facundo\poker\application\resources\sass\app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! C:\Users\Facundo\Facundo\Projects\poker\application\resources\js\app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! C:\Users\Facundo\Facundo\Projects\poker\application\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })

@@ -6,6 +6,7 @@ use App\Models\Action;
 use App\Events\NewAction;
 use App\Facades\Game;
 use App\Events\BetRoundFinished;
+use App\Models\Tournament;
 
 class ActionObserver
 {
@@ -18,18 +19,19 @@ class ActionObserver
     public function created(Action $action)
     {
 
+        $tournament=$action->betRound->round->tournament;
+        $bet_round=$action->betRound;
         Game::updatePlayer($action);
 
         event(new NewAction($action));
 
         //check if bet round finished
-        $bet_round=$action->betRound;
-        $tournament=$bet_round->round->tournament;
-
-        if($tournament->playingPlayers>1){
 
 
-            if($bet_round->players==$bet_round->actions()->count()&&$tournament->playingPlayers()->distinct('betting')->count()==1){
+        if($tournament->playingPlayers()->count()>1){
+
+
+            if($bet_round->players<=$bet_round->actions()->count()&&$tournament->playingPlayers()->distinct()->count('betting')==1){
 
                 event(new BetRoundFinished($bet_round));
             }else{

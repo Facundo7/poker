@@ -32,7 +32,7 @@ class FinishRound
         $event->round->current=false;
         $event->round->save();
 
-        if($tournament->playingPlayers==1)
+        if($tournament->playingPlayers()->count()==1)
         {
             //give pot to the player left
         }else {

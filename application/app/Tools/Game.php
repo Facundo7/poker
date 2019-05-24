@@ -178,12 +178,12 @@ class Game
         $player=$action->player;
         if($action->action==4){
 
-            $player->update(["playing"=>false]);
+            $player->playing=false;
             $player->save();
 
         }else if($action->action!=0){
             //call, raise, reraise
-            $player->update(["betting"=>$action->amount]);
+            $player->betting+=$action->amount;
             $player->save();
 
         }
@@ -204,6 +204,7 @@ class Game
 
         //deactivate button for current button player
         $players[$button_player_index]->button=false;
+        $players[$button_player_index]->save();
 
         //set button for next player
         $button_player_index+=1;
@@ -231,8 +232,8 @@ class Game
 
         //set the next player turn to the bet round
         $next_turn_index=$current_turn_index+1;
-        if($next_turn_index>=$players->count()){
-            $next_turn_index-=$players->count();
+        if($next_turn_index>=count($players)){
+            $next_turn_index-=count($players);
         }
         $bet_round->turn=$players[$next_turn_index]->id;
         $bet_round->save();
@@ -247,10 +248,11 @@ class Game
             $round->pot+=$player->betting;
             $player->stack-=$player->betting;
             $player->betting=0;
+            $player->save();
         }
 
         $round->save();
-        $players->save();
+        //$players->update(['betting'=>]);
     }
 
     public function dealBoardCards(BetRound $bet_round){
@@ -274,28 +276,30 @@ class Game
                 $max=5;
                 break;
             default:
-                //is preflop
+                $i=1;
+                $max=0;
                 break;
         }
 
 
         //create an array with available cards)
-        $cards=$tournament->availableDeckCards()->select('id')->get()->toArray();
-
+        $cards=$tournament->availableDeckCards()->pluck('id')->toArray();
 
          $remove=[]; //this array will contain the id of the cards that have been dealt so they can not be available again until next round
 
          //
+
          for($i;$i<=$max;$i++){
 
                 $index=rand(0,count($cards)-1);
-                BoardCard::insert(
-                    [
-                        'round_id'=>$bet_round->round->id,
-                        'card_id'=>$cards[$index],
-                        'position'=>$i,
-                    ]
-                );
+                $board_card=new BoardCard;
+
+                $board_card->round_id=$bet_round->round->id;
+                $board_card->card_id=$cards[$index];
+                $board_card->position=$i;
+                $board_card->save();
+
+
                 $remove[]=$cards[$index];
                 array_splice($cards, $index, 1);
             }
@@ -313,9 +317,9 @@ class Game
         $evaluated_hands=[];
 
         //store cards in hands
-        for($i=0;$i<$players->length;$i++)
+        for($i=0;$i<count($players);$i++)
         {
-            $hands[]=array(players[$i]->cards[0]->card,
+            $hands[]=array($players[$i]->cards[0]->card,
             $players[$i]->cards[1]->card,
             $board_cards[0]->card,
             $board_cards[1]->card,
@@ -326,7 +330,7 @@ class Game
         }
 
         //evaluate every hand and fill evaluated hand array
-        for($i=0;$i<$hands->length;$i++)
+        for($i=0;$i<count($hands);$i++)
         {
             $hand=$hands[$i];
 
@@ -346,35 +350,35 @@ class Game
 
 
 
-            $evaluated_hands[$i]=checkStraightFlush($hand);
+            $evaluated_hands[$i]=$this->checkStraightFlush($hand);
 
             if($evaluated_hands[$i]==false){
 
-                $evaluated_hands[$i]=checkPoker($hand);
+                $evaluated_hands[$i]=$this->checkPoker($hand);
 
                 if($evaluated_hands[$i]==false){
 
-                    $evaluated_hands[$i]=checkFullHouse($hand);
+                    $evaluated_hands[$i]=$this->checkFullHouse($hand);
 
                     if($evaluated_hands[$i]==false){
 
-                        $evaluated_hands[$i]=checkFlush($hand);
+                        $evaluated_hands[$i]=$this->checkFlush($hand);
 
                         if($evaluated_hands[$i]==false){
 
-                            $evaluated_hands[$i]=checkStraight($hand);
+                            $evaluated_hands[$i]=$this->checkStraight($hand);
 
                             if($evaluated_hands[$i]==false){
 
-                                $evaluated_hands[$i]=checkThree($hand);
+                                $evaluated_hands[$i]=$this->checkThree($hand);
 
                                 if($evaluated_hands[$i]==false){
 
-                                    $evaluated_hands[$i]=checkTwoPair($hand);
+                                    $evaluated_hands[$i]=$this->checkTwoPair($hand);
 
                                     if($evaluated_hands[$i]==false){
 
-                                        $evaluated_hands[$i]=checkPair($hand);
+                                        $evaluated_hands[$i]=$this->checkPair($hand);
 
                                         if($evaluated_hands[$i]==false){
 
@@ -400,9 +404,9 @@ class Game
 
             }
 
-            $winners=getWinners($evaluated_hands);
+            $winners=$this->getWinners($evaluated_hands);
 
-            for ($i=0; $i < $winners->length; $i++) {
+            for ($i=0; $i < count($winners); $i++) {
                 $winner= new RoundWinner;
                 $winner->player_id=$winners[$i][6];
                 $winner->round_id=$round->id;
@@ -414,7 +418,10 @@ class Game
             }
             public function checkStraightFlush($hand){
 
-
+                $spades=[];
+                $clubs=[];
+                $hearts=[];
+                $diamonds=[];
 
                 for ($i=0; $i <= 6; $i++) {
                     switch ($hand[$i]->value) {
@@ -434,16 +441,16 @@ class Game
                 }
 
 
-                if($clubs->length>=5)
+                if(count($clubs)>=5)
                 {
                     $hand=$clubs;
-                } else if($spades->length>=5)
+                } else if(count($spades)>=5)
                 {
                     $hand=$spades;
-                } if($hearts->length>=5)
+                } if(count($hearts)>=5)
                 {
                     $hand=$hearts;
-                } if($diamonds->length>=5)
+                } if(count($diamonds)>=5)
                 {
                     $hand=$diamonds;
                 } else {
@@ -452,7 +459,7 @@ class Game
 
                 //check straight in the hand
 
-                if($hand[$hand->length-1]->value==14&&
+                if($hand[count($hand)-1]->value==14&&
                 $hand[0]->value==2&&
                 $hand[1]->value==3&&
                 $hand[2]->value==4&&
@@ -468,7 +475,7 @@ class Game
                     );
                 }else{
 
-                    for ($i=$hand->length-1; $i > 3 ; $i--) {
+                    for ($i=count($hand)-1; $i > 3 ; $i--) {
 
                         if($hand[$i]->value==$hand[$i-1]->value+1&&
                         $hand[$i]->value==$hand[$i-2]->value+2&&
@@ -496,7 +503,7 @@ class Game
 
             public function checkPoker($hand){
 
-                for ($i=$hand->length-1; $i > 2 ; $i--) {
+                for ($i=count($hand)-1; $i > 2 ; $i--) {
 
                     if($hand[$i]->value==$hand[$i-1]->value&&
                     $hand[$i]->value==$hand[$i-2]->value&&
@@ -508,7 +515,7 @@ class Game
                         return array(
                             8,
                             $hand[$i]->value,
-                            $hand2[$hand2->length-1]->value,
+                            $hand2[count($hand2)-1]->value,
                             0,
                             0,
                             0
@@ -523,7 +530,7 @@ class Game
 
             public function checkFullHouse($hand){
 
-                for ($i=$hand->length-1; $i > 1 ; $i--) {
+                for ($i=count($hand)-1; $i > 1 ; $i--) {
 
                     if($hand[$i]->value==$hand[$i-1]->value&&
                     $hand[$i]->value==$hand[$i-2]->value
@@ -540,7 +547,7 @@ class Game
                         array_splice($hand2,$i-2,3);
 
                          //check couple in hand2
-                         for ($k=$hand2->length-1; $k > 0 ; $k--) {
+                         for ($k=count($hand2)-1; $k > 0 ; $k--) {
 
                             if($hand2[$k]->value==$hand2[$k-1]->value){
                                 return array(
@@ -565,6 +572,11 @@ class Game
 
             public function checkFlush($hand){
 
+                $spades=[];
+                $clubs=[];
+                $hearts=[];
+                $diamonds=[];
+
                 for ($i=0; $i <= 6; $i++) {
                     switch ($hand[$i]->value) {
                         case 1:
@@ -583,16 +595,16 @@ class Game
                 }
 
 
-                if($clubs->length>=5)
+                if(count($clubs)>=5)
                 {
                     $hand=$clubs;
-                } else if($spades->length>=5)
+                } else if(count($spades)>=5)
                 {
                     $hand=$spades;
-                } if($hearts->length>=5)
+                } if(count($hearts)>=5)
                 {
                     $hand=$hearts;
-                } if($diamonds->length>=5)
+                } if(count($diamonds)>=5)
                 {
                     $hand=$diamonds;
                 } else {
@@ -601,7 +613,7 @@ class Game
 
                 return array(
                     6,
-                    $hand[$hand->length-1]->value,
+                    $hand[count($hand)-1]->value,
                     0,
                     0,
                     0,
@@ -613,7 +625,7 @@ class Game
             public function checkStraight($hand){
 
 
-                if($hand[$hand->length-1]->value==14&&$hand[0]->value==2){
+                if($hand[count($hand)-1]->value==14&&$hand[0]->value==2){
 
                     if (in_array(3, array($hand[1]->value,
                                         $hand[2]->value,
@@ -646,7 +658,7 @@ class Game
 
 
 
-                for ($i=$hand->length-1; $i > 3 ; $i--) {
+                for ($i=count($hand)-1; $i > 3 ; $i--) {
 
                     if($hand[$i]->value==$hand[$i-1]->value+1&&
                     $hand[$i]->value==$hand[$i-2]->value+2&&
@@ -672,7 +684,7 @@ class Game
 
             public function checkThree($hand){
 
-                for ($i=$hand->length-1; $i > 1 ; $i--) {
+                for ($i=count($hand)-1; $i > 1 ; $i--) {
 
                     if($hand[$i]->value==$hand[$i-1]->value&&
                     $hand[$i]->value==$hand[$i-2]->value
@@ -682,8 +694,8 @@ class Game
                         return array(
                             4,
                             $hand[$i]->value,
-                            $hand2[$hand2->length-1]->value,
-                            $hand2[$hand2->length-2]->value,
+                            $hand2[count($hand2)-1]->value,
+                            $hand2[count($hand2)-2]->value,
                             0,
                             0
                         );
@@ -697,14 +709,14 @@ class Game
 
             public function checkTwoPair($hand){
 
-                for ($i=$hand->length-1; $i > 0 ; $i--) {
+                for ($i=count($hand)-1; $i > 0 ; $i--) {
 
                     if($hand[$i]->value==$hand[$i-1]->value
                     ){
                         $hand2=$hand;
                         array_splice($hand2,$i-1,2);
 
-                        for ($j=$hand2->length-1; $j > 0 ; $j--) {
+                        for ($j=count($hand2)-1; $j > 0 ; $j--) {
 
                             if($hand2[$j]->value==$hand2[$j-1]->value
                             ){
@@ -714,7 +726,7 @@ class Game
                                     3,
                                     $hand[$i]->value,
                                     $hand2[$j]->value,
-                                    $hand3[$hand2->length-1],
+                                    $hand3[count($hand2)-1],
                                     0,
                                     0
                                 );
@@ -733,18 +745,18 @@ class Game
 
             public function checkPair($hand){
 
-                for ($i=$hand->length-1; $i > 0 ; $i--) {
+                for ($i=count($hand)-1; $i > 0 ; $i--) {
 
                     if($hand[$i]->value==$hand[$i-1]->value
                     ){
                         $hand2=$hand;
                         array_splice($hand2,$i-1,2);
                         return array(
-                            3,
+                            2,
                             $hand[$i]->value,
-                            $hand2[$hand2->length-1]->value,
-                            $hand2[$hand2->length-2]->value,
-                            $hand2[$hand2->length-3]->value,
+                            $hand2[count($hand2)-1]->value,
+                            $hand2[count($hand2)-2]->value,
+                            $hand2[count($hand2)-3]->value,
                             0
                         );
                     }
@@ -762,14 +774,14 @@ class Game
 
                     $values=[];
 
-                    for($j=0;$j<$evaluations->length;$j++)
+                    for($j=0;$j<count($evaluations);$j++)
                     {
                         $values[]=$evaluations[$j][$i];
                     }
 
                     $winners=[];
 
-                    for($j=0;$j<$evaluations->length;$j++)
+                    for($j=0;$j<count($evaluations);$j++)
                     {
                         if($evaluations[$j][$i]==max($values))
                         {
@@ -777,7 +789,7 @@ class Game
                         }
                     }
 
-                    if($winners->length==1)
+                    if(count($winners)==1)
                     {
                         break;
                     }

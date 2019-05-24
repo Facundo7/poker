@@ -24,7 +24,7 @@ class RoundFinished
      */
     public function __construct(Round $round)
     {
-        $this->roud=$round;
+        $this->round=$round;
     }
 
     /**

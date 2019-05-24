@@ -25,7 +25,7 @@ class NewAction implements ShouldBroadcastNow
      */
     public function __construct(Action $action)
     {
-        //
+        $this->action=$action;
     }
 
     /**
@@ -35,6 +35,6 @@ class NewAction implements ShouldBroadcastNow
      */
     public function broadcastOn()
     {
-        return new PrivateChannel('channel-name');
+        return new Channel('tournament.'.$this->action->player->tournament_id);
     }
 }

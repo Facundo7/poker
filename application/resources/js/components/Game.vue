@@ -3,16 +3,31 @@
 
         <div class="poker-table" :class="sitsClass">
           <template v-if="players_show">
-            <div v-for="index in tournament.players_number" :key="index" class="sit">
-                {{players_show[index-1] ? players_show[index-1].user.nickname : 'empty'}}
-            <div class="cards"></div>
+            <div v-for="index in players.length" :key="index" class="sit">
+                {{players_show[index-1].user.nickname}}
+                {{players_show[index-1].stack-players_show[index-1].betting}}
+                {{players_show[index-1].betting}}
+            <div class="cards">
             </div>
-            <div class="table-info"></div>
+            </div>
+            <div class="table-infor">
+                <br>my cards<br>
+                {{player.cards[0].card.value}} of {{player.cards[0].card.suit}}<br>
+                {{player.cards[1].card.value}} of {{player.cards[1].card.suit}}
+                <br>
+                <br>
+                board cards <br>
+                <span v-for="index in round.board_cards.length" :key="index">
+                    {{board_cards[index-1]}}<br>
+                </span>
+            </div>
             <div class="user-panel">
                 <input type="text" v-model="amount">
-                <button @click="check()">Check</button>
-                <button @click="bet()">Bet</button>
-                <button @click="fold()">Fold</button>
+                <button @click="act(0,amount)">Check</button>
+                <button @click="act(1,amount)">call</button>
+                <button @click="act(2,amount)">raise</button>
+                <button @click="act(3,amount)">reraise</button>
+                <button @click="act(4,amount)">Fold</button>
             </div>
             </template>
         </div>
@@ -87,29 +102,11 @@
         },
         methods: {
             getData(){
-                // var self=this;
-                // axios.get(route('api.tournaments.show',{tournament: this.tournament_id})).then(response => {
-                //     this.tournament = response.data;
-                //     console.log("get tournament done");
-                //     axios.get(route('api.tournaments.players',{tournament: this.tournament_id})).then(response => {
-                //         this.players = response.data;
-                //         console.log("get players done");
-                //         axios.get(route('api.tournaments.playerlogged',{tournament: this.tournament_id})).then(response => {
-                //             this.player = response.data;
-                //             console.log("get player logged done");
-                //             if(this.player!=''){
-                //                 self.orderArray();
-                //             }
-                //         });
-                //     });
-                // });
                 this.getTournament();
                 this.getAllPlayers();
                 this.getPlayer();
                 this.getRound();
                 this.getBetRound();
-
-
 
             },
             getAllPlayers(){
@@ -156,8 +153,7 @@
 
                 })
                 .then(function (response) {
-                console.log(response);
-                //self.getData();
+                console.log("action done");
                 });
             },
             sit(id){
@@ -225,7 +221,8 @@
                 Echo.channel('tournament.'+this.tournament_id)
                 .listen('NewPlayer', ()=>{this.getData()})
                 .listen('NewBetRound', ()=>{this.getData()})
-                .listen('NewRound', ()=>{this.getData()});
+                .listen('NewRound', ()=>{this.getData()})
+                .listen('NewAction', ()=>{this.getData()});
 
             }
         }
