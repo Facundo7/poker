@@ -13,6 +13,8 @@ use App\Models\BetRound;
 use App\Observers\BetRoundObserver;
 use App\Models\Action;
 use App\Observers\ActionObserver;
+use App\Models\RoundWinner;
+use App\Observers\RoundWinnerObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -38,5 +40,6 @@ class AppServiceProvider extends ServiceProvider
         Tournament::observe(TournamentObserver::class);
         BetRound::observe(BetRoundObserver::class);
         Action::observe(ActionObserver::class);
+        RoundWinner::observe(RoundWinnerObserver::class);
     }
 }

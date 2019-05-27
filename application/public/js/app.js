@@ -1855,21 +1855,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "game",
   props: ['tournament_id'],
@@ -1885,16 +1870,50 @@ __webpack_require__.r(__webpack_exports__);
       //nice
       bet_round: '',
       //nice
-      amount: 15,
+      amount: '',
       sitsClass: 'xd',
       //nice
-      status: 'stop' //---?????
-
+      values: [2, 3, 4, 5, 6, 7, 8, 9, 10, 'J', 'Q', 'K', 'A'],
+      icons: ['♠', '♥', '♣', '◆']
     };
   },
   computed: {
     pot: function pot() {
       return this.round.pot;
+    },
+    max_bet: function max_bet() {
+      var max = 0;
+
+      for (var i = 0; i < this.players.length; i++) {
+        if (this.players[i].betting > max) {
+          max = this.players[i].betting;
+        }
+      }
+
+      return max;
+    },
+    minimum_bet: function minimum_bet() {
+      var max = 0;
+      var second = 0;
+
+      for (var i = 0; i < this.players.length; i++) {
+        if (this.players[i].betting > max) {
+          second = max;
+          max = this.players[i].betting;
+        } else {
+          if (this.players[i].betting > second) {
+            second = this.players[i].betting;
+          }
+        }
+      }
+
+      ;
+
+      if (max - second > this.round.bb) {
+        return max - second;
+      } else {
+        return this.round.bb;
+      }
     },
     player_cards: function player_cards() {
       return this.player.cards;
@@ -47539,7 +47558,315 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", { staticClass: "container-fluid" }, [
-    _vm._m(0),
+    _c("div", { staticClass: "poker-interface" }, [
+      _c(
+        "div",
+        { staticClass: "poker-table" },
+        [
+          _vm.player && _vm.players_show
+            ? [
+                _c(
+                  "div",
+                  { class: _vm.sitsClass },
+                  _vm._l(_vm.players_show, function(player) {
+                    return _c(
+                      "div",
+                      { key: player.id, staticClass: "player-info sit" },
+                      [
+                        _c("div", { staticClass: "text-center" }, [
+                          _vm._v(_vm._s(player.user.nickname))
+                        ]),
+                        _vm._v(" "),
+                        _c("div", { staticClass: "text-center" }, [
+                          _vm._v(_vm._s(player.stack - player.betting))
+                        ]),
+                        _vm._v(" "),
+                        _c("div", { staticClass: "text-center" }, [
+                          _vm._v(_vm._s(player.betting))
+                        ]),
+                        _vm._v(" "),
+                        _c("div", { staticClass: "player-icons" }, [
+                          player.playing
+                            ? _c("div", { staticClass: "mini-card1" })
+                            : _vm._e(),
+                          _vm._v(" "),
+                          player.playing
+                            ? _c("div", { staticClass: "mini-card2" })
+                            : _vm._e(),
+                          _vm._v(" "),
+                          player.button
+                            ? _c("div", { staticClass: "button" }, [
+                                _c("span", { staticClass: "align-middle" }, [
+                                  _vm._v("B")
+                                ])
+                              ])
+                            : _vm._e(),
+                          _vm._v(" "),
+                          player.sb
+                            ? _c("div", { staticClass: "sb" }, [
+                                _c("span", { staticClass: "align-middle" }, [
+                                  _vm._v("SB")
+                                ])
+                              ])
+                            : _vm._e(),
+                          _vm._v(" "),
+                          player.bb
+                            ? _c("div", { staticClass: "bb" }, [
+                                _c("span", { staticClass: "align-middle" }, [
+                                  _vm._v("BB")
+                                ])
+                              ])
+                            : _vm._e()
+                        ])
+                      ]
+                    )
+                  }),
+                  0
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "round-info" }, [
+                  _vm._v("POT: " + _vm._s(_vm.round.pot))
+                ]),
+                _vm._v(" "),
+                _vm.board_cards
+                  ? _c(
+                      "div",
+                      {
+                        staticClass: "board-cards d-flex justify-content-around"
+                      },
+                      [
+                        _vm.board_cards[0]
+                          ? _c("div", { staticClass: "poker-card" }, [
+                              _vm._v(
+                                _vm._s(
+                                  _vm.values[_vm.board_cards[0].card.value - 2]
+                                ) +
+                                  " " +
+                                  _vm._s(
+                                    _vm.icons[_vm.board_cards[0].card.suit - 1]
+                                  )
+                              )
+                            ])
+                          : _vm._e(),
+                        _vm._v(" "),
+                        _vm.board_cards[1]
+                          ? _c("div", { staticClass: "poker-card" }, [
+                              _vm._v(
+                                _vm._s(
+                                  _vm.values[_vm.board_cards[1].card.value - 2]
+                                ) +
+                                  " " +
+                                  _vm._s(
+                                    _vm.icons[_vm.board_cards[1].card.suit - 1]
+                                  )
+                              )
+                            ])
+                          : _vm._e(),
+                        _vm._v(" "),
+                        _vm.board_cards[2]
+                          ? _c("div", { staticClass: "poker-card" }, [
+                              _vm._v(
+                                _vm._s(
+                                  _vm.values[_vm.board_cards[2].card.value - 2]
+                                ) +
+                                  " " +
+                                  _vm._s(
+                                    _vm.icons[_vm.board_cards[2].card.suit - 1]
+                                  )
+                              )
+                            ])
+                          : _vm._e(),
+                        _vm._v(" "),
+                        _vm.board_cards[3]
+                          ? _c("div", { staticClass: "poker-card" }, [
+                              _vm._v(
+                                _vm._s(
+                                  _vm.values[_vm.board_cards[3].card.value - 2]
+                                ) +
+                                  " " +
+                                  _vm._s(
+                                    _vm.icons[_vm.board_cards[3].card.suit - 1]
+                                  )
+                              )
+                            ])
+                          : _vm._e(),
+                        _vm._v(" "),
+                        _vm.board_cards[4]
+                          ? _c("div", { staticClass: "poker-card" }, [
+                              _vm._v(
+                                _vm._s(
+                                  _vm.values[_vm.board_cards[4].card.value - 2]
+                                ) +
+                                  " " +
+                                  _vm._s(
+                                    _vm.icons[_vm.board_cards[4].card.suit - 1]
+                                  )
+                              )
+                            ])
+                          : _vm._e()
+                      ]
+                    )
+                  : _vm._e(),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  { staticClass: "player-cards d-flex justify-content-around" },
+                  [
+                    _c("div", { staticClass: "poker-card" }, [
+                      _vm._v(
+                        _vm._s(_vm.values[_vm.player_cards[0].card.value - 2]) +
+                          " " +
+                          _vm._s(_vm.icons[_vm.player_cards[0].card.suit - 1])
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "poker-card" }, [
+                      _vm._v(
+                        _vm._s(_vm.values[_vm.player_cards[1].card.value - 2]) +
+                          " " +
+                          _vm._s(_vm.icons[_vm.player_cards[1].card.suit - 1])
+                      )
+                    ])
+                  ]
+                ),
+                _vm._v(" "),
+                _vm.player.id == _vm.bet_round.turn
+                  ? _c("div", { staticClass: "user-panel" }, [
+                      _vm._m(0),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "amount" }, [
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.amount,
+                              expression: "amount"
+                            }
+                          ],
+                          staticClass: "range-input",
+                          attrs: {
+                            type: "range",
+                            min:
+                              _vm.max_bet -
+                              _vm.player.betting +
+                              _vm.minimum_bet,
+                            max: _vm.player.stack - _vm.player.betting
+                          },
+                          domProps: { value: _vm.amount },
+                          on: {
+                            __r: function($event) {
+                              _vm.amount = $event.target.value
+                            }
+                          }
+                        }),
+                        _vm._v(" "),
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.amount,
+                              expression: "amount"
+                            }
+                          ],
+                          staticClass: "amount-input",
+                          attrs: { type: "text" },
+                          domProps: { value: _vm.amount },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.amount = $event.target.value
+                            }
+                          }
+                        })
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "buttons" }, [
+                        _vm.max_bet == _vm.player.betting
+                          ? _c(
+                              "button",
+                              {
+                                staticClass: "btn act-button",
+                                on: {
+                                  click: function($event) {
+                                    return _vm.act(0, 0)
+                                  }
+                                }
+                              },
+                              [_vm._v("Check")]
+                            )
+                          : _c(
+                              "button",
+                              {
+                                staticClass: "btn act-button",
+                                on: {
+                                  click: function($event) {
+                                    return _vm.act(
+                                      1,
+                                      _vm.max_bet - _vm.player.betting
+                                    )
+                                  }
+                                }
+                              },
+                              [
+                                _vm._v(
+                                  "Call(" +
+                                    _vm._s(_vm.max_bet - _vm.player.betting) +
+                                    ")"
+                                )
+                              ]
+                            ),
+                        _vm._v(" "),
+                        _vm.max_bet == 0
+                          ? _c(
+                              "button",
+                              {
+                                staticClass: "btn act-button",
+                                on: {
+                                  click: function($event) {
+                                    return _vm.act(2, _vm.amount)
+                                  }
+                                }
+                              },
+                              [_vm._v("Bet(" + _vm._s(_vm.amount) + ")")]
+                            )
+                          : _c(
+                              "button",
+                              {
+                                staticClass: "btn act-button",
+                                on: {
+                                  click: function($event) {
+                                    return _vm.act(3, _vm.amount)
+                                  }
+                                }
+                              },
+                              [_vm._v("Raise(" + _vm._s(_vm.amount) + ")")]
+                            ),
+                        _vm._v(" "),
+                        _c(
+                          "button",
+                          {
+                            staticClass: "btn act-button",
+                            on: {
+                              click: function($event) {
+                                return _vm.act(4, 0)
+                              }
+                            }
+                          },
+                          [_vm._v("Fold")]
+                        )
+                      ])
+                    ])
+                  : _vm._e()
+              ]
+            : _vm._e()
+        ],
+        2
+      )
+    ]),
     _vm._v(" "),
     _c("div", { staticClass: "row" }, [
       _c(
@@ -47547,9 +47874,9 @@ var render = function() {
         _vm._l(_vm.players, function(player) {
           return _c("li", { key: player.id }, [
             _vm._v(
-              "\n                    " +
+              "\n                " +
                 _vm._s(player.user.nickname) +
-                "\n                "
+                "\n            "
             )
           ])
         }),
@@ -47615,7 +47942,13 @@ var render = function() {
         _vm._v(" "),
         _c("li", [_vm._v("pot: " + _vm._s(_vm.pot))]),
         _vm._v(" "),
-        _c("li", [_vm._v("amount: " + _vm._s(_vm.amount))])
+        _c("li", [_vm._v("amount: " + _vm._s(_vm.amount))]),
+        _vm._v(" "),
+        _c("li", [_vm._v("max: " + _vm._s(_vm.max_bet))]),
+        _vm._v(" "),
+        _c("li", [_vm._v("bb: " + _vm._s(_vm.round.bb))]),
+        _vm._v(" "),
+        _c("li", [_vm._v("min: " + _vm._s(_vm.minimum_bet))])
       ])
     ])
   ])
@@ -47625,54 +47958,16 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "poker-table" }, [
-      _c("div", { staticClass: "table" }, [
-        _c("div", { staticClass: "sits2" }, [
-          _c("div", { staticClass: "player-info sit" }, [
-            _c("div", { staticClass: "text-center" }, [_vm._v("10")]),
-            _vm._v(" "),
-            _c("div", { staticClass: "text-center" }, [_vm._v("120000")]),
-            _vm._v(" "),
-            _c("div", { staticClass: "text-center" }, [_vm._v("500")])
-          ]),
-          _vm._v(" "),
-          _c("div", { staticClass: "player-info sit" }, [
-            _c("div", { staticClass: "text-center" }, [_vm._v("11")]),
-            _vm._v(" "),
-            _c("div", { staticClass: "text-center" }, [_vm._v("120000")]),
-            _vm._v(" "),
-            _c("div", { staticClass: "text-center" }, [_vm._v("500")])
-          ])
-        ]),
-        _vm._v(" "),
-        _c("div", { staticClass: "round-info" }, [_vm._v("POT: 300")]),
-        _vm._v(" "),
-        _c(
-          "div",
-          { staticClass: "board-cards d-flex justify-content-around" },
-          [
-            _c("div", { staticClass: "card" }),
-            _vm._v(" "),
-            _c("div", { staticClass: "card" }),
-            _vm._v(" "),
-            _c("div", { staticClass: "card" }),
-            _vm._v(" "),
-            _c("div", { staticClass: "card" }),
-            _vm._v(" "),
-            _c("div", { staticClass: "card" })
-          ]
-        ),
-        _vm._v(" "),
-        _c(
-          "div",
-          { staticClass: "player-cards d-flex justify-content-around" },
-          [
-            _c("div", { staticClass: "card" }),
-            _vm._v(" "),
-            _c("div", { staticClass: "card" })
-          ]
-        )
-      ])
+    return _c("div", { staticClass: "pot-buttons" }, [
+      _c("button", { staticClass: "btn pot-button" }, [_vm._v("1/3")]),
+      _vm._v(" "),
+      _c("button", { staticClass: "btn pot-button" }, [_vm._v("1/2")]),
+      _vm._v(" "),
+      _c("button", { staticClass: "btn pot-button" }, [_vm._v("2/3")]),
+      _vm._v(" "),
+      _c("button", { staticClass: "btn pot-button" }, [_vm._v("POT")]),
+      _vm._v(" "),
+      _c("button", { staticClass: "btn pot-button" }, [_vm._v("All in")])
     ])
   }
 ]
@@ -60162,8 +60457,8 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! C:\Users\Facundo\poker\application\resources\js\app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! C:\Users\Facundo\poker\application\resources\sass\app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! C:\Users\Facundo\Facundo\Projects\poker\application\resources\js\app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! C:\Users\Facundo\Facundo\Projects\poker\application\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })

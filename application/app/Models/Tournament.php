@@ -43,7 +43,7 @@ class Tournament extends Model
     }
     public function playerLogged()
     {
-        return $this->hasOne(Player::class)->where('user_id',Auth::id())->with('cards');
+        return $this->hasOne(Player::class)->where('user_id',Auth::id());
     }
     public function alivePlayers()
     {

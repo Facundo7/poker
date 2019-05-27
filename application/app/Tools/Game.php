@@ -136,7 +136,7 @@ class Game
 
     public function killPlayers(Tournament $tournament){
 
-        $tournament->alivePlayers()->where('stack'==0)->update(['alive'=>false, 'sb'=>false, 'bb'=>false]);
+        $tournament->alivePlayers()->where('stack',0)->update(['alive'=>false, 'sb'=>false, 'bb'=>false]);
 
     }
 
@@ -237,7 +237,6 @@ class Game
                 break;
             }
         }
-
         //set the next player turn to the bet round
         $next_turn_index=$current_turn_index+1;
         if($next_turn_index>=count($players)){
@@ -291,7 +290,8 @@ class Game
 
 
         //create an array with available cards)
-        $cards=$tournament->availableDeckCards()->pluck('id')->toArray();
+        $cards=$tournament->availableDeckCards()->pluck('card_id')->toArray();
+
 
          $remove=[]; //this array will contain the id of the cards that have been dealt so they can not be available again until next round
 
@@ -418,7 +418,7 @@ class Game
                 $winner= new RoundWinner;
                 $winner->player_id=$winners[$i][6];
                 $winner->round_id=$round->id;
-                $winner->amount=$round->pot;
+                $winner->amount=$round->pot/count($winners);
                 $winner->save();
             }
 
@@ -813,7 +813,7 @@ class Game
                 }
 
 
-                dd($all, $evaluations);
+
                 return $evaluations;
             }
 
