@@ -6,6 +6,7 @@ use App\Events\RoundFinished;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Facades\Game;
+use App\Facades\Evaluation;
 
 class FinishRound
 {
@@ -34,14 +35,21 @@ class FinishRound
 
         if($tournament->playingPlayers()->count()==1)
         {
-            //give pot to the player left
+            $tournament->playingPlayers[0]->stack+=$event->round->pot;
+            $tournament->playingPlayers[0]->save();
         }else {
 
-            Game::evaluateCards($tournament->playingPlayers()->with('cards')->get(), $event->round->boardCards, $event->round);
+            Evaluation::evaluateCards($tournament->playingPlayers()->with(['cards' => function($query) use($tournament){
+                $query->where('round_id', $tournament->currentRound->id);
+            }])->get(), $event->round->boardCards, $event->round);
         }
 
-        Game::killPlayers($tournament);
+        //Game::killPlayers($tournament);
+        if($tournament->alivePlayers()->count()==1){
+            //finish tournament
+        }else{
         Game::changeButton($tournament);
         Game::createRound($tournament);
+        }
     }
 }

@@ -7,7 +7,7 @@
                     <div v-for="player in players_show" :key="player.id" class="player-info sit">
                         <div class="text-center">{{player.user.nickname}}</div>
                         <div class="text-center">{{player.stack-player.betting}}</div>
-                        <div class="text-center">{{player.betting}}</div>
+                        <div class="text-center">{{player.betting}}<i class="fas fa-coins"></i></div>
                         <div class="player-icons">
                             <div v-if="player.playing" class="mini-card1"></div>
                             <div v-if="player.playing" class="mini-card2"></div>
@@ -18,35 +18,56 @@
                     </div>
                 </div>
 
-                <div class="round-info">POT: {{round.pot}}</div>
-               <div v-if="board_cards" class="board-cards d-flex justify-content-around">
-                    <div v-if="board_cards[0]" class="poker-card">{{values[board_cards[0].card.value-2]}} {{icons[board_cards[0].card.suit-1]}}</div>
-                    <div v-if="board_cards[1]" class="poker-card">{{values[board_cards[1].card.value-2]}} {{icons[board_cards[1].card.suit-1]}}</div>
-                    <div v-if="board_cards[2]" class="poker-card">{{values[board_cards[2].card.value-2]}} {{icons[board_cards[2].card.suit-1]}}</div>
-                    <div v-if="board_cards[3]" class="poker-card">{{values[board_cards[3].card.value-2]}} {{icons[board_cards[3].card.suit-1]}}</div>
-                    <div v-if="board_cards[4]" class="poker-card">{{values[board_cards[4].card.value-2]}} {{icons[board_cards[4].card.suit-1]}}</div>
+                <div class="round-info">POT: {{round.pot}}<br>TOTAL POT: {{pot}}</div>
+                <div v-if="board_cards" class="board-cards d-flex">
+                    <div v-if="board_cards[0]" class="poker-card">
+                        <div class="card-value">{{values[board_cards[0].card.value-2]}}</div>
+                        <div class="card-suit" :style="{color:colors[board_cards[0].card.suit-1]}">{{icons[board_cards[0].card.suit-1]}}</div>
+                    </div>
+                    <div v-if="board_cards[1]" class="poker-card">
+                        <div class="card-value">{{values[board_cards[1].card.value-2]}}</div>
+                        <div class="card-suit" :style="{color:colors[board_cards[1].card.suit-1]}">{{icons[board_cards[1].card.suit-1]}}</div>
+                    </div>
+                    <div v-if="board_cards[2]" class="poker-card">
+                        <div class="card-value">{{values[board_cards[2].card.value-2]}}</div>
+                        <div class="card-suit" :style="{color:colors[board_cards[2].card.suit-1]}">{{icons[board_cards[2].card.suit-1]}}</div>
+                    </div>
+                    <div v-if="board_cards[3]" class="poker-card">
+                        <div class="card-value">{{values[board_cards[3].card.value-2]}}</div>
+                        <div class="card-suit" :style="{color:colors[board_cards[3].card.suit-1]}">{{icons[board_cards[3].card.suit-1]}}</div>
+                    </div>
+                    <div v-if="board_cards[4]" class="poker-card">
+                        <div class="card-value">{{values[board_cards[4].card.value-2]}}</div>
+                        <div class="card-suit" :style="{color:colors[board_cards[4].card.suit-1]}">{{icons[board_cards[4].card.suit-1]}}</div>
+                    </div>
                 </div>
                 <div class="player-cards d-flex justify-content-around">
-                    <div class="poker-card">{{values[player_cards[0].card.value-2]}} {{icons[player_cards[0].card.suit-1]}}</div>
-                    <div class="poker-card">{{values[player_cards[1].card.value-2]}} {{icons[player_cards[1].card.suit-1]}}</div>
+                    <div class="poker-card">
+                        <div class="card-value">{{values[player_cards[0].card.value-2]}}</div>
+                        <div class="card-suit" :style="{color:colors[player_cards[0].card.suit-1]}">{{icons[player_cards[0].card.suit-1]}}</div>
+                    </div>
+                    <div class="poker-card">
+                        <div class="card-value">{{values[player_cards[1].card.value-2]}}</div>
+                        <div class="card-suit" :style="{color:colors[player_cards[1].card.suit-1]}">{{icons[player_cards[1].card.suit-1]}}</div>
+                    </div>
                 </div>
                 <div v-if="player.id==bet_round.turn" class="user-panel">
                     <div class="pot-buttons">
-                        <button class="btn pot-button">1/3</button>
-                        <button class="btn pot-button">1/2</button>
-                        <button class="btn pot-button">2/3</button>
-                        <button class="btn pot-button">POT</button>
-                        <button class="btn pot-button">All in</button>
+                        <button class="btn pot-button" @click="changeAmount(1)">1/3</button>
+                        <button class="btn pot-button" @click="changeAmount(2)">1/2</button>
+                        <button class="btn pot-button" @click="changeAmount(3)">3/4</button>
+                        <button class="btn pot-button" @click="changeAmount(4)">POT</button>
+                        <button class="btn pot-button" @click="changeAmount(5)">All in</button>
                     </div>
                     <div class="amount">
-                        <input type="range" class="range-input" v-bind:min="max_bet-player.betting+minimum_bet" v-bind:max="player.stack-player.betting" v-model="amount">
-                        <input type="text" class="amount-input" v-model="amount">
+                        <input type="range" class="range-input" @input="function(){input=amount}" v-bind:min="max_bet+minimum_bet" v-bind:max="player.stack-player.betting" v-model="amount">
+                        <input type="text" class="amount-input" v-model="input" @keyup="setAmount()">
                     </div>
                     <div class="buttons">
                         <button v-if="max_bet==player.betting" @click="act(0,0)" class="btn act-button">Check</button>
                         <button v-else @click="act(1,max_bet-player.betting)" class="btn act-button">Call({{max_bet-player.betting}})</button>
                         <button v-if="max_bet==0" @click="act(2,amount)" class="btn act-button">Bet({{amount}})</button>
-                        <button v-else @click="act(3,amount)" class="btn act-button">Raise({{amount}})</button>
+                        <button v-else @click="act(3,amount-player.betting)" class="btn act-button">Raise({{amount}})</button>
                         <button @click="act(4,0)" class="btn act-button">Fold</button>
                     </div>
                 </div>
@@ -105,12 +126,19 @@
                 sitsClass:'xd',//nice
                 values:[2,3,4,5,6,7,8,9,10,'J','Q','K','A'],
                 icons:['♠','♥','♣','◆'],
+                colors:['black','red','green','blue'],
+                input:'',
 
             }
         },
         computed: {
             pot: function() {
-                return this.round.pot;
+                    var bets=0;
+                for (var i=0; i<this.players.length; i++) {
+                    bets+=this.players[i].betting;
+                }
+
+                return this.round.pot+bets;
             },
             max_bet: function() {
                 var max=0;
@@ -163,48 +191,44 @@
         methods: {
             getData(){
 
-                this.getTournament();
-                this.getAllPlayers();
-                this.getPlayer();
-                this.getRound();
-                this.getBetRound();
-
+                    axios.all([
+                        this.getTournament(),
+                        this.getAllPlayers(),
+                        this.getPlayer(),
+                        this.getRound(),
+                        this.getBetRound()
+                    ]).then(axios.spread((tourRes, allPlayerRes,playerRes,roundRes,betRoundRes) => {
+                        this.player = playerRes.data;
+                        this.round = roundRes.data;
+                        this.tournament = tourRes.data;
+                        this.bet_round = betRoundRes.data;
+                        this.players = allPlayerRes.data;
+                        this.setClass();
+                        if(this.max_bet!=0){
+                            this.amount=this.max_bet+this.minimum_bet;
+                        }else {
+                            this.amount=this.max_bet-this.player.betting+this.minimum_bet;
+                        }
+                        this.input=this.amount;
+                    }))
             },
+
             getAllPlayers(){
-                var self=this;
-                axios.get(route('api.tournaments.players',{tournament: this.tournament_id})).then(response => {
-                    this.players = response.data;
-                    console.log("get players done");
-                });
+                return axios.get(route('api.tournaments.players',{tournament: this.tournament_id}));
             },
             getPlayer(){
-                var self=this;
-                axios.get(route('api.tournaments.playerlogged',{tournament: this.tournament_id})).then(response => {
-                    this.player = response.data;
-                    console.log("get player logged done");
-                });
+                return axios.get(route('api.tournaments.playerlogged',{tournament: this.tournament_id}));
             },
             getTournament(){
-                var self=this;
-                axios.get(route('api.tournaments.show',{tournament: this.tournament_id})).then(response => {
-                    this.tournament = response.data;
-                    console.log("get tournament done");
-                    this.setClass();
-                });
+
+                return axios.get(route('api.tournaments.show',{tournament: this.tournament_id}));
             },
             getRound(){
-                var self=this;
-                axios.get(route('api.tournaments.round',{tournament: this.tournament_id})).then(response => {
-                    this.round = response.data;
-                    console.log("get round done");
-                });
+                return axios.get(route('api.tournaments.round',{tournament: this.tournament_id}));
             },
             getBetRound(){
-                var self=this;
-                axios.get(route('api.tournaments.betround',{tournament: this.tournament_id})).then(response => {
-                    this.bet_round = response.data;
-                    console.log("get betRound done");
-                });
+
+                return axios.get(route('api.tournaments.betround',{tournament: this.tournament_id}));
             },
             act(action, amount){
                 axios.post(route('api.actions.store'), {
@@ -256,6 +280,56 @@
                         z++;
                     }
                     return array;
+
+            },
+            changeAmount(option){
+                switch (option) {
+                    case 1:
+                        //1/3
+                        if (this.pot/3>=this.minimum_bet+this.max_bet){
+                            this.amount=Math.round(this.pot/3);
+                        }
+                        break;
+                    case 2:
+                        //1/2
+                        if (this.pot/2>=this.minimum_bet+this.max_bet){
+                            this.amount=Math.round(this.pot/2);
+                        }
+                        break;
+                    case 3:
+                        //1/4
+                        if (this.pot/4*3>=this.minimum_bet+this.max_bet){
+                            this.amount=Math.round(this.pot/4*3);
+                        }
+                        break;
+                    case 4:
+                        //pot
+                        if (this.pot>=this.minimum_bet+this.max_bet){
+                            this.amount=this.pot;
+                        }
+                        break;
+                    case 5:
+                        this.amount=this.player.stack-this.player.betting;
+                        break;
+
+                    default:
+                        break;
+                }
+
+                this.input=this.amount;
+
+            },
+            setAmount(){
+
+                if(isNaN(this.input)){
+                    this.amount=this.max_bet-this.player.betting+this.minimum_bet;
+                }else if(this.input>this.player.stack-this.player.betting){
+                    this.amount=this.player.stack-this.player.betting;
+                }else if(this.input<this.max_bet-this.player.betting+this.minimum_bet){
+                    this.amount=this.max_bet-this.player.betting+this.minimum_bet;
+                }else {
+                    this.amount=Math.round(this.input);
+                }
 
             },
             listen(){

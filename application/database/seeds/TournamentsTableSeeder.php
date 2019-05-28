@@ -22,7 +22,7 @@ class TournamentsTableSeeder extends Seeder
                 'bb_increase_time'=>5,
                 'bb_increase_value'=>2,
                 'initial_stack'=>1000,
-                'players_number'=>5,
+                'players_number'=>2,
                 'turn_seconds'=>30,
                 'buy_in'=>5,
             ]

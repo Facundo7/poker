@@ -61,4 +61,7 @@ class Tournament extends Model
     {
         return $this->hasMany(DeckCard::class)->where('available',true);
     }
+    public function winner(){
+        return $this->belongsTo(User::class, 'winner_id');
+    }
 }

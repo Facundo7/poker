@@ -84,9 +84,10 @@ class TournamentController extends Controller
 
     public function playerLogged(Tournament $tournament){
 
-        return $tournament->playerLogged->with(['cards' => function($query){
-            dd($query);
-                $query->where('round_id',$tournament->id);
+        return $tournament->playerLogged()->with(['cards' => function($query) use ($tournament){
+
+            $query->where('round_id', $tournament->currentRound->id);
+
         }])->first();
 
     }
