@@ -152,7 +152,7 @@ class Game
 
         //set turn
         //get players
-        $players=$betRound->round->tournament->playingPlayers()->orderBy('sit')->get();
+        $players=$betRound->round->tournament->alivePlayers()->orderBy('sit')->get();
 
         //get the button player index inside de $players array
         for($i=0;$i<count($players);$i++){
@@ -173,9 +173,24 @@ class Game
         if($turn_index>=count($players)){
             $turn_index-=count($players);
         }
-        //set as turn the id of the player
-        $betRound->turn=$players[$turn_index]->id;
-        $betRound->save();
+
+        for($i=0;$i<count($players);$i++){
+            if($players[$turn_index]->playing){
+                //set as turn the id of the player
+                $betRound->turn=$players[$turn_index]->id;
+                $betRound->save();
+                break;
+            }else {
+
+             $turn_index++;
+                if($turn_index>=count($players)){
+                    $turn_index-=count($players);
+                }
+            }
+        }
+
+
+
     }
 
     public function createBetRound(Round $round, $bet_phase){

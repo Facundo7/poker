@@ -72,6 +72,10 @@
                     </div>
                 </div>
                 </template>
+
+            </div>
+            <div class="history">
+                <p v-for="(action, index) in actions" :key="index">{{action}}</p>
             </div>
 
         </div>
@@ -128,6 +132,8 @@
                 icons:['♠','♥','♣','◆'],
                 colors:['black','red','green','blue'],
                 input:'',
+                actions:[],
+                verbs:['checks', 'calls', 'bets', 'raises to', 'folds'],
 
             }
         },
@@ -332,12 +338,54 @@
                 }
 
             },
+            addAction(data){
+
+                var newRow=data.action.player.user.nickname+" "+this.verbs[data.action.action];
+
+                if(data.action.amount>0){
+                    newRow+=" "+data.action.amount;
+                }
+
+                this.actions.push(newRow);
+
+            },
+            addShow(players){
+
+
+
+                var firstRow="";
+
+                for(var i=0; i<5; i++){
+                    firstRow+=this.values[this.board_cards[i].card.value-2]+
+                              this.icons[this.board_cards[i].card.suit-1]+" ";
+                }
+
+                this.actions.push(firstRow);
+
+                for (var i=0;i<players.length; i++) {
+
+                    this.actions.push(
+                        players[i].user.nickname+" "+
+                        this.values[players[i].cards[0].card.value-2]+
+                        this.icons[players[i].cards[0].card.suit-1]+" "+
+                        this.values[players[i].cards[1].card.value-2]+
+                        this.icons[players[i].cards[1].card.suit-1]
+                    );
+
+                }
+
+            },
             listen(){
                 Echo.channel('tournament.'+this.tournament_id)
                 .listen('NewPlayer', ()=>{this.getData()})
                 .listen('NewBetRound', ()=>{this.getData()})
                 .listen('NewRound', ()=>{this.getData()})
-                .listen('NewAction', ()=>{this.getData()});
+                .listen('NewAction', (data)=>{
+                    console.log(data);
+                    this.addAction(data);
+                    this.getData();
+                })
+                .listen('ShowDown', (data)=>{console.log(JSON.parse(data.players)); this.addShow(JSON.parse(data.players))});
 
             }
         }

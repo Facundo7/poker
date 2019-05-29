@@ -7,6 +7,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Facades\Game;
 use App\Facades\Evaluation;
+use App\Events\ShowDown;
 
 class FinishRound
 {
@@ -30,26 +31,31 @@ class FinishRound
     {
 
         $tournament=$event->round->tournament;
-        $event->round->current=false;
-        $event->round->save();
 
-        if($tournament->playingPlayers()->count()==1)
+        $players=$tournament->playingPlayers()->with(['user','cards' => function($query) use($tournament){
+            $query->where('round_id', $tournament->currentRound->id);
+        }])->get();
+
+
+        if(count($players)==1)
         {
-            $tournament->playingPlayers[0]->stack+=$event->round->pot;
-            $tournament->playingPlayers[0]->save();
+            $players[0]->stack+=$event->round->pot;
+            $players[0]->save();
         }else {
 
-            Evaluation::evaluateCards($tournament->playingPlayers()->with(['cards' => function($query) use($tournament){
-                $query->where('round_id', $tournament->currentRound->id);
-            }])->get(), $event->round->boardCards, $event->round);
+            event(new ShowDown($players));
+            Evaluation::evaluateCards($players, $event->round->boardCards, $event->round);
         }
 
-        //Game::killPlayers($tournament);
+
+        //$event->round->current=false;
+        //$event->round->save();
+        Game::changeButton($tournament);
+        Game::killPlayers($tournament);
         if($tournament->alivePlayers()->count()==1){
             //finish tournament
         }else{
-        Game::changeButton($tournament);
-        Game::createRound($tournament);
+            //Game::createRound($tournament);
         }
     }
 }

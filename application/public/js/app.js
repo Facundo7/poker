@@ -1876,6 +1876,10 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "game",
   props: ['tournament_id'],
@@ -1897,7 +1901,9 @@ __webpack_require__.r(__webpack_exports__);
       values: [2, 3, 4, 5, 6, 7, 8, 9, 10, 'J', 'Q', 'K', 'A'],
       icons: ['♠', '♥', '♣', '◆'],
       colors: ['black', 'red', 'green', 'blue'],
-      input: ''
+      input: '',
+      actions: [],
+      verbs: ['checks', 'calls', 'bets', 'raises to', 'folds']
     };
   },
   computed: {
@@ -2114,6 +2120,28 @@ __webpack_require__.r(__webpack_exports__);
         this.amount = Math.round(this.input);
       }
     },
+    addAction: function addAction(data) {
+      var newRow = data.action.player.user.nickname + " " + this.verbs[data.action.action];
+
+      if (data.action.amount > 0) {
+        newRow += " " + data.action.amount;
+      }
+
+      this.actions.push(newRow);
+    },
+    addShow: function addShow(players) {
+      var firstRow = "";
+
+      for (var i = 0; i < 5; i++) {
+        firstRow += this.values[this.board_cards[i].card.value - 2] + this.icons[this.board_cards[i].card.suit - 1] + " ";
+      }
+
+      this.actions.push(firstRow);
+
+      for (var i = 0; i < players.length; i++) {
+        this.actions.push(players[i].user.nickname + " " + this.values[players[i].cards[0].card.value - 2] + this.icons[players[i].cards[0].card.suit - 1] + " " + this.values[players[i].cards[1].card.value - 2] + this.icons[players[i].cards[1].card.suit - 1]);
+      }
+    },
     listen: function listen() {
       var _this2 = this;
 
@@ -2123,8 +2151,16 @@ __webpack_require__.r(__webpack_exports__);
         _this2.getData();
       }).listen('NewRound', function () {
         _this2.getData();
-      }).listen('NewAction', function () {
+      }).listen('NewAction', function (data) {
+        console.log(data);
+
+        _this2.addAction(data);
+
         _this2.getData();
+      }).listen('ShowDown', function (data) {
+        console.log(JSON.parse(data.players));
+
+        _this2.addShow(JSON.parse(data.players));
       });
     }
   }
@@ -48109,6 +48145,15 @@ var render = function() {
             : _vm._e()
         ],
         2
+      ),
+      _vm._v(" "),
+      _c(
+        "div",
+        { staticClass: "history" },
+        _vm._l(_vm.actions, function(action, index) {
+          return _c("p", { key: index }, [_vm._v(_vm._s(action))])
+        }),
+        0
       )
     ]),
     _vm._v(" "),

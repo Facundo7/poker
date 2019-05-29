@@ -10,22 +10,26 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
-use App\Models\Action;
 
-class NewAction implements ShouldBroadcastNow
+class ShowDown implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $action;
 
+    public $players;
+    public $id;
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(Action $action)
+    public function __construct($players)
     {
-        $this->action=$action;
+
+        $this->players=$players->toJson();
+        $this->id=$players[0]->tournament_id;
+
+
     }
 
     /**
@@ -35,10 +39,6 @@ class NewAction implements ShouldBroadcastNow
      */
     public function broadcastOn()
     {
-        return new Channel('tournament.'.$this->action->player->tournament_id);
-    }
-    public function broadcastWith()
-    {
-        return ['action'=>$this->action, 'nickname'=>$this->action->player->user->nickname];
+        return new Channel('tournament.'.$this->id);
     }
 }

@@ -5,6 +5,7 @@
     width: 1300px;
     min-width: 1300px;
     height: 600px;
+    position: relative;
 }
 
 .poker-table{
@@ -23,6 +24,18 @@
     background-image: url('/images/mat2.jpg');
     background-repeat: no-repeat;
     background-size: cover;
+}
+
+.history{
+
+    border:1px solid black;
+    width: 300px;
+    height: 400px;
+    position: absolute;
+    top:15px;
+    right:15px;
+    overflow: auto;
+
 }
 
 .board-cards{

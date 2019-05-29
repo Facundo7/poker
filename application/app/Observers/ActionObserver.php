@@ -21,6 +21,7 @@ class ActionObserver
 
         $tournament=$action->betRound->round->tournament;
         $bet_round=$action->betRound;
+        Game::nextTurn($tournament);
         Game::updatePlayer($action);
 
         event(new NewAction($action));
@@ -34,9 +35,6 @@ class ActionObserver
             if($bet_round->players<=$bet_round->actions()->count()&&$tournament->playingPlayers()->distinct()->count('betting')==1){
 
                 event(new BetRoundFinished($bet_round));
-            }else{
-
-                Game::nextTurn($tournament);
             }
 
         }else {
