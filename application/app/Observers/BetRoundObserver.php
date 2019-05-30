@@ -5,6 +5,8 @@ namespace App\Observers;
 use App\Models\BetRound;
 use App\Events\NewBetRound;
 use App\Facades\Game;
+use App\Facades\RoundTool;
+use App\Facades\BetRoundTool;
 
 class BetRoundObserver
 {
@@ -17,8 +19,8 @@ class BetRoundObserver
     public function created(BetRound $betRound)
     {
 
-        Game::dealBoardCards($betRound);
-        Game::setFirstTurn($betRound);
+        RoundTool::dealBoardCards($betRound);
+        BetRoundTool::setFirstTurn($betRound);
 
 
         event(new NewBetRound($betRound));
