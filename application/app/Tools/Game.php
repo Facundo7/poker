@@ -32,6 +32,7 @@ class Game
 
         //set deck cards available
         $tournament->deckCards()->update(['available' => true]);
+        $tournament->players()->update(['total_bet' => 0]);
 
         //create round
         $round=new Round;
@@ -280,6 +281,7 @@ class Game
         foreach ($players as $key => $player) {
             $round->pot+=$player->betting;
             $player->stack-=$player->betting;
+            $player->total_bet+=$player->betting;
             $player->betting=0;
             $player->save();
         }

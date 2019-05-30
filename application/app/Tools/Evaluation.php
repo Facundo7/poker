@@ -2,13 +2,14 @@
 
 namespace App\Tools;
 
-use App\Models\RoundWinner;
+use App\Models\Player;
 
 class Evaluation
 {
 
-    public function evaluateCards($players, $board_cards, $round){
+    public function evaluateCards($tournament, $players){
 
+        $board_cards=$tournament->currentRound->boardCards;
         $hands=[];
         $evaluated_hands=[];
 
@@ -96,19 +97,57 @@ class Evaluation
                 }
             }
 
+
             $evaluated_hands[$i][6]=$players[$i]->id;
 
             }
 
-            $winners=$this->getWinners($evaluated_hands);
+            $all_players=$tournament->alivePlayers()->orderBy('total_bet')->get();
 
-            for ($i=0; $i < count($winners); $i++) {
-                $winner= new RoundWinner;
-                $winner->player_id=$winners[$i][6];
-                $winner->round_id=$round->id;
-                $winner->amount=$round->pot/count($winners);
-                $winner->save();
-            }
+
+
+            do {
+                $side_pot=0;
+                $smallest_bet=$all_players[0]->total_bet;
+                foreach ($all_players as $index => $player) {
+                    $side_pot+=$smallest_bet;
+                    $player->total_bet-=$smallest_bet;
+                    $player->save();
+                    if($player->total_bet<1){
+                        $all_players->forget($index);
+                    }
+                }
+                $all_players=$all_players->values();
+
+
+                $winners=$this->getWinners($evaluated_hands);
+
+
+                foreach ($winners as $index => $winner) {
+                    $player=Player::find($winner[6]);
+                    $player->stack+=round($side_pot/count($winners));
+                    $player->save();
+                }
+
+
+                foreach ($evaluated_hands as $index => $hand) {
+                    if(Player::find($hand[6])->total_bet==0){
+                        unset($evaluated_hands[$index]);
+                    }
+                }
+
+                $evaluated_hands=array_values($evaluated_hands);
+
+            } while (count($all_players) > 1);
+
+
+            // for ($i=0; $i < count($winners); $i++) {
+            //     $winner= new RoundWinner;
+            //     $winner->player_id=$winners[$i][6];
+            //     $winner->round_id=$round->id;
+            //     $winner->amount=$round->pot/count($winners);
+            //     $winner->save();
+            // }
 
 
             }
@@ -463,7 +502,6 @@ class Evaluation
             public function getWinners($evaluations){
 
 
-                $all=$evaluations;
 
                 for($i=0;$i<6;$i++)
                 {
@@ -482,7 +520,6 @@ class Evaluation
                     for($j=0;$j<$x;$j++)
                     {
 
-                        $arrays[]=$evaluations;
                         if($evaluations[$j][$i]!=max($values))
                         {
                             unset($evaluations[$j]);
@@ -499,8 +536,6 @@ class Evaluation
                     }
 
                 }
-
-
 
                 return $evaluations;
             }

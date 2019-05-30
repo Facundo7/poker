@@ -31,10 +31,6 @@ class Player extends Model
         return $this->hasMany(Action::class);
     }
 
-    public function roundWinners()
-    {
-        return $this->hasMany(RoundWinner::class);
-    }
 
     public function cards()
     {

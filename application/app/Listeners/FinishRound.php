@@ -44,18 +44,18 @@ class FinishRound
         }else {
 
             event(new ShowDown($players));
-            Evaluation::evaluateCards($players, $event->round->boardCards, $event->round);
+            Evaluation::evaluateCards($tournament, $players);
         }
 
 
-        //$event->round->current=false;
-        //$event->round->save();
+        $event->round->current=false;
+        $event->round->save();
         Game::changeButton($tournament);
         Game::killPlayers($tournament);
         if($tournament->alivePlayers()->count()==1){
             //finish tournament
         }else{
-            //Game::createRound($tournament);
+            Game::createRound($tournament);
         }
     }
 }

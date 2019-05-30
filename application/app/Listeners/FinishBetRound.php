@@ -31,8 +31,8 @@ class FinishBetRound
         $bet_round=$event->bet_round;
         $tournament=$bet_round->round->tournament;
         Game::updatePotStack($tournament);
-        //$event->bet_round->current=false;
-        //$event->bet_round->save();
+        $event->bet_round->current=false;
+        $event->bet_round->save();
 
         if($tournament->playingPlayers()->count()==1)
         {
