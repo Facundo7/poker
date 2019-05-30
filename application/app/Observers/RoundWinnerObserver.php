@@ -14,8 +14,10 @@ class RoundWinnerObserver
      */
     public function created(RoundWinner $roundWinner)
     {
-        $roundWinner->player->stack+=$roundWinner->amount;
-        $roundWinner->player->save();
+        $player=$roundWinner->player;
+        $player->stack+=$roundWinner->amount;
+        $player->save();
+
     }
 
     /**

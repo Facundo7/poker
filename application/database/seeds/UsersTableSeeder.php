@@ -37,10 +37,10 @@ class UsersTableSeeder extends Seeder
                 'image' => 'imageurl'
             ],
             [
-                'name' => 'laura',
-                'email' => 'laura@poker.com',
+                'name' => 'valentina',
+                'email' => 'valentina@poker.com',
                 'password' => Hash::make('123456'),
-                'nickname' => 'lauranick',
+                'nickname' => 'valentinanick',
                 'image' => 'imageurl'
             ],
             [
