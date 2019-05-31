@@ -40,6 +40,5 @@ class AppServiceProvider extends ServiceProvider
         Tournament::observe(TournamentObserver::class);
         BetRound::observe(BetRoundObserver::class);
         Action::observe(ActionObserver::class);
-        RoundWinner::observe(RoundWinnerObserver::class);
     }
 }

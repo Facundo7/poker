@@ -10662,6 +10662,11 @@ a.text-dark:focus {
   }
 }
 
+body {
+  background-color: #000;
+  color: white;
+}
+
 .poker-interface {
   border: 1px solid black;
   margin: 10px;
@@ -10669,6 +10674,8 @@ a.text-dark:focus {
   min-width: 1300px;
   height: 600px;
   position: relative;
+  background-image: url("/images/bg1.jpg");
+  background-size: cover;
 }
 
 .poker-table {
@@ -10687,12 +10694,28 @@ a.text-dark:focus {
 
 .history {
   border: 1px solid black;
+  background-color: #fff;
+  color: black;
   width: 300px;
   height: 400px;
   position: absolute;
   top: 15px;
   right: 15px;
   overflow: auto;
+  padding: 10px;
+}
+
+.showdown {
+  border: 1px solid black;
+  padding: 5px;
+}
+
+.lilcard {
+  display: inline-block;
+  border: 1px solid black;
+  padding: 0px 0px;
+  width: 32px;
+  text-align: center;
 }
 
 .board-cards {
@@ -10712,6 +10735,8 @@ a.text-dark:focus {
   box-sizing: border-box;
   background-color: white;
   border-radius: 5%;
+  color: black;
+  font-size: 1.3em;
   border: 1px solid black;
 }
 
@@ -10723,6 +10748,18 @@ a.text-dark:focus {
   height: 100px;
 }
 
+.player-cards .poker-card:first-child {
+  -webkit-transform: rotate(-7deg);
+          transform: rotate(-7deg);
+  margin-right: -15px;
+}
+
+.player-cards .poker-card:nth-child(2) {
+  margin-left: -15px;
+  -webkit-transform: rotate(7deg);
+          transform: rotate(7deg);
+}
+
 .card-value {
   font-size: 1em;
   font-weight: bolder;
@@ -10732,6 +10769,7 @@ a.text-dark:focus {
 .card-suit {
   font-size: 2.5em;
   text-align: center;
+  margin-top: -12px;
 }
 
 .round-info {
@@ -10748,15 +10786,17 @@ a.text-dark:focus {
   color: white;
   background-color: black;
   width: 130px;
-  height: 80px;
+  height: 115px;
+  border-radius: 15%;
+  border: 3px solid black;
+  z-index: 10;
   position: absolute;
 }
 
 .player-icons {
-  z-index: 10;
-  width: 130px;
+  width: 110px;
   height: 35px;
-  background-color: black;
+  border-radius: 20%;
 }
 
 .mini-card1,
@@ -10792,26 +10832,27 @@ a.text-dark:focus {
   color: black;
   font-weight: bolder;
   position: absolute;
-  left: 10px;
 }
 
 .button {
   background-color: yellow;
+  left: 45px;
 }
 
 .bb {
   background-color: gray;
   color: white;
+  left: 10px;
 }
 
 .sb {
   background-color: white;
+  left: 10px;
 }
 
 .user-panel {
-  background-color: lime;
   display: inline-block;
-  width: 300px;
+  width: 290px;
   height: 125px;
   position: absolute;
   bottom: -135px;
@@ -10821,16 +10862,16 @@ a.text-dark:focus {
 .pot-buttons {
   position: absolute;
   top: 5px;
-  width: 300px;
+  width: 290px;
   height: 30px;
-  background-color: yellow;
 }
 
 .pot-button {
   height: 30px;
   width: 55px;
   font-size: 0.8em;
-  background-color: pink;
+  background-color: black;
+  color: white;
 }
 
 .amount {
@@ -10844,7 +10885,7 @@ a.text-dark:focus {
   -webkit-appearance: none;
   height: 10px;
   border-radius: 5px;
-  background: #d3d3d3;
+  background: white;
   outline: none;
   transition: opacity 0.2s;
 }
@@ -10856,8 +10897,8 @@ a.text-dark:focus {
 .range-input::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 23px;
-  height: 24px;
+  width: 35px;
+  height: 35px;
   border: 0;
   background: url("/images/chip.png");
   background-size: cover;
@@ -10865,8 +10906,8 @@ a.text-dark:focus {
 }
 
 .range-input::-moz-range-thumb {
-  width: 23px;
-  height: 24px;
+  width: 35px;
+  height: 35px;
   border: 0;
   background: url("/images/chip.png");
   background-size: cover;
@@ -10877,6 +10918,7 @@ a.text-dark:focus {
   width: 90px;
   margin-left: 7px;
   color: black;
+  border-radius: 10%;
 }
 
 .buttons {
@@ -10885,10 +10927,70 @@ a.text-dark:focus {
 }
 
 .act-button {
-  background-color: purple;
+  background-color: black;
   color: white;
-  margin-right: 7px;
+  margin-right: 2px;
+  margin-left: 2px;
   width: 90px;
+}
+
+@-webkit-keyframes bg-blink {
+  0% {
+    background-color: #ffffff;
+    color: #000;
+  }
+
+  49% {
+    background-color: #ffffff;
+    color: #000;
+  }
+
+  50% {
+    background-color: #000;
+    color: #fff;
+  }
+
+  99% {
+    background-color: #000;
+    color: #fff;
+  }
+
+  100% {
+    background-color: #ffffff;
+    color: #000;
+  }
+}
+
+@keyframes bg-blink {
+  0% {
+    background-color: #ffffff;
+    color: #000;
+  }
+
+  49% {
+    background-color: #ffffff;
+    color: #000;
+  }
+
+  50% {
+    background-color: #000;
+    color: #fff;
+  }
+
+  99% {
+    background-color: #000;
+    color: #fff;
+  }
+
+  100% {
+    background-color: #ffffff;
+    color: #000;
+  }
+}
+
+.blink {
+  -webkit-animation: bg-blink 1s infinite;
+  animation: bg-blink 1s infinite;
 }
 
 div[class^=sits] {
@@ -10902,7 +11004,7 @@ div[class^=sits] {
 
 .sit:first-child {
   left: 335px;
-  bottom: -105px;
+  bottom: -110px;
 }
 
 .sits12 .sit:nth-child(2),

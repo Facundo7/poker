@@ -32,7 +32,7 @@ class ActionObserver
         if($tournament->playingPlayers()->count()>1){
 
 
-            if($bet_round->players<=$bet_round->actions()->count()&&$tournament->playingPlayers()->distinct()->count('betting')==1){
+            if($bet_round->players<=$bet_round->actions()->count()&&$tournament->playingPlayers()->where('stack', ">", 0)->whereColumn('stack','<>','betting')->distinct()->count('betting')==1){
 
                 event(new BetRoundFinished($bet_round));
             }
