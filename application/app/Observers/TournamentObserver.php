@@ -19,11 +19,7 @@ class TournamentObserver
      */
     public function created(Tournament $tournament)
     {
-
-
         Game::createDeck($tournament);
-
-
     }
 
     /**

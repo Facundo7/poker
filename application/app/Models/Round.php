@@ -22,11 +22,6 @@ class Round extends Model
         return $this->hasOne(BetRound::class)->where('current', true);
     }
 
-    public function roundWinners()
-    {
-        return $this->hasMany(RoundWinner::class);
-    }
-
     public function playerCards()
     {
         return $this->hasMany(PlayerCard::class);

@@ -7,6 +7,7 @@ use App\Events\NewAction;
 use App\Facades\Game;
 use App\Events\BetRoundFinished;
 use App\Models\Tournament;
+use App\Facades\BetRoundTool;
 
 class ActionObserver
 {
@@ -21,13 +22,12 @@ class ActionObserver
 
         $tournament=$action->betRound->round->tournament;
         $bet_round=$action->betRound;
-        Game::nextTurn($tournament);
+        BetRoundTool::nextTurn($tournament);
         Game::updatePlayer($action);
 
         event(new NewAction($action));
 
         //check if bet round finished
-
 
         if($tournament->playingPlayers()->count()>1){
 

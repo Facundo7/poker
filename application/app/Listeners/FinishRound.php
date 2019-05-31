@@ -8,6 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Facades\Game;
 use App\Facades\Evaluation;
 use App\Events\ShowDown;
+use App\Facades\RoundTool;
 
 class FinishRound
 {
@@ -44,18 +45,18 @@ class FinishRound
         }else {
 
             event(new ShowDown($players));
-            Evaluation::evaluateCards($players, $event->round->boardCards, $event->round);
+            Evaluation::evaluateCards($tournament, $players);
         }
 
 
-        //$event->round->current=false;
-        //$event->round->save();
+        $event->round->current=false;
+        $event->round->save();
         Game::changeButton($tournament);
         Game::killPlayers($tournament);
         if($tournament->alivePlayers()->count()==1){
-            //finish tournament
+            Game::finishTournament($tournament);
         }else{
-            //Game::createRound($tournament);
+            RoundTool::createRound($tournament);
         }
     }
 }
