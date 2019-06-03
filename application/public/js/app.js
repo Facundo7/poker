@@ -1983,19 +1983,13 @@ __webpack_require__.r(__webpack_exports__);
 
         _this.setClass();
 
-        if (_this.max_bet != 0) {
-          _this.amount = _this.max_bet + _this.minimum_bet;
-        } else {
-          _this.amount = _this.max_bet - _this.player.betting + _this.minimum_bet;
-        }
-
-        _this.input = _this.amount;
+        _this.updateAmount();
 
         if (_this.bet_round.turn == _this.player.id) {
           if (!_this.checkAllin()) {
-            setTimeout(function () {
-              _this.my_turn = true;
-            }, 500);
+            _this.my_turn = true;
+          } else {
+            _this.act(5, 0);
           }
         }
       }));
@@ -2027,6 +2021,7 @@ __webpack_require__.r(__webpack_exports__);
     },
     act: function act(action, amount) {
       this.my_turn = false;
+      this.updatePlayer(action, amount);
       axios.post(route('api.actions.store'), {
         action: action,
         bet_round_id: this.bet_round.id,
@@ -2037,8 +2032,8 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     checkAllin: function checkAllin() {
-      if (this.player.stack == 0 || this.player.stack == this.player.betting) {
-        this.act(5, 0);
+      if (this.player.stack == 0) return true;else if (this.player.stack == this.player.betting) {
+        return true;
       } else {
         var allin = true;
 
@@ -2049,7 +2044,6 @@ __webpack_require__.r(__webpack_exports__);
         }
 
         if (allin) {
-          this.act(5, 0);
           return true;
         } else {
           return false;
@@ -2151,14 +2145,23 @@ __webpack_require__.r(__webpack_exports__);
         this.amount = Math.round(this.input);
       }
     },
-    addAction: function addAction(data) {
-      if (data.action.action != 5) {
-        var newRow = data.action.player.user.nickname + " " + this.verbs[data.action.action];
+    updateAmount: function updateAmount() {
+      if (this.max_bet != 0) {
+        this.amount = this.max_bet + this.minimum_bet;
+      } else {
+        this.amount = this.max_bet - this.player.betting + this.minimum_bet;
+      }
 
-        if (data.action.action == 3) {
-          newRow += " " + data.action.player.betting;
-        } else if (data.action.action > 0) {
-          newRow += " " + data.action.amount;
+      this.input = this.amount;
+    },
+    addAction: function addAction(action, nickname) {
+      if (action.action != 5) {
+        var newRow = nickname + " " + this.verbs[action.action];
+
+        if (action.action == 3) {
+          newRow += " " + action.player.betting;
+        } else if (action.action > 0) {
+          newRow += " " + action.amount;
         }
 
         this.actions.push(newRow);
@@ -2179,24 +2182,81 @@ __webpack_require__.r(__webpack_exports__);
 
       this.actions.push(showdown);
     },
+    updatePlayers: function updatePlayers(players) {
+      this.players = players;
+    },
+    updateRound: function updateRound(round) {
+      this.round = round;
+    },
+    updateBetRound: function updateBetRound(bet_round) {
+      this.bet_round = bet_round;
+    },
+    updatePlayer: function updatePlayer(players) {
+      for (var i = 0; i < players.length; i++) {
+        if (players[i].id == this.player.id) {
+          this.player.betting = players[i].betting;
+          this.player.stack = players[i].stack;
+          this.player.total_bet = players[i].total_bet;
+          this.player.playing = players[i].playing;
+          this.player.alive = players[i].alive;
+        }
+      }
+    },
     listen: function listen() {
       var _this2 = this;
 
       Echo.channel('tournament.' + this.tournament_id).listen('NewPlayer', function () {
         _this2.getData();
-      }).listen('NewBetRound', function () {
-        _this2.getData();
-      }).listen('NewRound', function () {
-        _this2.getData();
+      }).listen('NewBetRound', function (data) {
+        console.log('newBetRound');
+
+        _this2.updateBetRound(JSON.parse(data.bet_round));
+
+        _this2.updateRound(JSON.parse(data.round));
+
+        _this2.updatePlayers(JSON.parse(data.players));
+
+        _this2.updatePlayer(JSON.parse(data.players));
+
+        _this2.updateAmount();
+      }).listen('NewRound', function (data) {
+        console.log('newRound');
+
+        _this2.updateRound(JSON.parse(data.round));
+
+        _this2.updatePlayers(JSON.parse(data.players));
+
+        axios.get(route('api.tournaments.playerlogged', {
+          tournament: _this2.tournament_id
+        })).then(function (response) {
+          console.log(response.data);
+          _this2.player = response.data;
+        });
+
+        _this2.updateAmount();
       }).listen('NewAction', function (data) {
-        console.log(data);
+        console.log('newAction');
 
-        _this2.addAction(data);
+        _this2.addAction(JSON.parse(data.action), data.nickname);
 
-        _this2.getData();
+        _this2.updatePlayers(JSON.parse(data.players));
+
+        _this2.updateBetRound(JSON.parse(data.bet_round));
+
+        _this2.updateRound(JSON.parse(data.round));
+
+        _this2.updateAmount();
+
+        console.log(_this2.bet_round.turn, _this2.player.id);
+
+        if (_this2.bet_round.turn == _this2.player.id) {
+          if (!_this2.checkAllin()) {
+            _this2.my_turn = true;
+          } else {
+            _this2.act(5, 0);
+          }
+        }
       }).listen('ShowDown', function (data) {
-        console.log(JSON.parse(data.players));
-
         _this2.addShow(JSON.parse(data.players));
       });
     }

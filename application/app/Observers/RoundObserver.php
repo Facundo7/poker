@@ -28,7 +28,7 @@ class RoundObserver
         BetRoundTool::createBetRound($round, 0);
 
 
-        event(new NewRound($round));
+        event(new NewRound($round->tournament->currentRound));
 
     }
 
