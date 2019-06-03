@@ -1880,6 +1880,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "game",
   props: ['tournament_id'],
@@ -1903,7 +1904,8 @@ __webpack_require__.r(__webpack_exports__);
       colors: ['black', 'red', 'green', 'blue'],
       input: '',
       actions: [],
-      verbs: ['checks', 'calls', 'bets', 'raises to', 'folds']
+      verbs: ['checks', 'calls', 'bets', 'raises to', 'folds'],
+      my_turn: false
     };
   },
   computed: {
@@ -1988,6 +1990,14 @@ __webpack_require__.r(__webpack_exports__);
         }
 
         _this.input = _this.amount;
+
+        if (_this.bet_round.turn == _this.player.id) {
+          if (!_this.checkAllin()) {
+            setTimeout(function () {
+              _this.my_turn = true;
+            }, 500);
+          }
+        }
       }));
     },
     getAllPlayers: function getAllPlayers() {
@@ -2016,6 +2026,7 @@ __webpack_require__.r(__webpack_exports__);
       }));
     },
     act: function act(action, amount) {
+      this.my_turn = false;
       axios.post(route('api.actions.store'), {
         action: action,
         bet_round_id: this.bet_round.id,
@@ -2024,6 +2035,26 @@ __webpack_require__.r(__webpack_exports__);
       }).then(function (response) {
         console.log("action done");
       });
+    },
+    checkAllin: function checkAllin() {
+      if (this.player.stack == 0 || this.player.stack == this.player.betting) {
+        this.act(5, 0);
+      } else {
+        var allin = true;
+
+        for (var i = 0; i < this.players.length; i++) {
+          if (this.players[i].playing && this.players[i].id != this.player.id && (this.players[i].stack > 0 || this.players[i].stack != this.players[i].betting || this.player.betting < this.players[i].betting)) {
+            allin = false;
+          }
+        }
+
+        if (allin) {
+          this.act(5, 0);
+          return true;
+        } else {
+          return false;
+        }
+      }
     },
     sit: function sit(id) {
       var self = this;
@@ -2100,7 +2131,7 @@ __webpack_require__.r(__webpack_exports__);
           break;
 
         case 5:
-          this.amount = this.player.stack - this.player.betting;
+          this.amount = this.player.stack;
           break;
 
         default:
@@ -2113,7 +2144,7 @@ __webpack_require__.r(__webpack_exports__);
       if (isNaN(this.input)) {
         this.amount = this.max_bet - this.player.betting + this.minimum_bet;
       } else if (this.input > this.player.stack - this.player.betting) {
-        this.amount = this.player.stack - this.player.betting;
+        this.amount = this.player.stack;
       } else if (this.input < this.max_bet - this.player.betting + this.minimum_bet) {
         this.amount = this.max_bet - this.player.betting + this.minimum_bet;
       } else {
@@ -2121,26 +2152,32 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     addAction: function addAction(data) {
-      var newRow = data.action.player.user.nickname + " " + this.verbs[data.action.action];
+      if (data.action.action != 5) {
+        var newRow = data.action.player.user.nickname + " " + this.verbs[data.action.action];
 
-      if (data.action.amount > 0) {
-        newRow += " " + data.action.amount;
-      }
+        if (data.action.action == 3) {
+          newRow += " " + data.action.player.betting;
+        } else if (data.action.action > 0) {
+          newRow += " " + data.action.amount;
+        }
 
-      this.actions.push(newRow);
+        this.actions.push(newRow);
+      } else console.log('all in');
     },
     addShow: function addShow(players) {
-      var firstRow = "";
+      var showdown = "<div class='showdown'><p>";
 
       for (var i = 0; i < 5; i++) {
-        firstRow += this.values[this.board_cards[i].card.value - 2] + this.icons[this.board_cards[i].card.suit - 1] + " ";
+        showdown += "<span class='lilcard'>" + this.values[this.board_cards[i].card.value - 2] + "<span style='color:" + this.colors[this.board_cards[i].card.suit - 1] + "'>" + this.icons[this.board_cards[i].card.suit - 1] + "</span></span> ";
       }
 
-      this.actions.push(firstRow);
+      showdown += "</p>";
 
       for (var i = 0; i < players.length; i++) {
-        this.actions.push(players[i].user.nickname + " " + this.values[players[i].cards[0].card.value - 2] + this.icons[players[i].cards[0].card.suit - 1] + " " + this.values[players[i].cards[1].card.value - 2] + this.icons[players[i].cards[1].card.suit - 1]);
+        showdown += "<p>" + players[i].user.nickname + " <span class='lilcard'>" + this.values[players[i].cards[0].card.value - 2] + "<span style='color:" + this.colors[players[i].cards[0].card.suit - 1] + "'>" + this.icons[players[i].cards[0].card.suit - 1] + "</span></span> <span class='lilcard'>" + this.values[players[i].cards[1].card.value - 2] + "<span style='color:" + this.colors[players[i].cards[1].card.suit - 1] + "'>" + this.icons[players[i].cards[1].card.suit - 1] + "</span></span></p>";
       }
+
+      this.actions.push(showdown);
     },
     listen: function listen() {
       var _this2 = this;
@@ -47673,7 +47710,11 @@ var render = function() {
                   _vm._l(_vm.players_show, function(player) {
                     return _c(
                       "div",
-                      { key: player.id, staticClass: "player-info sit" },
+                      {
+                        key: player.id,
+                        staticClass: "player-info sit",
+                        class: { blink: player.id == _vm.bet_round.turn }
+                      },
                       [
                         _c("div", { staticClass: "text-center" }, [
                           _vm._v(_vm._s(player.user.nickname))
@@ -47683,43 +47724,50 @@ var render = function() {
                           _vm._v(_vm._s(player.stack - player.betting))
                         ]),
                         _vm._v(" "),
+                        _c(
+                          "div",
+                          {
+                            staticClass: "player-icons",
+                            class: { blink: player.id == _vm.bet_round.turn }
+                          },
+                          [
+                            player.playing
+                              ? _c("div", { staticClass: "mini-card1" })
+                              : _vm._e(),
+                            _vm._v(" "),
+                            player.playing
+                              ? _c("div", { staticClass: "mini-card2" })
+                              : _vm._e(),
+                            _vm._v(" "),
+                            player.button
+                              ? _c("div", { staticClass: "button" }, [
+                                  _c("span", { staticClass: "align-middle" }, [
+                                    _vm._v("B")
+                                  ])
+                                ])
+                              : _vm._e(),
+                            _vm._v(" "),
+                            player.sb
+                              ? _c("div", { staticClass: "sb" }, [
+                                  _c("span", { staticClass: "align-middle" }, [
+                                    _vm._v("SB")
+                                  ])
+                                ])
+                              : _vm._e(),
+                            _vm._v(" "),
+                            player.bb
+                              ? _c("div", { staticClass: "bb" }, [
+                                  _c("span", { staticClass: "align-middle" }, [
+                                    _vm._v("BB")
+                                  ])
+                                ])
+                              : _vm._e()
+                          ]
+                        ),
+                        _vm._v(" "),
                         _c("div", { staticClass: "text-center" }, [
                           _vm._v(_vm._s(player.betting)),
                           _c("i", { staticClass: "fas fa-coins" })
-                        ]),
-                        _vm._v(" "),
-                        _c("div", { staticClass: "player-icons" }, [
-                          player.playing
-                            ? _c("div", { staticClass: "mini-card1" })
-                            : _vm._e(),
-                          _vm._v(" "),
-                          player.playing
-                            ? _c("div", { staticClass: "mini-card2" })
-                            : _vm._e(),
-                          _vm._v(" "),
-                          player.button
-                            ? _c("div", { staticClass: "button" }, [
-                                _c("span", { staticClass: "align-middle" }, [
-                                  _vm._v("B")
-                                ])
-                              ])
-                            : _vm._e(),
-                          _vm._v(" "),
-                          player.sb
-                            ? _c("div", { staticClass: "sb" }, [
-                                _c("span", { staticClass: "align-middle" }, [
-                                  _vm._v("SB")
-                                ])
-                              ])
-                            : _vm._e(),
-                          _vm._v(" "),
-                          player.bb
-                            ? _c("div", { staticClass: "bb" }, [
-                                _c("span", { staticClass: "align-middle" }, [
-                                  _vm._v("BB")
-                                ])
-                              ])
-                            : _vm._e()
                         ])
                       ]
                     )
@@ -47939,7 +47987,7 @@ var render = function() {
                   ]
                 ),
                 _vm._v(" "),
-                _vm.player.id == _vm.bet_round.turn
+                _vm.my_turn
                   ? _c("div", { staticClass: "user-panel" }, [
                       _c("div", { staticClass: "pot-buttons" }, [
                         _c(
@@ -48022,7 +48070,7 @@ var render = function() {
                           attrs: {
                             type: "range",
                             min: _vm.max_bet + _vm.minimum_bet,
-                            max: _vm.player.stack - _vm.player.betting
+                            max: _vm.player.stack
                           },
                           domProps: { value: _vm.amount },
                           on: {
@@ -48151,7 +48199,10 @@ var render = function() {
         "div",
         { staticClass: "history" },
         _vm._l(_vm.actions, function(action, index) {
-          return _c("p", { key: index }, [_vm._v(_vm._s(action))])
+          return _c("p", {
+            key: index,
+            domProps: { innerHTML: _vm._s(action) }
+          })
         }),
         0
       )
@@ -48213,6 +48264,8 @@ var render = function() {
     _vm._v(" "),
     _c("div", { staticClass: "row" }, [
       _c("ul", [
+        _c("li", [_vm._v("my turn: " + _vm._s(_vm.my_turn))]),
+        _vm._v(" "),
         _c("li", [_vm._v("players: " + _vm._s(_vm.players))]),
         _vm._v(" "),
         _c("li", [_vm._v("players_show: " + _vm._s(_vm.players_show))]),

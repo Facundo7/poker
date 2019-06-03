@@ -4,17 +4,17 @@
             <div class="poker-table">
                 <template v-if="player && players_show">
                 <div :class="sitsClass">
-                    <div v-for="player in players_show" :key="player.id" class="player-info sit">
+                    <div v-for="player in players_show" :key="player.id" class="player-info sit" :class="{blink: player.id==bet_round.turn}">
                         <div class="text-center">{{player.user.nickname}}</div>
                         <div class="text-center">{{player.stack-player.betting}}</div>
-                        <div class="text-center">{{player.betting}}<i class="fas fa-coins"></i></div>
-                        <div class="player-icons">
+                        <div class="player-icons" :class="{blink: player.id==bet_round.turn}">
                             <div v-if="player.playing" class="mini-card1"></div>
                             <div v-if="player.playing" class="mini-card2"></div>
                             <div v-if="player.button" class="button"><span class="align-middle">B</span></div>
                             <div v-if="player.sb" class="sb"><span class="align-middle">SB</span></div>
                             <div v-if="player.bb" class="bb"><span class="align-middle">BB</span></div>
                         </div>
+                        <div class="text-center">{{player.betting}}<i class="fas fa-coins"></i></div>
                     </div>
                 </div>
 
@@ -51,7 +51,7 @@
                         <div class="card-suit" :style="{color:colors[player_cards[1].card.suit-1]}">{{icons[player_cards[1].card.suit-1]}}</div>
                     </div>
                 </div>
-                <div v-if="player.id==bet_round.turn" class="user-panel">
+                <div v-if="my_turn" class="user-panel">
                     <div class="pot-buttons">
                         <button class="btn pot-button" @click="changeAmount(1)">1/3</button>
                         <button class="btn pot-button" @click="changeAmount(2)">1/2</button>
@@ -60,7 +60,7 @@
                         <button class="btn pot-button" @click="changeAmount(5)">All in</button>
                     </div>
                     <div class="amount">
-                        <input type="range" class="range-input" @input="function(){input=amount}" v-bind:min="max_bet+minimum_bet" v-bind:max="player.stack-player.betting" v-model="amount">
+                        <input type="range" class="range-input" @input="function(){input=amount}" v-bind:min="max_bet+minimum_bet" v-bind:max="player.stack" v-model="amount">
                         <input type="text" class="amount-input" v-model="input" @keyup="setAmount()">
                     </div>
                     <div class="buttons">
@@ -75,7 +75,7 @@
 
             </div>
             <div class="history">
-                <p v-for="(action, index) in actions" :key="index">{{action}}</p>
+                <p v-for="(action, index) in actions" :key="index" v-html="action"></p>
             </div>
 
         </div>
@@ -94,6 +94,7 @@
         </div>
         <div class="row">
             <ul>
+                <li>my turn: {{my_turn}}</li>
                 <li>players: {{players}}</li>
                 <li>players_show: {{players_show}}</li>
                 <li>player: {{player}}</li>
@@ -134,6 +135,7 @@
                 input:'',
                 actions:[],
                 verbs:['checks', 'calls', 'bets', 'raises to', 'folds'],
+                my_turn:false
 
             }
         },
@@ -210,12 +212,28 @@
                         this.bet_round = betRoundRes.data;
                         this.players = allPlayerRes.data;
                         this.setClass();
+
                         if(this.max_bet!=0){
                             this.amount=this.max_bet+this.minimum_bet;
                         }else {
                             this.amount=this.max_bet-this.player.betting+this.minimum_bet;
                         }
                         this.input=this.amount;
+
+                        if(this.bet_round.turn==this.player.id){
+
+                            if(!this.checkAllin()){
+
+                                setTimeout(() => {
+                                    this.my_turn=true;
+                                }, 500);
+
+
+                            }
+
+                        }
+
+
                     }))
             },
 
@@ -237,6 +255,7 @@
                 return axios.get(route('api.tournaments.betround',{tournament: this.tournament_id}));
             },
             act(action, amount){
+                this.my_turn=false;
                 axios.post(route('api.actions.store'), {
                 action: action,
                 bet_round_id: this.bet_round.id,
@@ -247,6 +266,32 @@
                 .then(function (response) {
                 console.log("action done");
                 });
+
+
+            },
+            checkAllin(){
+
+                if(this.player.stack==0||this.player.stack==this.player.betting){
+                        this.act(5,0);
+                }else {
+
+                    var allin=true;
+                    for(var i=0;i<this.players.length;i++){
+
+                        if(this.players[i].playing&&this.players[i].id!=this.player.id&&((this.players[i].stack>0||this.players[i].stack!=this.players[i].betting)||(this.player.betting<this.players[i].betting))){
+                            allin=false;
+                        }
+                    }
+
+                    if(allin){
+                        this.act(5,0);
+                        return true;
+                    }else {
+                        return false;
+                    }
+
+                }
+
             },
             sit(id){
                 var self = this;
@@ -315,7 +360,7 @@
                         }
                         break;
                     case 5:
-                        this.amount=this.player.stack-this.player.betting;
+                        this.amount=this.player.stack;
                         break;
 
                     default:
@@ -330,7 +375,7 @@
                 if(isNaN(this.input)){
                     this.amount=this.max_bet-this.player.betting+this.minimum_bet;
                 }else if(this.input>this.player.stack-this.player.betting){
-                    this.amount=this.player.stack-this.player.betting;
+                    this.amount=this.player.stack;
                 }else if(this.input<this.max_bet-this.player.betting+this.minimum_bet){
                     this.amount=this.max_bet-this.player.betting+this.minimum_bet;
                 }else {
@@ -340,39 +385,43 @@
             },
             addAction(data){
 
+                if(data.action.action!=5){
+
                 var newRow=data.action.player.user.nickname+" "+this.verbs[data.action.action];
 
-                if(data.action.amount>0){
+                if(data.action.action==3){
+                    newRow+=" "+data.action.player.betting;
+                }else if(data.action.action>0){
                     newRow+=" "+data.action.amount;
                 }
 
                 this.actions.push(newRow);
-
+                }else console.log('all in');
             },
             addShow(players){
 
+                var showdown="<div class='showdown'><p>";
 
-
-                var firstRow="";
 
                 for(var i=0; i<5; i++){
-                    firstRow+=this.values[this.board_cards[i].card.value-2]+
-                              this.icons[this.board_cards[i].card.suit-1]+" ";
+                    showdown+="<span class='lilcard'>"+this.values[this.board_cards[i].card.value-2]+
+                              "<span style='color:"+this.colors[this.board_cards[i].card.suit-1]+"'>"+this.icons[this.board_cards[i].card.suit-1]+"</span></span> ";
                 }
 
-                this.actions.push(firstRow);
+                showdown+="</p>";
 
                 for (var i=0;i<players.length; i++) {
 
-                    this.actions.push(
-                        players[i].user.nickname+" "+
+                    showdown+="<p>"+
+                        players[i].user.nickname+" <span class='lilcard'>"+
                         this.values[players[i].cards[0].card.value-2]+
-                        this.icons[players[i].cards[0].card.suit-1]+" "+
+                        "<span style='color:"+this.colors[players[i].cards[0].card.suit-1]+"'>"+this.icons[players[i].cards[0].card.suit-1]+"</span></span> <span class='lilcard'>"+
                         this.values[players[i].cards[1].card.value-2]+
-                        this.icons[players[i].cards[1].card.suit-1]
-                    );
+                        "<span style='color:"+this.colors[players[i].cards[1].card.suit-1]+"'>"+this.icons[players[i].cards[1].card.suit-1]+"</span></span></p>";
 
                 }
+
+                this.actions.push(showdown);
 
             },
             listen(){
