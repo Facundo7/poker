@@ -102,8 +102,7 @@ class Evaluation
 
             }
 
-            $all_players=$tournament->alivePlayers()->orderBy('total_bet')->get();
-
+            $all_players=$tournament->alivePlayers()->orderBy('total_bet', 'asc')->get();
 
 
             do {
@@ -122,13 +121,11 @@ class Evaluation
 
                 $winners=$this->getWinners($evaluated_hands);
 
-
                 foreach ($winners as $index => $winner) {
                     $player=Player::find($winner[6]);
                     $player->stack+=round($side_pot/count($winners));
                     $player->save();
                 }
-
 
                 foreach ($evaluated_hands as $index => $hand) {
                     if(Player::find($hand[6])->total_bet==0){
@@ -138,7 +135,7 @@ class Evaluation
 
                 $evaluated_hands=array_values($evaluated_hands);
 
-            } while (count($all_players) > 1);
+            } while (count($all_players) > 0);
 
 
             // for ($i=0; $i < count($winners); $i++) {

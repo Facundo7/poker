@@ -71,13 +71,15 @@ class Game
 
     public function killPlayers(Tournament $tournament){
 
-        $tournament->alivePlayers()->where('stack',0)->update(['alive'=>false, 'sb'=>false, 'bb'=>false]);
+        $tournament->alivePlayers()->where('stack',0)->update(['alive'=>false, 'playing'=>false, 'sb'=>false, 'bb'=>false]);
 
     }
 
     public function finishTournament(Tournament $tournament){
 
         $tournament->active=false;
+        $tournament->winner_id=$tournament->alivePlayers->first()->id;
+        $tournament->save();
 
     }
 
@@ -98,7 +100,7 @@ class Game
 
     public function changeButton(Tournament $tournament){
 
-        $players=$tournament->alivePlayers()->orderBy('sit')->get();
+        $players=$tournament->players()->orderBy('sit')->get();
 
         //get index of the button player
         for($i=0;$i<count($players);$i++){
@@ -112,14 +114,22 @@ class Game
         $players[$button_player_index]->button=false;
         $players[$button_player_index]->save();
 
+        do{
+
         //set button for next player
         $button_player_index+=1;
         if($button_player_index>=count($players)){
             $button_player_index-=count($players);
         }
 
-        $players[$button_player_index]->button=true;
-        $players[$button_player_index]->save();
+        if($players[$button_player_index]->alive){
+            $players[$button_player_index]->button=true;
+            $players[$button_player_index]->save();
+            break;
+        }
+
+        }while(true);
+
     }
 
 

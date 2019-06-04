@@ -22,6 +22,10 @@ class ActionObserver
 
         $tournament=$action->betRound->round->tournament;
         $bet_round=$action->betRound;
+
+
+
+
         BetRoundTool::nextTurn($tournament);
         Game::updatePlayer($action);
 
@@ -32,9 +36,27 @@ class ActionObserver
 
         if($tournament->playingPlayers()->count()>1){
 
+            if($tournament->playingPlayers()->where('stack', ">", 0)->whereColumn('stack','<>','betting')->count()>=1)
+            {
+                $notAllinBetting=$tournament->playingPlayers()->where('stack', ">", 0)->whereColumn('stack','<>','betting')->max('betting');
+            }else
+            {
+                $notAllinBetting=0;
+            }
 
-            if($bet_round->players<=$bet_round->actions()->count()&&$tournament->playingPlayers()->where('stack', ">", 0)->whereColumn('stack','<>','betting')->distinct()->count('betting')==1){
+            if($tournament->playingPlayers()->where('stack', ">", 0)->whereColumn('stack','=','betting')->count()>1)
+            {
+                $allinBetting=$tournament->playingPlayers()->where('stack', ">", 0)->whereColumn('stack','=','betting')->max('betting');
+            }else
+            {
+                $allinBetting=0;
+            }
 
+
+            if($bet_round->players<=$bet_round->actions()->count()&&
+            $tournament->playingPlayers()->where('stack', ">", 0)->whereColumn('stack','<>','betting')->distinct()->count('betting')<=1&&(
+            $notAllinBetting>=$allinBetting||$notAllinBetting==0))
+            {
                 event(new BetRoundFinished($bet_round));
             }
 

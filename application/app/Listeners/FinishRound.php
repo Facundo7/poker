@@ -51,8 +51,8 @@ class FinishRound
 
         $event->round->current=false;
         $event->round->save();
-        Game::changeButton($tournament);
         Game::killPlayers($tournament);
+        Game::changeButton($tournament);
         if($tournament->alivePlayers()->count()==1){
             Game::finishTournament($tournament);
         }else{

@@ -1,5 +1,5 @@
 <template>
-    <div class="container-fluid">
+    <div class="container-fluid"  v-if="tournament.active">
         <div class="poker-interface">
             <div class="poker-table">
                 <template v-if="player && players_show">
@@ -60,12 +60,12 @@
                         <button class="btn pot-button" @click="changeAmount(5)">All in</button>
                     </div>
                     <div class="amount">
-                        <input type="range" class="range-input" @input="function(){input=amount}" v-bind:min="max_bet+minimum_bet" v-bind:max="player.stack" v-model="amount">
+                        <input type="range" class="range-input" @input="function(){input=amount}" v-bind:min="minAmount" v-bind:max="player.stack" v-model="amount">
                         <input type="text" class="amount-input" v-model="input" @keyup="setAmount()">
                     </div>
                     <div class="buttons">
                         <button v-if="max_bet==player.betting" @click="act(0,0)" class="btn act-button">Check</button>
-                        <button v-else @click="act(1,max_bet-player.betting)" class="btn act-button">Call({{max_bet-player.betting}})</button>
+                        <button v-else @click="act(1,callAmount)" class="btn act-button">Call({{callAmount}})</button>
                         <button v-if="max_bet==0" @click="act(2,amount)" class="btn act-button">Bet({{amount}})</button>
                         <button v-else @click="act(3,amount-player.betting)" class="btn act-button">Raise({{amount}})</button>
                         <button @click="act(4,0)" class="btn act-button">Fold</button>
@@ -108,11 +108,17 @@
                 <li>max: {{max_bet}}</li>
                 <li>bb: {{round.bb}}</li>
                 <li>min: {{minimum_bet}}</li>
+                <li>minamount: {{minAmount}}</li>
             </ul>
         </div>
     </div>
 
+<div v-else>
+tournament finished
+</div>
 </template>
+
+
 
 
 
@@ -179,6 +185,18 @@
                     return this.round.bb;
                 }
             },
+            callAmount: function(){
+                if(this.max_bet-this.player.betting<=this.player.stack-this.player.betting){
+                    return this.max_bet-this.player.betting
+                }
+                else return this.player.stack-this.player.betting;
+
+            },
+            minAmount: function(){
+                if(this.max_bet+this.minimum_bet<this.player.stack)
+                return this.max_bet+this.minimum_bet;
+                else return this.player.stack;
+            },
             player_cards: function() {
                 return this.player.cards;
             },
@@ -199,31 +217,36 @@
         methods: {
             getData(){
 
+                var self=this;
+
+                axios.get(route('api.tournaments.show',{tournament: this.tournament_id}))
+                .then(function(response){
+
+                    console.log(response.data);
+
+                    self.tournament = response.data;
+
                     axios.all([
-                        this.getTournament(),
-                        this.getAllPlayers(),
-                        this.getPlayer(),
-                        this.getRound(),
-                        this.getBetRound()
-                    ]).then(axios.spread((tourRes, allPlayerRes,playerRes,roundRes,betRoundRes) => {
-                        this.player = playerRes.data;
-                        this.round = roundRes.data;
-                        this.tournament = tourRes.data;
-                        this.bet_round = betRoundRes.data;
-                        this.players = allPlayerRes.data;
-                        this.setClass();
-                        this.updateAmount();
+                        self.getAllPlayers(),
+                        self.getPlayer(),
+                        self.getRound(),
+                        self.getBetRound()
+                    ]).then(axios.spread((allPlayerRes,playerRes,roundRes,betRoundRes) => {
+                        self.player = playerRes.data;
+                        self.round = roundRes.data;
+                        self.bet_round = betRoundRes.data;
+                        self.players = allPlayerRes.data;
+                        self.setClass();
+                        self.updateAmount();
 
+                        if(self.bet_round.turn==self.player.id){
 
-
-                        if(this.bet_round.turn==this.player.id){
-
-                            if(!this.checkAllin()){
-
-                                    this.my_turn=true;
-                            }else{this.act(5,0);}
+                            if(!self.checkAllin()){
+                                    self.my_turn=true;
+                            }else{self.act(5,0);}
                         }
-                    }))
+                    }));
+                });
             },
 
             getAllPlayers(){
@@ -271,7 +294,10 @@
                     var allin=true;
                     for(var i=0;i<this.players.length;i++){
 
-                        if(this.players[i].playing&&this.players[i].id!=this.player.id&&((this.players[i].stack>0||this.players[i].stack!=this.players[i].betting)||(this.player.betting<this.players[i].betting))){
+                        console.log(this.players[i].betting);
+                        if(this.players[i].playing&&
+                        this.players[i].id!=this.player.id&&
+                        ((this.players[i].stack>0||this.players[i].stack!=this.players[i].betting)||(this.player.betting<this.players[i].betting))){
                             allin=false;
                         }
                     }
@@ -376,11 +402,16 @@
 
             },
             updateAmount(){
-                if(this.max_bet!=0){
-                            this.amount=this.max_bet+this.minimum_bet;
-                        }else {
-                            this.amount=this.max_bet-this.player.betting+this.minimum_bet;
-                        }
+                // if(this.max_bet!=0){
+                //         if(this.max_bet+this.minimum_bet<this.player.stack)
+                //             this.amount=this.max_bet+this.minimum_bet;
+                //             else this.amount=this.player.stack;
+                //         }else {
+                //             if(this.max_bet-this.player.betting+this.minimum_bet<this.player.tack)
+                //             this.amount=this.max_bet-this.player.betting+this.minimum_bet;
+                //             else this.amount=this.player.stack;
+                //         }
+                        this.amount=this.minAmount;
                         this.input=this.amount;
             },
             addAction(action, nickname){
@@ -476,6 +507,7 @@
                     this.addAction(JSON.parse(data.action),data.nickname);
                     this.updatePlayers(JSON.parse(data.players));
                     this.updateBetRound(JSON.parse(data.bet_round));
+                    this.updatePlayer(JSON.parse(data.players));
                     this.updateRound(JSON.parse(data.round));
                     this.updateAmount();
                     console.log(this.bet_round.turn, this.player.id);
