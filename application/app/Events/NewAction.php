@@ -17,6 +17,12 @@ class NewAction implements ShouldBroadcastNow
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $action;
+    public $nickname;
+    public $players;
+    public $round;
+    public $bet_round;
+    public $id;
+
 
     /**
      * Create a new event instance.
@@ -25,7 +31,14 @@ class NewAction implements ShouldBroadcastNow
      */
     public function __construct(Action $action)
     {
-        $this->action=$action;
+        $this->action=$action->toJson();
+        $tournament=$action->player->tournament;
+        $this->players=$tournament->players->toJson();
+        $this->bet_round=$tournament->currentRound->currentBetRound->toJson();
+        $this->round=$tournament->currentRound->toJson();
+        $this->nickname=$action->player->user->nickname;
+
+        $this->id=$action->player->tournament_id;
     }
 
     /**
@@ -35,10 +48,7 @@ class NewAction implements ShouldBroadcastNow
      */
     public function broadcastOn()
     {
-        return new Channel('tournament.'.$this->action->player->tournament_id);
+        return new Channel('tournament.'.$this->id);
     }
-    public function broadcastWith()
-    {
-        return ['action'=>$this->action, 'nickname'=>$this->action->player->user->nickname];
-    }
+
 }

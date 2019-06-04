@@ -17,6 +17,9 @@ class NewBetRound implements ShouldBroadcastNow
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $bet_round;
+    public $round;
+    public $players;
+    public $id;
 
     /**
      * Create a new event instance.
@@ -25,7 +28,11 @@ class NewBetRound implements ShouldBroadcastNow
      */
     public function __construct(BetRound $bet_round)
     {
-        $this->bet_round=$bet_round;
+        $tournament=$bet_round->round->tournament;
+        $this->id=$tournament->id;
+        $this->bet_round=$bet_round->toJson();
+        $this->round=$bet_round->round->tournament->currentRound->toJson();
+        $this->players=$tournament->players->toJson();
     }
 
     /**
@@ -35,6 +42,6 @@ class NewBetRound implements ShouldBroadcastNow
      */
     public function broadcastOn()
     {
-        return new Channel('tournament.'.$this->bet_round->round->tournament_id);
+        return new Channel('tournament.'.$this->id);
     }
 }

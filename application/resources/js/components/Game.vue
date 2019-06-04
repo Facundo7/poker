@@ -212,28 +212,17 @@
                         this.bet_round = betRoundRes.data;
                         this.players = allPlayerRes.data;
                         this.setClass();
+                        this.updateAmount();
 
-                        if(this.max_bet!=0){
-                            this.amount=this.max_bet+this.minimum_bet;
-                        }else {
-                            this.amount=this.max_bet-this.player.betting+this.minimum_bet;
-                        }
-                        this.input=this.amount;
+
 
                         if(this.bet_round.turn==this.player.id){
 
                             if(!this.checkAllin()){
 
-                                setTimeout(() => {
                                     this.my_turn=true;
-                                }, 500);
-
-
-                            }
-
+                            }else{this.act(5,0);}
                         }
-
-
                     }))
             },
 
@@ -256,6 +245,7 @@
             },
             act(action, amount){
                 this.my_turn=false;
+                this.updatePlayer(action, amount);
                 axios.post(route('api.actions.store'), {
                 action: action,
                 bet_round_id: this.bet_round.id,
@@ -271,8 +261,11 @@
             },
             checkAllin(){
 
-                if(this.player.stack==0||this.player.stack==this.player.betting){
-                        this.act(5,0);
+                if(this.player.stack==0)
+                    return true;
+                else if(this.player.stack==this.player.betting){
+
+                    return true;
                 }else {
 
                     var allin=true;
@@ -284,7 +277,6 @@
                     }
 
                     if(allin){
-                        this.act(5,0);
                         return true;
                     }else {
                         return false;
@@ -383,16 +375,24 @@
                 }
 
             },
-            addAction(data){
+            updateAmount(){
+                if(this.max_bet!=0){
+                            this.amount=this.max_bet+this.minimum_bet;
+                        }else {
+                            this.amount=this.max_bet-this.player.betting+this.minimum_bet;
+                        }
+                        this.input=this.amount;
+            },
+            addAction(action, nickname){
 
-                if(data.action.action!=5){
+                if(action.action!=5){
 
-                var newRow=data.action.player.user.nickname+" "+this.verbs[data.action.action];
+                var newRow=nickname+" "+this.verbs[action.action];
 
-                if(data.action.action==3){
-                    newRow+=" "+data.action.player.betting;
-                }else if(data.action.action>0){
-                    newRow+=" "+data.action.amount;
+                if(action.action==3){
+                    newRow+=" "+action.player.betting;
+                }else if(action.action>0){
+                    newRow+=" "+action.amount;
                 }
 
                 this.actions.push(newRow);
@@ -424,17 +424,71 @@
                 this.actions.push(showdown);
 
             },
+            updatePlayers(players){
+                this.players=players;
+            },
+            updateRound(round){
+
+                this.round=round;
+            },
+            updateBetRound(bet_round){
+
+                this.bet_round=bet_round;
+            },
+            updatePlayer(players){
+
+                for(var i=0; i<players.length;i++){
+
+                    if(players[i].id==this.player.id){
+                        this.player.betting=players[i].betting;
+                        this.player.stack=players[i].stack;
+                        this.player.total_bet=players[i].total_bet;
+                        this.player.playing=players[i].playing;
+                        this.player.alive=players[i].alive;
+                    }
+                }
+            },
             listen(){
                 Echo.channel('tournament.'+this.tournament_id)
-                .listen('NewPlayer', ()=>{this.getData()})
-                .listen('NewBetRound', ()=>{this.getData()})
-                .listen('NewRound', ()=>{this.getData()})
+                .listen('NewPlayer', ()=>{
+                    this.getData()
+                    })
+                .listen('NewBetRound', (data)=>{
+                    console.log('newBetRound');
+                    this.updateBetRound(JSON.parse(data.bet_round));
+                    this.updateRound(JSON.parse(data.round));
+                    this.updatePlayers(JSON.parse(data.players));
+                    this.updatePlayer(JSON.parse(data.players));
+                    this.updateAmount();
+                    })
+                .listen('NewRound', (data)=>{
+                    console.log('newRound');
+                    this.updateRound(JSON.parse(data.round));
+                    this.updatePlayers(JSON.parse(data.players));
+                    axios.get(route('api.tournaments.playerlogged',{tournament: this.tournament_id})).then(response => {
+                        console.log(response.data);
+                        this.player=response.data;
+                    });
+                    this.updateAmount();
+                    })
                 .listen('NewAction', (data)=>{
-                    console.log(data);
-                    this.addAction(data);
-                    this.getData();
+                    console.log('newAction');
+                    this.addAction(JSON.parse(data.action),data.nickname);
+                    this.updatePlayers(JSON.parse(data.players));
+                    this.updateBetRound(JSON.parse(data.bet_round));
+                    this.updateRound(JSON.parse(data.round));
+                    this.updateAmount();
+                    console.log(this.bet_round.turn, this.player.id);
+                    if(this.bet_round.turn==this.player.id){
+
+                            if(!this.checkAllin()){
+                                    this.my_turn=true;
+                            }else{this.act(5,0);}
+                        }
                 })
-                .listen('ShowDown', (data)=>{console.log(JSON.parse(data.players)); this.addShow(JSON.parse(data.players))});
+                .listen('ShowDown', (data)=>{
+                    this.addShow(JSON.parse(data.players))
+                    });
 
             }
         }

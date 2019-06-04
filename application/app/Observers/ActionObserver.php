@@ -25,7 +25,8 @@ class ActionObserver
         BetRoundTool::nextTurn($tournament);
         Game::updatePlayer($action);
 
-        event(new NewAction($action));
+
+
 
         //check if bet round finished
 
@@ -42,8 +43,7 @@ class ActionObserver
             event(new BetRoundFinished($bet_round));
         }
 
-
-
+        event(new NewAction($action));
     }
 
     /**
