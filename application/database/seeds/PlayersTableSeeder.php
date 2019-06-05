@@ -15,14 +15,32 @@ class PlayersTableSeeder extends Seeder
     public function run()
     {
         Collection::make([
-            // [
-            //     'tournament_id' => 1,
-            //     'user_id' => 3,
-            //     'stack' => 1000,
-            //     'betting' => 0,
-            //     'sit' => 1,
-            // ],
             [
+                'id'=>1,
+                'tournament_id' => 2,
+                'user_id' => 5,
+                'stack' => 1000,
+                'betting' => 0,
+                'sit' => 1,
+            ],
+            [
+                'id'=>2,
+                'tournament_id' => 2,
+                'user_id' => 6,
+                'stack' => 1000,
+                'betting' => 0,
+                'sit' => 2,
+            ],
+            [
+                'id'=>3,
+                'tournament_id' => 2,
+                'user_id' => 4,
+                'stack' => 1000,
+                'betting' => 0,
+                'sit' => 3,
+            ],
+            [
+                'id'=>4,
                 'tournament_id' => 1,
                 'user_id' => 6,
                 'stack' => 1000,
@@ -37,6 +55,7 @@ class PlayersTableSeeder extends Seeder
             //     'sit' => 3,
             // ],
             [
+                'id'=>5,
                 'tournament_id' => 1,
                 'user_id' => 5,
                 'stack' => 1000,
@@ -55,7 +74,7 @@ class PlayersTableSeeder extends Seeder
         ])->each(function ($item) {
 
             Player::updateOrCreate(
-                ['user_id' => $item['user_id']],
+                ['id' => $item['id']],
                 $item
             );
 

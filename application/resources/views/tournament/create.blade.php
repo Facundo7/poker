@@ -6,23 +6,17 @@
     </div>
     <form action="/tournaments" method="post">
         @csrf
-        <div class="label">title: </div>
+        <div class="label">Title: </div>
         <input class="form-control" type="text" name="title" value="{{ old('title') }}">
-        <div class="label">BB: </div>
+        <div class="label">Big Blind: </div>
         <input class="form-control" type="text" name="bb" value="{{ old('bb') }}">
-        <div class="label">BB start value: </div>
-        <input class="form-control" type="text" name="bb_start_value" value="{{ old('bb_start_value') }}">
-        <div class="label">bb_increase_time: </div>
-        <input class="form-control" type="text" name="bb_increase_time" value="{{ old('bb_increase_time') }}">
-        <div class="label">bb_increase_value: </div>
-        <input class="form-control" type="text" name="bb_increase_value" value="{{ old('bb_increase_value') }}">
-        <div class="label">initial_stack: </div>
+        <div class="label">Inicial Stack: </div>
         <input class="form-control" type="text" name="initial_stack" value="{{ old('initial_stack') }}">
-        <div class="label">turn_seconds: </div>
+        <div class="label">duration of turn(in seconds): </div>
         <input class="form-control" type="text" name="turn_seconds" value="{{ old('turn_seconds') }}">
-        <div class="label">players_number: </div>
+        <div class="label">Number of players: </div>
         <input class="form-control" type="text" name="players_number" value="{{ old('players_number') }}">
-        <div class="label">buy_in: </div>
+        <div class="label">Buy in: </div>
         <input class="form-control" type="text" name="buy_in" value="{{ old('buy_in') }}">
 
         <div><input type="submit" value="Create tournament" class="btn btn-primary form-submit"></div>

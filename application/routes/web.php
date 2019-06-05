@@ -11,36 +11,44 @@
 |
 */
 
-Route::get('/', function () {
-    return view('home');
-});
-
 Auth::routes();
 
-Route::get('/home', 'HomeController@index')->name('home');
 
-Route::resource('tournaments', 'TournamentController');
+Route::group(['middleware' => 'auth'],function() {
 
-Route::prefix('api')->name('api.')->group(function () {
-
-
-    Route::prefix('tournaments')->name('tournaments.')->group(function () {
-
-        Route::get('{tournament}/round', 'Api\TournamentController@currentRound')->name('round');
-        Route::get('{tournament}/betround', 'Api\TournamentController@currentBetRound')->name('betround');
-        Route::get('{tournament}/playerlogged', 'Api\TournamentController@playerLogged')->name('playerlogged');
-        Route::get('{tournament}/players', 'Api\TournamentController@players')->name('players');
-
+    Route::get('/', function () {
+        return view('home');
     });
 
-    Route::apiResource('tournaments', 'Api\TournamentController')->only([
-        'index', 'show'
-    ]);
-    Route::apiResource('players', 'Api\PlayerController')->only([
-        'index', 'store'
-    ]);
-    Route::apiResource('actions', 'Api\ActionController')->only([
-        'store'
-    ]);
+    Route::get('/home', 'HomeController@index')->name('home');
+
+    Route::resource('tournaments', 'TournamentController');
+
+    Route::prefix('api')->name('api.')->group(function () {
+
+
+        Route::prefix('tournaments')->name('tournaments.')->group(function () {
+
+            Route::get('{tournament}/round', 'Api\TournamentController@currentRound')->name('round');
+            Route::get('{tournament}/betround', 'Api\TournamentController@currentBetRound')->name('betround');
+            Route::get('{tournament}/playerlogged', 'Api\TournamentController@playerLogged')->name('playerlogged');
+            Route::get('{tournament}/players', 'Api\TournamentController@players')->name('players');
+
+        });
+
+        Route::apiResource('tournaments', 'Api\TournamentController')->only([
+            'index', 'show'
+        ]);
+        Route::apiResource('players', 'Api\PlayerController')->only([
+            'index', 'store'
+        ]);
+        Route::apiResource('actions', 'Api\ActionController')->only([
+            'store'
+        ]);
+    });
+
+
 });
+
+
 

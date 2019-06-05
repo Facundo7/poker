@@ -36,7 +36,8 @@ class TournamentController extends Controller
      */
     public function store(Request $request)
     {
-        $tournament = Tournament::create($request->toArray());
+        $request['bb_start_value']=$request->bb;
+        Tournament::create($request->toArray());
 
         return View::make('home');
     }

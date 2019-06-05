@@ -8,10 +8,11 @@
                     <td>{{tournament.bb_start_value}} / {{tournament.bb_start_value / 2}}</td>
                     <td>{{tournament.initial_stack}}</td>
                     <td>{{tournament.buy_in}}</td>
-                    <td>WIP</td>
-                    <td><button @click="join(tournament.id)">Join</button></td>
+                    <td>{{tournament.players_count}}/{{tournament.players_number}}</td>
+                    <td><button class="btn join-btn" @click="join(tournament.id)">Join</button></td>
                 </tr>
             </table>
+            <button class="btn create-btn" @click="newTournament() ">New Tournament</button>
         </div>
     </div>
 </template>
@@ -35,6 +36,11 @@
             },
             join(id){
                 window.location.href=(route('tournaments.show',id));
+            },
+            newTournament(){
+
+                window.location.href=(route('tournaments.create'));
+
             }
         }
     }

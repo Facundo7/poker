@@ -4,10 +4,10 @@
             <div class="poker-table">
                 <template v-if="player && players_show">
                 <div :class="sitsClass">
-                    <div v-for="player in players_show" :key="player.id" class="player-info sit" :class="{blink: player.id==bet_round.turn}">
+                    <div v-for="player in players_show" :key="player.id" class="player-info sit" :class="{blink: player.id==bet_round.turn, dead: !player.alive}">
                         <div class="text-center">{{player.user.nickname}}</div>
                         <div class="text-center">{{player.stack-player.betting}}</div>
-                        <div class="player-icons" :class="{blink: player.id==bet_round.turn}">
+                        <div class="player-icons">
                             <div v-if="player.playing" class="mini-card1"></div>
                             <div v-if="player.playing" class="mini-card2"></div>
                             <div v-if="player.button" class="button"><span class="align-middle">B</span></div>
@@ -15,6 +15,7 @@
                             <div v-if="player.bb" class="bb"><span class="align-middle">BB</span></div>
                         </div>
                         <div class="text-center">{{player.betting}}<i class="fas fa-coins"></i></div>
+                        <div class="counter" v-if="player.id==bet_round.turn">{{counter}}</div>
                     </div>
                 </div>
 
@@ -41,7 +42,7 @@
                         <div class="card-suit" :style="{color:colors[board_cards[4].card.suit-1]}">{{icons[board_cards[4].card.suit-1]}}</div>
                     </div>
                 </div>
-                <div class="player-cards d-flex justify-content-around">
+                <div v-if="player.alive" class="player-cards d-flex justify-content-around">
                     <div class="poker-card">
                         <div class="card-value">{{values[player_cards[0].card.value-2]}}</div>
                         <div class="card-suit" :style="{color:colors[player_cards[0].card.suit-1]}">{{icons[player_cards[0].card.suit-1]}}</div>
@@ -74,8 +75,8 @@
                 </template>
 
             </div>
-            <div class="history">
-                <p v-for="(action, index) in actions" :key="index" v-html="action"></p>
+            <div id="messages" class="history" @="scrollDown()">
+                <p v-for="(message, index) in messages" :key="index" v-html="message"></p>
             </div>
 
         </div>
@@ -139,9 +140,11 @@ tournament finished
                 icons:['♠','♥','♣','◆'],
                 colors:['black','red','green','blue'],
                 input:'',
-                actions:[],
+                messages:[],
                 verbs:['checks', 'calls', 'bets', 'raises to', 'folds'],
-                my_turn:false
+                my_turn:false,
+                automatic_action:'',
+                counter:''
 
             }
         },
@@ -206,13 +209,23 @@ tournament finished
             players_show: function(){
                  if(this.player!='' && this.players!=''){
                      return this.orderArray(this.player, this.players);
-            };
+                } else if(this.players!='') {
+                    return this.orderArray(this.players[0], this.players);
+                }
             }
 
         },
         mounted() {
             this.getData();
             this.listen();
+        },
+        watch: {
+            'messages': function (val, oldVal) {
+                console.log('scrolling');
+                var element = document.getElementById("messages");
+                setTimeout(function(){
+                element.scrollTop = element.scrollHeight;},5)
+            }
         },
         methods: {
             getData(){
@@ -243,8 +256,11 @@ tournament finished
 
                             if(!self.checkAllin()){
                                     self.my_turn=true;
+                                    self.automatic_action=setTimeout(self.automaticAction, self.tournament.turn_seconds*1000);
                             }else{self.act(5,0);}
                         }
+                        self.counter=self.tournament.turn_seconds;
+                                    setInterval(function(){if(self.counter>0)self.counter--},1000)
                     }));
                 });
             },
@@ -267,6 +283,7 @@ tournament finished
                 return axios.get(route('api.tournaments.betround',{tournament: this.tournament_id}));
             },
             act(action, amount){
+                clearTimeout(this.automatic_action);
                 this.my_turn=false;
                 this.updatePlayer(action, amount);
                 axios.post(route('api.actions.store'), {
@@ -422,11 +439,13 @@ tournament finished
 
                 if(action.action==3){
                     newRow+=" "+action.player.betting;
-                }else if(action.action>0){
+                }else if(action.action==1||action.action==2){
                     newRow+=" "+action.amount;
                 }
 
-                this.actions.push(newRow);
+                this.messages.push(newRow);
+
+
                 }else console.log('all in');
             },
             addShow(players){
@@ -452,7 +471,18 @@ tournament finished
 
                 }
 
-                this.actions.push(showdown);
+                var self=this;
+                setTimeout(function(){
+                    self.messages.push(showdown);
+                },1000);
+
+            },
+            automaticAction(){
+
+                if(this.max_bet==this.player.betting)
+                    this.act(0,0);
+                else
+                    this.act(4,0);
 
             },
             updatePlayers(players){
@@ -515,11 +545,13 @@ tournament finished
 
                             if(!this.checkAllin()){
                                     this.my_turn=true;
+                                    this.automatic_action = setTimeout(this.automaticAction, this.tournament.turn_seconds*1000);
                             }else{this.act(5,0);}
                         }
+                        this.counter=this.tournament.turn_seconds;
                 })
                 .listen('ShowDown', (data)=>{
-                    this.addShow(JSON.parse(data.players))
+                    this.addShow(JSON.parse(data.players));
                     });
 
             }

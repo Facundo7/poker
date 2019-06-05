@@ -15,7 +15,7 @@ class TournamentController extends Controller
      */
     public function index()
     {
-        return Tournament::all()->toJson();
+        return Tournament::where('active',true)->withCount('players')->get()->toJson();
     }
 
     /**
