@@ -9,10 +9,10 @@
         <div class="label">Title: </div>
         <input class="form-control" style="width:30%" type="text" name="title" value="{{ old('title') }}">
         <div class="label">Big Blind: </div>
-        <input class="form-control" style="width:30%" type="number" name="bb" value="{{ old('bb') }}">
+        <input class="form-control" style="width:30%" type="text" name="bb" value="{{ old('bb') }}">
         <div class="label">Inicial Stack: </div>
         <input class="form-control" style="width:30%" type="text" name="initial_stack" value="{{ old('initial_stack') }}">
-        <div class="label">duration of turn(in seconds): </div>
+        <div class="label">Duration of turn (in seconds): </div>
         <input class="form-control" style="width:30%" type="text" name="turn_seconds" value="{{ old('turn_seconds') }}">
         <div class="label">Number of players: </div>
         <input class="form-control" style="width:30%" type="text" name="players_number" value="{{ old('players_number') }}">
