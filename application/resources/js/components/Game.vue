@@ -1,8 +1,11 @@
 <template>
-    <div class="container-fluid"  v-if="tournament.active">
+    <div class="container-fluid">
         <div class="poker-interface">
             <div class="poker-table">
-                <template v-if="player && players_show">
+                <button v-if="tournament && tournament.players_count<tournament.players_number && !player" class="btn join-btn" @click="sit(tournament_id)">Join {{tournament.players_count}}/{{tournament.players_number}}</button>
+                <div v-else-if="tournament && tournament.players_count<tournament.players_number" class="sign">Waiting for players {{tournament.players_count}}/{{tournament.players_number}}</div>
+                <div v-if="tournament && !tournament.active" class="sign">Tournament Finished. {{winner}} won<br><button class="btn exit-btn" @click="exit()">Exit home</button></div>
+                <template v-if="players_show">
                 <div :class="sitsClass">
                     <div v-for="player in players_show" :key="player.id" class="player-info sit" :class="{blink: player.id==bet_round.turn, dead: !player.alive}">
                         <div class="text-center">{{player.user.nickname}}</div>
@@ -19,7 +22,7 @@
                     </div>
                 </div>
 
-                <div class="round-info">POT: {{round.pot}}<br>TOTAL POT: {{pot}}</div>
+                <div v-if="!isNaN(pot)" class="round-info">POT: {{round.pot}}<br>TOTAL POT: {{pot}}</div>
                 <div v-if="board_cards" class="board-cards d-flex">
                     <div v-if="board_cards[0]" class="poker-card">
                         <div class="card-value">{{values[board_cards[0].card.value-2]}}</div>
@@ -42,7 +45,7 @@
                         <div class="card-suit" :style="{color:colors[board_cards[4].card.suit-1]}">{{icons[board_cards[4].card.suit-1]}}</div>
                     </div>
                 </div>
-                <div v-if="player.alive" class="player-cards d-flex justify-content-around">
+                <div v-if="player.alive && player_cards" class="player-cards d-flex justify-content-around">
                     <div class="poker-card">
                         <div class="card-value">{{values[player_cards[0].card.value-2]}}</div>
                         <div class="card-suit" :style="{color:colors[player_cards[0].card.suit-1]}">{{icons[player_cards[0].card.suit-1]}}</div>
@@ -75,25 +78,25 @@
                 </template>
 
             </div>
+            <div class="history-head">History of actions</div>
             <div id="messages" class="history" @="scrollDown()">
                 <p v-for="(message, index) in messages" :key="index" v-html="message"></p>
             </div>
-
         </div>
 
-        <div class="row">
+        <!-- <div class="row">
             <ul>
                 <li v-for="player in players" :key="player.id">
                     {{player.user.nickname}}
                 </li>
             </ul>
-        </div>
-        <div class="row">
+        </div> -->
+        <!-- <div class="row">
             <button @click="sit(tournament_id)">Join</button>
             <button @click="orderArray()">order</button>
             <button @click="getData()">order</button>
-        </div>
-        <div class="row">
+        </div> -->
+        <!-- <div class="row">
             <ul>
                 <li>my turn: {{my_turn}}</li>
                 <li>players: {{players}}</li>
@@ -111,12 +114,8 @@
                 <li>min: {{minimum_bet}}</li>
                 <li>minamount: {{minAmount}}</li>
             </ul>
-        </div>
+        </div> -->
     </div>
-
-<div v-else>
-tournament finished
-</div>
 </template>
 
 
@@ -212,6 +211,14 @@ tournament finished
                 } else if(this.players!='') {
                     return this.orderArray(this.players[0], this.players);
                 }
+            },
+            winner: function(){
+
+                    for(var i=0;i<this.players.length;i++){
+                        if(this.players[i].id==this.tournament.winner_id)
+                        return this.players[i].user.nickname;
+                    }
+
             }
 
         },
@@ -232,25 +239,31 @@ tournament finished
 
                 var self=this;
 
-                axios.get(route('api.tournaments.show',{tournament: this.tournament_id}))
-                .then(function(response){
-
-                    console.log(response.data);
-
-                    self.tournament = response.data;
-
                     axios.all([
+                        self.getTournament(),
                         self.getAllPlayers(),
                         self.getPlayer(),
                         self.getRound(),
                         self.getBetRound()
-                    ]).then(axios.spread((allPlayerRes,playerRes,roundRes,betRoundRes) => {
-                        self.player = playerRes.data;
-                        self.round = roundRes.data;
-                        self.bet_round = betRoundRes.data;
+                    ]).then(axios.spread((tourRes,allPlayerRes,playerRes,roundRes,betRoundRes) => {
+                        console.log(tourRes,allPlayerRes,playerRes,roundRes,betRoundRes);
+                        if(tourRes.data!='')
+                        self.tournament = tourRes.data;
+                        if(allPlayerRes.data!='')
                         self.players = allPlayerRes.data;
+                        if(playerRes.data!='')
+                        self.player = playerRes.data;
+                        if(roundRes.data!='')
+                        self.round = roundRes.data;
+                        if(betRoundRes.data!='')
+                        self.bet_round = betRoundRes.data;
+
                         self.setClass();
-                        self.updateAmount();
+
+
+                        if(self.bet_round!=''){
+
+                            self.updateAmount();
 
                         if(self.bet_round.turn==self.player.id){
 
@@ -261,8 +274,9 @@ tournament finished
                         }
                         self.counter=self.tournament.turn_seconds;
                                     setInterval(function(){if(self.counter>0)self.counter--},1000)
+                        }
                     }));
-                });
+
             },
 
             getAllPlayers(){
@@ -304,14 +318,13 @@ tournament finished
                 if(this.player.stack==0)
                     return true;
                 else if(this.player.stack==this.player.betting){
-
                     return true;
                 }else {
 
                     var allin=true;
                     for(var i=0;i<this.players.length;i++){
 
-                        console.log(this.players[i].betting);
+                        console.log(this.player,this.players[i]);
                         if(this.players[i].playing&&
                         this.players[i].id!=this.player.id&&
                         ((this.players[i].stack>0||this.players[i].stack!=this.players[i].betting)||(this.player.betting<this.players[i].betting))){
@@ -509,6 +522,11 @@ tournament finished
                     }
                 }
             },
+            exit(){
+
+                window.location.href=(route('home'));
+
+            },
             listen(){
                 Echo.channel('tournament.'+this.tournament_id)
                 .listen('NewPlayer', ()=>{
@@ -523,6 +541,7 @@ tournament finished
                     this.updateAmount();
                     })
                 .listen('NewRound', (data)=>{
+                    this.player.cards='';
                     console.log('newRound');
                     this.updateRound(JSON.parse(data.round));
                     this.updatePlayers(JSON.parse(data.players));
@@ -552,7 +571,12 @@ tournament finished
                 })
                 .listen('ShowDown', (data)=>{
                     this.addShow(JSON.parse(data.players));
-                    });
+                })
+                .listen('TournamentFinished', ()=>{
+                    this.bet_round='';
+                    this.round='';
+                    this.getData();
+                });
 
             }
         }

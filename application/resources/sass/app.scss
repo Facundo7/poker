@@ -20,13 +20,30 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
 }
 
-.label{
+label{
 color:black;
 
 }
 
 .card-header{
-
     color:black;
+}
+
+.logout{
+
+    text-align: right;
+
+}
+
+.logout-btn{
+
+    color:white;
+
+}
+
+.login-btn{
+
+    background-color: black;
+    color:white;
 
 }

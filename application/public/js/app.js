@@ -1887,7 +1887,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "game",
   props: ['tournament_id'],
@@ -1981,6 +1980,11 @@ __webpack_require__.r(__webpack_exports__);
       } else if (this.players != '') {
         return this.orderArray(this.players[0], this.players);
       }
+    },
+    winner: function winner() {
+      for (var i = 0; i < this.players.length; i++) {
+        if (this.players[i].id == this.tournament.winner_id) return this.players[i].user.nickname;
+      }
     }
   },
   mounted: function mounted() {
@@ -1999,17 +2003,16 @@ __webpack_require__.r(__webpack_exports__);
   methods: {
     getData: function getData() {
       var self = this;
-      axios.get(route('api.tournaments.show', {
-        tournament: this.tournament_id
-      })).then(function (response) {
-        console.log(response.data);
-        self.tournament = response.data;
-        axios.all([self.getAllPlayers(), self.getPlayer(), self.getRound(), self.getBetRound()]).then(axios.spread(function (allPlayerRes, playerRes, roundRes, betRoundRes) {
-          self.player = playerRes.data;
-          self.round = roundRes.data;
-          self.bet_round = betRoundRes.data;
-          self.players = allPlayerRes.data;
-          self.setClass();
+      axios.all([self.getTournament(), self.getAllPlayers(), self.getPlayer(), self.getRound(), self.getBetRound()]).then(axios.spread(function (tourRes, allPlayerRes, playerRes, roundRes, betRoundRes) {
+        console.log(tourRes, allPlayerRes, playerRes, roundRes, betRoundRes);
+        if (tourRes.data != '') self.tournament = tourRes.data;
+        if (allPlayerRes.data != '') self.players = allPlayerRes.data;
+        if (playerRes.data != '') self.player = playerRes.data;
+        if (roundRes.data != '') self.round = roundRes.data;
+        if (betRoundRes.data != '') self.bet_round = betRoundRes.data;
+        self.setClass();
+
+        if (self.bet_round != '') {
           self.updateAmount();
 
           if (self.bet_round.turn == self.player.id) {
@@ -2025,8 +2028,8 @@ __webpack_require__.r(__webpack_exports__);
           setInterval(function () {
             if (self.counter > 0) self.counter--;
           }, 1000);
-        }));
-      });
+        }
+      }));
     },
     getAllPlayers: function getAllPlayers() {
       return axios.get(route('api.tournaments.players', {
@@ -2073,7 +2076,7 @@ __webpack_require__.r(__webpack_exports__);
         var allin = true;
 
         for (var i = 0; i < this.players.length; i++) {
-          console.log(this.players[i].betting);
+          console.log(this.player, this.players[i]);
 
           if (this.players[i].playing && this.players[i].id != this.player.id && (this.players[i].stack > 0 || this.players[i].stack != this.players[i].betting || this.player.betting < this.players[i].betting)) {
             allin = false;
@@ -2249,6 +2252,9 @@ __webpack_require__.r(__webpack_exports__);
         }
       }
     },
+    exit: function exit() {
+      window.location.href = route('home');
+    },
     listen: function listen() {
       var _this = this;
 
@@ -2267,6 +2273,7 @@ __webpack_require__.r(__webpack_exports__);
 
         _this.updateAmount();
       }).listen('NewRound', function (data) {
+        _this.player.cards = '';
         console.log('newRound');
 
         _this.updateRound(JSON.parse(data.round));
@@ -2310,6 +2317,11 @@ __webpack_require__.r(__webpack_exports__);
         _this.counter = _this.tournament.turn_seconds;
       }).listen('ShowDown', function (data) {
         _this.addShow(JSON.parse(data.players));
+      }).listen('TournamentFinished', function () {
+        _this.bet_round = '';
+        _this.round = '';
+
+        _this.getData();
       });
     }
   }
@@ -2326,6 +2338,11 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
 //
 //
 //
@@ -47812,676 +47829,593 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _vm.tournament.active
-    ? _c("div", { staticClass: "container-fluid" }, [
-        _c("div", { staticClass: "poker-interface" }, [
-          _c(
-            "div",
-            { staticClass: "poker-table" },
-            [
-              _vm.player && _vm.players_show
-                ? [
-                    _c(
+  return _c("div", { staticClass: "container-fluid" }, [
+    _c("div", { staticClass: "poker-interface" }, [
+      _c(
+        "div",
+        { staticClass: "poker-table" },
+        [
+          _vm.tournament &&
+          _vm.tournament.players_count < _vm.tournament.players_number &&
+          !_vm.player
+            ? _c(
+                "button",
+                {
+                  staticClass: "btn join-btn",
+                  on: {
+                    click: function($event) {
+                      return _vm.sit(_vm.tournament_id)
+                    }
+                  }
+                },
+                [
+                  _vm._v(
+                    "Join " +
+                      _vm._s(_vm.tournament.players_count) +
+                      "/" +
+                      _vm._s(_vm.tournament.players_number)
+                  )
+                ]
+              )
+            : _vm.tournament &&
+              _vm.tournament.players_count < _vm.tournament.players_number
+            ? _c("div", { staticClass: "sign" }, [
+                _vm._v(
+                  "Waiting for players " +
+                    _vm._s(_vm.tournament.players_count) +
+                    "/" +
+                    _vm._s(_vm.tournament.players_number)
+                )
+              ])
+            : _vm._e(),
+          _vm._v(" "),
+          _vm.tournament && !_vm.tournament.active
+            ? _c("div", { staticClass: "sign" }, [
+                _vm._v("Tournament Finished. " + _vm._s(_vm.winner) + " won"),
+                _c("br"),
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn exit-btn",
+                    on: {
+                      click: function($event) {
+                        return _vm.exit()
+                      }
+                    }
+                  },
+                  [_vm._v("Exit home")]
+                )
+              ])
+            : _vm._e(),
+          _vm._v(" "),
+          _vm.players_show
+            ? [
+                _c(
+                  "div",
+                  { class: _vm.sitsClass },
+                  _vm._l(_vm.players_show, function(player) {
+                    return _c(
                       "div",
-                      { class: _vm.sitsClass },
-                      _vm._l(_vm.players_show, function(player) {
-                        return _c(
-                          "div",
-                          {
-                            key: player.id,
-                            staticClass: "player-info sit",
-                            class: {
-                              blink: player.id == _vm.bet_round.turn,
-                              dead: !player.alive
-                            }
-                          },
-                          [
-                            _c("div", { staticClass: "text-center" }, [
-                              _vm._v(_vm._s(player.user.nickname))
-                            ]),
-                            _vm._v(" "),
-                            _c("div", { staticClass: "text-center" }, [
-                              _vm._v(_vm._s(player.stack - player.betting))
-                            ]),
-                            _vm._v(" "),
-                            _c("div", { staticClass: "player-icons" }, [
-                              player.playing
-                                ? _c("div", { staticClass: "mini-card1" })
-                                : _vm._e(),
-                              _vm._v(" "),
-                              player.playing
-                                ? _c("div", { staticClass: "mini-card2" })
-                                : _vm._e(),
-                              _vm._v(" "),
-                              player.button
-                                ? _c("div", { staticClass: "button" }, [
-                                    _c(
-                                      "span",
-                                      { staticClass: "align-middle" },
-                                      [_vm._v("B")]
-                                    )
-                                  ])
-                                : _vm._e(),
-                              _vm._v(" "),
-                              player.sb
-                                ? _c("div", { staticClass: "sb" }, [
-                                    _c(
-                                      "span",
-                                      { staticClass: "align-middle" },
-                                      [_vm._v("SB")]
-                                    )
-                                  ])
-                                : _vm._e(),
-                              _vm._v(" "),
-                              player.bb
-                                ? _c("div", { staticClass: "bb" }, [
-                                    _c(
-                                      "span",
-                                      { staticClass: "align-middle" },
-                                      [_vm._v("BB")]
-                                    )
-                                  ])
-                                : _vm._e()
-                            ]),
-                            _vm._v(" "),
-                            _c("div", { staticClass: "text-center" }, [
-                              _vm._v(_vm._s(player.betting)),
-                              _c("i", { staticClass: "fas fa-coins" })
-                            ]),
-                            _vm._v(" "),
-                            player.id == _vm.bet_round.turn
-                              ? _c("div", { staticClass: "counter" }, [
-                                  _vm._v(_vm._s(_vm.counter))
+                      {
+                        key: player.id,
+                        staticClass: "player-info sit",
+                        class: {
+                          blink: player.id == _vm.bet_round.turn,
+                          dead: !player.alive
+                        }
+                      },
+                      [
+                        _c("div", { staticClass: "text-center" }, [
+                          _vm._v(_vm._s(player.user.nickname))
+                        ]),
+                        _vm._v(" "),
+                        _c("div", { staticClass: "text-center" }, [
+                          _vm._v(_vm._s(player.stack - player.betting))
+                        ]),
+                        _vm._v(" "),
+                        _c("div", { staticClass: "player-icons" }, [
+                          player.playing
+                            ? _c("div", { staticClass: "mini-card1" })
+                            : _vm._e(),
+                          _vm._v(" "),
+                          player.playing
+                            ? _c("div", { staticClass: "mini-card2" })
+                            : _vm._e(),
+                          _vm._v(" "),
+                          player.button
+                            ? _c("div", { staticClass: "button" }, [
+                                _c("span", { staticClass: "align-middle" }, [
+                                  _vm._v("B")
                                 ])
-                              : _vm._e()
-                          ]
-                        )
-                      }),
-                      0
-                    ),
-                    _vm._v(" "),
-                    _c("div", { staticClass: "round-info" }, [
+                              ])
+                            : _vm._e(),
+                          _vm._v(" "),
+                          player.sb
+                            ? _c("div", { staticClass: "sb" }, [
+                                _c("span", { staticClass: "align-middle" }, [
+                                  _vm._v("SB")
+                                ])
+                              ])
+                            : _vm._e(),
+                          _vm._v(" "),
+                          player.bb
+                            ? _c("div", { staticClass: "bb" }, [
+                                _c("span", { staticClass: "align-middle" }, [
+                                  _vm._v("BB")
+                                ])
+                              ])
+                            : _vm._e()
+                        ]),
+                        _vm._v(" "),
+                        _c("div", { staticClass: "text-center" }, [
+                          _vm._v(_vm._s(player.betting)),
+                          _c("i", { staticClass: "fas fa-coins" })
+                        ]),
+                        _vm._v(" "),
+                        player.id == _vm.bet_round.turn
+                          ? _c("div", { staticClass: "counter" }, [
+                              _vm._v(_vm._s(_vm.counter))
+                            ])
+                          : _vm._e()
+                      ]
+                    )
+                  }),
+                  0
+                ),
+                _vm._v(" "),
+                !isNaN(_vm.pot)
+                  ? _c("div", { staticClass: "round-info" }, [
                       _vm._v("POT: " + _vm._s(_vm.round.pot)),
                       _c("br"),
                       _vm._v("TOTAL POT: " + _vm._s(_vm.pot))
-                    ]),
-                    _vm._v(" "),
-                    _vm.board_cards
-                      ? _c("div", { staticClass: "board-cards d-flex" }, [
-                          _vm.board_cards[0]
-                            ? _c("div", { staticClass: "poker-card" }, [
-                                _c("div", { staticClass: "card-value" }, [
-                                  _vm._v(
-                                    _vm._s(
-                                      _vm.values[
-                                        _vm.board_cards[0].card.value - 2
-                                      ]
-                                    )
-                                  )
-                                ]),
-                                _vm._v(" "),
-                                _c(
-                                  "div",
-                                  {
-                                    staticClass: "card-suit",
-                                    style: {
-                                      color:
-                                        _vm.colors[
-                                          _vm.board_cards[0].card.suit - 1
-                                        ]
-                                    }
-                                  },
-                                  [
-                                    _vm._v(
-                                      _vm._s(
-                                        _vm.icons[
-                                          _vm.board_cards[0].card.suit - 1
-                                        ]
-                                      )
-                                    )
-                                  ]
+                    ])
+                  : _vm._e(),
+                _vm._v(" "),
+                _vm.board_cards
+                  ? _c("div", { staticClass: "board-cards d-flex" }, [
+                      _vm.board_cards[0]
+                        ? _c("div", { staticClass: "poker-card" }, [
+                            _c("div", { staticClass: "card-value" }, [
+                              _vm._v(
+                                _vm._s(
+                                  _vm.values[_vm.board_cards[0].card.value - 2]
                                 )
-                              ])
-                            : _vm._e(),
-                          _vm._v(" "),
-                          _vm.board_cards[1]
-                            ? _c("div", { staticClass: "poker-card" }, [
-                                _c("div", { staticClass: "card-value" }, [
-                                  _vm._v(
-                                    _vm._s(
-                                      _vm.values[
-                                        _vm.board_cards[1].card.value - 2
-                                      ]
-                                    )
-                                  )
-                                ]),
-                                _vm._v(" "),
-                                _c(
-                                  "div",
-                                  {
-                                    staticClass: "card-suit",
-                                    style: {
-                                      color:
-                                        _vm.colors[
-                                          _vm.board_cards[1].card.suit - 1
-                                        ]
-                                    }
-                                  },
-                                  [
-                                    _vm._v(
-                                      _vm._s(
-                                        _vm.icons[
-                                          _vm.board_cards[1].card.suit - 1
-                                        ]
-                                      )
-                                    )
-                                  ]
-                                )
-                              ])
-                            : _vm._e(),
-                          _vm._v(" "),
-                          _vm.board_cards[2]
-                            ? _c("div", { staticClass: "poker-card" }, [
-                                _c("div", { staticClass: "card-value" }, [
-                                  _vm._v(
-                                    _vm._s(
-                                      _vm.values[
-                                        _vm.board_cards[2].card.value - 2
-                                      ]
-                                    )
-                                  )
-                                ]),
-                                _vm._v(" "),
-                                _c(
-                                  "div",
-                                  {
-                                    staticClass: "card-suit",
-                                    style: {
-                                      color:
-                                        _vm.colors[
-                                          _vm.board_cards[2].card.suit - 1
-                                        ]
-                                    }
-                                  },
-                                  [
-                                    _vm._v(
-                                      _vm._s(
-                                        _vm.icons[
-                                          _vm.board_cards[2].card.suit - 1
-                                        ]
-                                      )
-                                    )
-                                  ]
-                                )
-                              ])
-                            : _vm._e(),
-                          _vm._v(" "),
-                          _vm.board_cards[3]
-                            ? _c("div", { staticClass: "poker-card" }, [
-                                _c("div", { staticClass: "card-value" }, [
-                                  _vm._v(
-                                    _vm._s(
-                                      _vm.values[
-                                        _vm.board_cards[3].card.value - 2
-                                      ]
-                                    )
-                                  )
-                                ]),
-                                _vm._v(" "),
-                                _c(
-                                  "div",
-                                  {
-                                    staticClass: "card-suit",
-                                    style: {
-                                      color:
-                                        _vm.colors[
-                                          _vm.board_cards[3].card.suit - 1
-                                        ]
-                                    }
-                                  },
-                                  [
-                                    _vm._v(
-                                      _vm._s(
-                                        _vm.icons[
-                                          _vm.board_cards[3].card.suit - 1
-                                        ]
-                                      )
-                                    )
-                                  ]
-                                )
-                              ])
-                            : _vm._e(),
-                          _vm._v(" "),
-                          _vm.board_cards[4]
-                            ? _c("div", { staticClass: "poker-card" }, [
-                                _c("div", { staticClass: "card-value" }, [
-                                  _vm._v(
-                                    _vm._s(
-                                      _vm.values[
-                                        _vm.board_cards[4].card.value - 2
-                                      ]
-                                    )
-                                  )
-                                ]),
-                                _vm._v(" "),
-                                _c(
-                                  "div",
-                                  {
-                                    staticClass: "card-suit",
-                                    style: {
-                                      color:
-                                        _vm.colors[
-                                          _vm.board_cards[4].card.suit - 1
-                                        ]
-                                    }
-                                  },
-                                  [
-                                    _vm._v(
-                                      _vm._s(
-                                        _vm.icons[
-                                          _vm.board_cards[4].card.suit - 1
-                                        ]
-                                      )
-                                    )
-                                  ]
-                                )
-                              ])
-                            : _vm._e()
-                        ])
-                      : _vm._e(),
-                    _vm._v(" "),
-                    _vm.player.alive
-                      ? _c(
-                          "div",
-                          {
-                            staticClass:
-                              "player-cards d-flex justify-content-around"
-                          },
-                          [
-                            _c("div", { staticClass: "poker-card" }, [
-                              _c("div", { staticClass: "card-value" }, [
-                                _vm._v(
-                                  _vm._s(
-                                    _vm.values[
-                                      _vm.player_cards[0].card.value - 2
-                                    ]
-                                  )
-                                )
-                              ]),
-                              _vm._v(" "),
-                              _c(
-                                "div",
-                                {
-                                  staticClass: "card-suit",
-                                  style: {
-                                    color:
-                                      _vm.colors[
-                                        _vm.player_cards[0].card.suit - 1
-                                      ]
-                                  }
-                                },
-                                [
-                                  _vm._v(
-                                    _vm._s(
-                                      _vm.icons[
-                                        _vm.player_cards[0].card.suit - 1
-                                      ]
-                                    )
-                                  )
-                                ]
                               )
                             ]),
                             _vm._v(" "),
-                            _c("div", { staticClass: "poker-card" }, [
-                              _c("div", { staticClass: "card-value" }, [
+                            _c(
+                              "div",
+                              {
+                                staticClass: "card-suit",
+                                style: {
+                                  color:
+                                    _vm.colors[_vm.board_cards[0].card.suit - 1]
+                                }
+                              },
+                              [
                                 _vm._v(
                                   _vm._s(
-                                    _vm.values[
-                                      _vm.player_cards[1].card.value - 2
-                                    ]
+                                    _vm.icons[_vm.board_cards[0].card.suit - 1]
                                   )
                                 )
-                              ]),
-                              _vm._v(" "),
-                              _c(
-                                "div",
-                                {
-                                  staticClass: "card-suit",
-                                  style: {
-                                    color:
-                                      _vm.colors[
-                                        _vm.player_cards[1].card.suit - 1
-                                      ]
-                                  }
-                                },
-                                [
-                                  _vm._v(
-                                    _vm._s(
-                                      _vm.icons[
-                                        _vm.player_cards[1].card.suit - 1
-                                      ]
-                                    )
-                                  )
-                                ]
+                              ]
+                            )
+                          ])
+                        : _vm._e(),
+                      _vm._v(" "),
+                      _vm.board_cards[1]
+                        ? _c("div", { staticClass: "poker-card" }, [
+                            _c("div", { staticClass: "card-value" }, [
+                              _vm._v(
+                                _vm._s(
+                                  _vm.values[_vm.board_cards[1].card.value - 2]
+                                )
                               )
-                            ])
-                          ]
-                        )
-                      : _vm._e(),
-                    _vm._v(" "),
-                    _vm.my_turn
-                      ? _c("div", { staticClass: "user-panel" }, [
-                          _c("div", { staticClass: "pot-buttons" }, [
-                            _c(
-                              "button",
-                              {
-                                staticClass: "btn pot-button",
-                                on: {
-                                  click: function($event) {
-                                    return _vm.changeAmount(1)
-                                  }
-                                }
-                              },
-                              [_vm._v("1/3")]
-                            ),
+                            ]),
                             _vm._v(" "),
                             _c(
-                              "button",
+                              "div",
                               {
-                                staticClass: "btn pot-button",
-                                on: {
-                                  click: function($event) {
-                                    return _vm.changeAmount(2)
-                                  }
+                                staticClass: "card-suit",
+                                style: {
+                                  color:
+                                    _vm.colors[_vm.board_cards[1].card.suit - 1]
                                 }
                               },
-                              [_vm._v("1/2")]
-                            ),
+                              [
+                                _vm._v(
+                                  _vm._s(
+                                    _vm.icons[_vm.board_cards[1].card.suit - 1]
+                                  )
+                                )
+                              ]
+                            )
+                          ])
+                        : _vm._e(),
+                      _vm._v(" "),
+                      _vm.board_cards[2]
+                        ? _c("div", { staticClass: "poker-card" }, [
+                            _c("div", { staticClass: "card-value" }, [
+                              _vm._v(
+                                _vm._s(
+                                  _vm.values[_vm.board_cards[2].card.value - 2]
+                                )
+                              )
+                            ]),
                             _vm._v(" "),
                             _c(
-                              "button",
+                              "div",
                               {
-                                staticClass: "btn pot-button",
-                                on: {
-                                  click: function($event) {
-                                    return _vm.changeAmount(3)
-                                  }
+                                staticClass: "card-suit",
+                                style: {
+                                  color:
+                                    _vm.colors[_vm.board_cards[2].card.suit - 1]
                                 }
                               },
-                              [_vm._v("3/4")]
-                            ),
+                              [
+                                _vm._v(
+                                  _vm._s(
+                                    _vm.icons[_vm.board_cards[2].card.suit - 1]
+                                  )
+                                )
+                              ]
+                            )
+                          ])
+                        : _vm._e(),
+                      _vm._v(" "),
+                      _vm.board_cards[3]
+                        ? _c("div", { staticClass: "poker-card" }, [
+                            _c("div", { staticClass: "card-value" }, [
+                              _vm._v(
+                                _vm._s(
+                                  _vm.values[_vm.board_cards[3].card.value - 2]
+                                )
+                              )
+                            ]),
                             _vm._v(" "),
                             _c(
-                              "button",
+                              "div",
                               {
-                                staticClass: "btn pot-button",
-                                on: {
-                                  click: function($event) {
-                                    return _vm.changeAmount(4)
-                                  }
+                                staticClass: "card-suit",
+                                style: {
+                                  color:
+                                    _vm.colors[_vm.board_cards[3].card.suit - 1]
                                 }
                               },
-                              [_vm._v("POT")]
-                            ),
+                              [
+                                _vm._v(
+                                  _vm._s(
+                                    _vm.icons[_vm.board_cards[3].card.suit - 1]
+                                  )
+                                )
+                              ]
+                            )
+                          ])
+                        : _vm._e(),
+                      _vm._v(" "),
+                      _vm.board_cards[4]
+                        ? _c("div", { staticClass: "poker-card" }, [
+                            _c("div", { staticClass: "card-value" }, [
+                              _vm._v(
+                                _vm._s(
+                                  _vm.values[_vm.board_cards[4].card.value - 2]
+                                )
+                              )
+                            ]),
                             _vm._v(" "),
                             _c(
-                              "button",
+                              "div",
                               {
-                                staticClass: "btn pot-button",
-                                on: {
-                                  click: function($event) {
-                                    return _vm.changeAmount(5)
-                                  }
+                                staticClass: "card-suit",
+                                style: {
+                                  color:
+                                    _vm.colors[_vm.board_cards[4].card.suit - 1]
                                 }
                               },
-                              [_vm._v("All in")]
+                              [
+                                _vm._v(
+                                  _vm._s(
+                                    _vm.icons[_vm.board_cards[4].card.suit - 1]
+                                  )
+                                )
+                              ]
+                            )
+                          ])
+                        : _vm._e()
+                    ])
+                  : _vm._e(),
+                _vm._v(" "),
+                _vm.player.alive && _vm.player_cards
+                  ? _c(
+                      "div",
+                      {
+                        staticClass:
+                          "player-cards d-flex justify-content-around"
+                      },
+                      [
+                        _c("div", { staticClass: "poker-card" }, [
+                          _c("div", { staticClass: "card-value" }, [
+                            _vm._v(
+                              _vm._s(
+                                _vm.values[_vm.player_cards[0].card.value - 2]
+                              )
                             )
                           ]),
                           _vm._v(" "),
-                          _c("div", { staticClass: "amount" }, [
-                            _c("input", {
-                              directives: [
-                                {
-                                  name: "model",
-                                  rawName: "v-model",
-                                  value: _vm.amount,
-                                  expression: "amount"
-                                }
-                              ],
-                              staticClass: "range-input",
-                              attrs: {
-                                type: "range",
-                                min: _vm.minAmount,
-                                max: _vm.player.stack
-                              },
-                              domProps: { value: _vm.amount },
-                              on: {
-                                input: function() {
-                                  _vm.input = _vm.amount
-                                },
-                                __r: function($event) {
-                                  _vm.amount = $event.target.value
-                                }
+                          _c(
+                            "div",
+                            {
+                              staticClass: "card-suit",
+                              style: {
+                                color:
+                                  _vm.colors[_vm.player_cards[0].card.suit - 1]
                               }
-                            }),
-                            _vm._v(" "),
-                            _c("input", {
-                              directives: [
-                                {
-                                  name: "model",
-                                  rawName: "v-model",
-                                  value: _vm.input,
-                                  expression: "input"
-                                }
-                              ],
-                              staticClass: "amount-input",
-                              attrs: { type: "text" },
-                              domProps: { value: _vm.input },
-                              on: {
-                                keyup: function($event) {
-                                  return _vm.setAmount()
-                                },
-                                input: function($event) {
-                                  if ($event.target.composing) {
-                                    return
-                                  }
-                                  _vm.input = $event.target.value
-                                }
-                              }
-                            })
+                            },
+                            [
+                              _vm._v(
+                                _vm._s(
+                                  _vm.icons[_vm.player_cards[0].card.suit - 1]
+                                )
+                              )
+                            ]
+                          )
+                        ]),
+                        _vm._v(" "),
+                        _c("div", { staticClass: "poker-card" }, [
+                          _c("div", { staticClass: "card-value" }, [
+                            _vm._v(
+                              _vm._s(
+                                _vm.values[_vm.player_cards[1].card.value - 2]
+                              )
+                            )
                           ]),
                           _vm._v(" "),
-                          _c("div", { staticClass: "buttons" }, [
-                            _vm.max_bet == _vm.player.betting
-                              ? _c(
-                                  "button",
-                                  {
-                                    staticClass: "btn act-button",
-                                    on: {
-                                      click: function($event) {
-                                        return _vm.act(0, 0)
-                                      }
-                                    }
-                                  },
-                                  [_vm._v("Check")]
+                          _c(
+                            "div",
+                            {
+                              staticClass: "card-suit",
+                              style: {
+                                color:
+                                  _vm.colors[_vm.player_cards[1].card.suit - 1]
+                              }
+                            },
+                            [
+                              _vm._v(
+                                _vm._s(
+                                  _vm.icons[_vm.player_cards[1].card.suit - 1]
                                 )
-                              : _c(
-                                  "button",
-                                  {
-                                    staticClass: "btn act-button",
-                                    on: {
-                                      click: function($event) {
-                                        return _vm.act(1, _vm.callAmount)
-                                      }
-                                    }
-                                  },
-                                  [
-                                    _vm._v(
-                                      "Call(" + _vm._s(_vm.callAmount) + ")"
-                                    )
-                                  ]
-                                ),
-                            _vm._v(" "),
-                            _vm.max_bet == 0
-                              ? _c(
-                                  "button",
-                                  {
-                                    staticClass: "btn act-button",
-                                    on: {
-                                      click: function($event) {
-                                        return _vm.act(2, _vm.amount)
-                                      }
-                                    }
-                                  },
-                                  [_vm._v("Bet(" + _vm._s(_vm.amount) + ")")]
-                                )
-                              : _c(
-                                  "button",
-                                  {
-                                    staticClass: "btn act-button",
-                                    on: {
-                                      click: function($event) {
-                                        return _vm.act(
-                                          3,
-                                          _vm.amount - _vm.player.betting
-                                        )
-                                      }
-                                    }
-                                  },
-                                  [_vm._v("Raise(" + _vm._s(_vm.amount) + ")")]
-                                ),
-                            _vm._v(" "),
-                            _c(
+                              )
+                            ]
+                          )
+                        ])
+                      ]
+                    )
+                  : _vm._e(),
+                _vm._v(" "),
+                _vm.my_turn
+                  ? _c("div", { staticClass: "user-panel" }, [
+                      _c("div", { staticClass: "pot-buttons" }, [
+                        _c(
+                          "button",
+                          {
+                            staticClass: "btn pot-button",
+                            on: {
+                              click: function($event) {
+                                return _vm.changeAmount(1)
+                              }
+                            }
+                          },
+                          [_vm._v("1/3")]
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "button",
+                          {
+                            staticClass: "btn pot-button",
+                            on: {
+                              click: function($event) {
+                                return _vm.changeAmount(2)
+                              }
+                            }
+                          },
+                          [_vm._v("1/2")]
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "button",
+                          {
+                            staticClass: "btn pot-button",
+                            on: {
+                              click: function($event) {
+                                return _vm.changeAmount(3)
+                              }
+                            }
+                          },
+                          [_vm._v("3/4")]
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "button",
+                          {
+                            staticClass: "btn pot-button",
+                            on: {
+                              click: function($event) {
+                                return _vm.changeAmount(4)
+                              }
+                            }
+                          },
+                          [_vm._v("POT")]
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "button",
+                          {
+                            staticClass: "btn pot-button",
+                            on: {
+                              click: function($event) {
+                                return _vm.changeAmount(5)
+                              }
+                            }
+                          },
+                          [_vm._v("All in")]
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "amount" }, [
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.amount,
+                              expression: "amount"
+                            }
+                          ],
+                          staticClass: "range-input",
+                          attrs: {
+                            type: "range",
+                            min: _vm.minAmount,
+                            max: _vm.player.stack
+                          },
+                          domProps: { value: _vm.amount },
+                          on: {
+                            input: function() {
+                              _vm.input = _vm.amount
+                            },
+                            __r: function($event) {
+                              _vm.amount = $event.target.value
+                            }
+                          }
+                        }),
+                        _vm._v(" "),
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.input,
+                              expression: "input"
+                            }
+                          ],
+                          staticClass: "amount-input",
+                          attrs: { type: "text" },
+                          domProps: { value: _vm.input },
+                          on: {
+                            keyup: function($event) {
+                              return _vm.setAmount()
+                            },
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.input = $event.target.value
+                            }
+                          }
+                        })
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "buttons" }, [
+                        _vm.max_bet == _vm.player.betting
+                          ? _c(
                               "button",
                               {
                                 staticClass: "btn act-button",
                                 on: {
                                   click: function($event) {
-                                    return _vm.act(4, 0)
+                                    return _vm.act(0, 0)
                                   }
                                 }
                               },
-                              [_vm._v("Fold")]
+                              [_vm._v("Check")]
                             )
-                          ])
-                        ])
-                      : _vm._e()
-                  ]
-                : _vm._e()
-            ],
-            2
-          ),
-          _vm._v(" "),
-          _c(
-            "div",
-            {
-              staticClass: "history",
-              attrs: { id: "messages" },
-              on: {
-                "": function($event) {
-                  return _vm.scrollDown()
-                }
-              }
-            },
-            _vm._l(_vm.messages, function(message, index) {
-              return _c("p", {
-                key: index,
-                domProps: { innerHTML: _vm._s(message) }
-              })
-            }),
-            0
-          )
-        ]),
-        _vm._v(" "),
-        _c("div", { staticClass: "row" }, [
-          _c(
-            "ul",
-            _vm._l(_vm.players, function(player) {
-              return _c("li", { key: player.id }, [
-                _vm._v(
-                  "\n                    " +
-                    _vm._s(player.user.nickname) +
-                    "\n                "
-                )
-              ])
-            }),
-            0
-          )
-        ]),
-        _vm._v(" "),
-        _c("div", { staticClass: "row" }, [
-          _c(
-            "button",
-            {
-              on: {
-                click: function($event) {
-                  return _vm.sit(_vm.tournament_id)
-                }
-              }
-            },
-            [_vm._v("Join")]
-          ),
-          _vm._v(" "),
-          _c(
-            "button",
-            {
-              on: {
-                click: function($event) {
-                  return _vm.orderArray()
-                }
-              }
-            },
-            [_vm._v("order")]
-          ),
-          _vm._v(" "),
-          _c(
-            "button",
-            {
-              on: {
-                click: function($event) {
-                  return _vm.getData()
-                }
-              }
-            },
-            [_vm._v("order")]
-          )
-        ]),
-        _vm._v(" "),
-        _c("div", { staticClass: "row" }, [
-          _c("ul", [
-            _c("li", [_vm._v("my turn: " + _vm._s(_vm.my_turn))]),
-            _vm._v(" "),
-            _c("li", [_vm._v("players: " + _vm._s(_vm.players))]),
-            _vm._v(" "),
-            _c("li", [_vm._v("players_show: " + _vm._s(_vm.players_show))]),
-            _vm._v(" "),
-            _c("li", [_vm._v("player: " + _vm._s(_vm.player))]),
-            _vm._v(" "),
-            _c("li", [_vm._v("tournament: " + _vm._s(_vm.tournament))]),
-            _vm._v(" "),
-            _c("li", [_vm._v("round: " + _vm._s(_vm.round))]),
-            _vm._v(" "),
-            _c("li", [_vm._v("betround: " + _vm._s(_vm.bet_round))]),
-            _vm._v(" "),
-            _c("li", [_vm._v("board cards: " + _vm._s(_vm.board_cards))]),
-            _vm._v(" "),
-            _c("li", [_vm._v("player cards:  " + _vm._s(_vm.player_cards))]),
-            _vm._v(" "),
-            _c("li", [_vm._v("pot: " + _vm._s(_vm.pot))]),
-            _vm._v(" "),
-            _c("li", [_vm._v("amount: " + _vm._s(_vm.amount))]),
-            _vm._v(" "),
-            _c("li", [_vm._v("max: " + _vm._s(_vm.max_bet))]),
-            _vm._v(" "),
-            _c("li", [_vm._v("bb: " + _vm._s(_vm.round.bb))]),
-            _vm._v(" "),
-            _c("li", [_vm._v("min: " + _vm._s(_vm.minimum_bet))]),
-            _vm._v(" "),
-            _c("li", [_vm._v("minamount: " + _vm._s(_vm.minAmount))])
-          ])
-        ])
-      ])
-    : _c("div", [_vm._v("\ntournament finished\n")])
+                          : _c(
+                              "button",
+                              {
+                                staticClass: "btn act-button",
+                                on: {
+                                  click: function($event) {
+                                    return _vm.act(1, _vm.callAmount)
+                                  }
+                                }
+                              },
+                              [_vm._v("Call(" + _vm._s(_vm.callAmount) + ")")]
+                            ),
+                        _vm._v(" "),
+                        _vm.max_bet == 0
+                          ? _c(
+                              "button",
+                              {
+                                staticClass: "btn act-button",
+                                on: {
+                                  click: function($event) {
+                                    return _vm.act(2, _vm.amount)
+                                  }
+                                }
+                              },
+                              [_vm._v("Bet(" + _vm._s(_vm.amount) + ")")]
+                            )
+                          : _c(
+                              "button",
+                              {
+                                staticClass: "btn act-button",
+                                on: {
+                                  click: function($event) {
+                                    return _vm.act(
+                                      3,
+                                      _vm.amount - _vm.player.betting
+                                    )
+                                  }
+                                }
+                              },
+                              [_vm._v("Raise(" + _vm._s(_vm.amount) + ")")]
+                            ),
+                        _vm._v(" "),
+                        _c(
+                          "button",
+                          {
+                            staticClass: "btn act-button",
+                            on: {
+                              click: function($event) {
+                                return _vm.act(4, 0)
+                              }
+                            }
+                          },
+                          [_vm._v("Fold")]
+                        )
+                      ])
+                    ])
+                  : _vm._e()
+              ]
+            : _vm._e()
+        ],
+        2
+      ),
+      _vm._v(" "),
+      _c("div", { staticClass: "history-head" }, [
+        _vm._v("History of actions")
+      ]),
+      _vm._v(" "),
+      _c(
+        "div",
+        {
+          staticClass: "history",
+          attrs: { id: "messages" },
+          on: {
+            "": function($event) {
+              return _vm.scrollDown()
+            }
+          }
+        },
+        _vm._l(_vm.messages, function(message, index) {
+          return _c("p", {
+            key: index,
+            domProps: { innerHTML: _vm._s(message) }
+          })
+        }),
+        0
+      )
+    ])
+  ])
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -48506,56 +48440,53 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", { staticClass: "container" }, [
-    _c("div", { staticClass: "row justify-content-center" }, [
-      _c(
-        "table",
-        { staticClass: "table table-bordered" },
-        [
-          _vm._m(0),
-          _vm._v(" "),
+    _c("div", { staticClass: "row" }, [
+      _c("h1", { staticClass: "title" }, [_vm._v("Tournaments")]),
+      _vm._v(" "),
+      _c("table", { staticClass: "table table-dark table-hover" }, [
+        _vm._m(0),
+        _vm._v(" "),
+        _c(
+          "tbody",
           _vm._l(_vm.tournaments, function(tournament) {
-            return _c("tr", { key: tournament.id }, [
-              _c("td", [_vm._v(_vm._s(tournament.title))]),
-              _vm._v(" "),
-              _c("td", [
-                _vm._v(
-                  _vm._s(tournament.bb_start_value) +
-                    " / " +
-                    _vm._s(tournament.bb_start_value / 2)
-                )
-              ]),
-              _vm._v(" "),
-              _c("td", [_vm._v(_vm._s(tournament.initial_stack))]),
-              _vm._v(" "),
-              _c("td", [_vm._v(_vm._s(tournament.buy_in))]),
-              _vm._v(" "),
-              _c("td", [
-                _vm._v(
-                  _vm._s(tournament.players_count) +
-                    "/" +
-                    _vm._s(tournament.players_number)
-                )
-              ]),
-              _vm._v(" "),
-              _c("td", [
-                _c(
-                  "button",
-                  {
-                    staticClass: "btn join-btn",
-                    on: {
-                      click: function($event) {
-                        return _vm.join(tournament.id)
-                      }
-                    }
-                  },
-                  [_vm._v("Join")]
-                )
-              ])
-            ])
-          })
-        ],
-        2
-      ),
+            return _c(
+              "tr",
+              {
+                key: tournament.id,
+                on: {
+                  click: function($event) {
+                    return _vm.join(tournament.id)
+                  }
+                }
+              },
+              [
+                _c("td", [_vm._v(_vm._s(tournament.title))]),
+                _vm._v(" "),
+                _c("td", [
+                  _vm._v(
+                    _vm._s(tournament.bb_start_value) +
+                      " / " +
+                      _vm._s(tournament.bb_start_value / 2)
+                  )
+                ]),
+                _vm._v(" "),
+                _c("td", [_vm._v(_vm._s(tournament.initial_stack))]),
+                _vm._v(" "),
+                _c("td", [_vm._v(_vm._s(tournament.buy_in))]),
+                _vm._v(" "),
+                _c("td", [
+                  _vm._v(
+                    _vm._s(tournament.players_count) +
+                      "/" +
+                      _vm._s(tournament.players_number)
+                  )
+                ])
+              ]
+            )
+          }),
+          0
+        )
+      ]),
       _vm._v(" "),
       _c(
         "button",
@@ -48577,13 +48508,14 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("tr", [
-      _c("th", [_vm._v("Title")]),
-      _c("th", [_vm._v("BB/SB")]),
-      _c("th", [_vm._v("Initial stack")]),
-      _c("th", [_vm._v("Buy in")]),
-      _c("th", [_vm._v("players")]),
-      _c("th", [_vm._v("join")])
+    return _c("thead", { staticClass: "thead-light" }, [
+      _c("tr", [
+        _c("th", { staticStyle: { width: "40%" } }, [_vm._v("Title")]),
+        _c("th", [_vm._v("BB/SB")]),
+        _c("th", [_vm._v("Initial stack")]),
+        _c("th", [_vm._v("Buy in")]),
+        _c("th", [_vm._v("Players")])
+      ])
     ])
   }
 ]

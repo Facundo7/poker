@@ -36,6 +36,17 @@ class TournamentController extends Controller
      */
     public function store(Request $request)
     {
+
+
+        $request->validate([
+            'title' => 'required|unique:tournaments|max:50',
+            'bb' => 'required|integer',
+            'initial_stack' => 'required|integer',
+            'turn_seconds' => 'required|integer',
+            'players_number' => 'required|integer',
+            'buy_in' => 'required|numeric',
+        ]);
+
         $request['bb_start_value']=$request->bb;
         Tournament::create($request->toArray());
 

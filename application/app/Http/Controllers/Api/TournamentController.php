@@ -37,7 +37,7 @@ class TournamentController extends Controller
      */
     public function show(Tournament $tournament)
     {
-        return $tournament->toJson();
+        return Tournament::withCount('players')->find($tournament->id);
     }
 
     /**
@@ -84,11 +84,14 @@ class TournamentController extends Controller
 
     public function playerLogged(Tournament $tournament){
 
+        if($tournament->currentRound){
         return $tournament->playerLogged()->with(['cards' => function($query) use ($tournament){
 
             $query->where('round_id', $tournament->currentRound->id);
 
         }])->first();
+        }
+        else return $tournament->playerLogged;
 
     }
 

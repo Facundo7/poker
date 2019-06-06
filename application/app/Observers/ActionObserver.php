@@ -44,7 +44,7 @@ class ActionObserver
                 $notAllinBetting=0;
             }
 
-            if($tournament->playingPlayers()->where('stack', ">", 0)->whereColumn('stack','=','betting')->count()>1)
+            if($tournament->playingPlayers()->where('stack', ">", 0)->whereColumn('stack','=','betting')->count()>=1)
             {
                 $allinBetting=$tournament->playingPlayers()->where('stack', ">", 0)->whereColumn('stack','=','betting')->max('betting');
             }else

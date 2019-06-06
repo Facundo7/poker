@@ -9,6 +9,7 @@ use App\Facades\Game;
 use App\Facades\Evaluation;
 use App\Events\ShowDown;
 use App\Facades\RoundTool;
+use App\Events\TournamentFinished;
 
 class FinishRound
 {
@@ -55,6 +56,7 @@ class FinishRound
         Game::changeButton($tournament);
         if($tournament->alivePlayers()->count()==1){
             Game::finishTournament($tournament);
+            event(new TournamentFinished($tournament));
         }else{
             RoundTool::createRound($tournament);
         }

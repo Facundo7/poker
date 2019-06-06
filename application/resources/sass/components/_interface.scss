@@ -43,11 +43,26 @@ body{
     width: 300px;
     height: 400px;
     position: absolute;
-    top:15px;
+    top:55px;
     right:15px;
     overflow: auto;
     padding:10px;
-    border-radius: 5px;
+    border-radius: 0px 0px 5px 5px;
+
+}
+
+.history-head{
+
+    position: absolute;
+    top:25px;
+    right:15px;
+    height: 30px;
+    width: 300px;
+    background-color: black;
+    padding:10px;
+    border-radius: 5px 5px 0px 0px;
+    border-bottom: 1px solid white;
+
 
 }
 
@@ -87,6 +102,44 @@ padding: 0px 0px;
 width: 32px;
 text-align: center;
 
+
+}
+
+.join-btn{
+
+    background-color: black;
+    color: white;
+    position: absolute;
+    width: 150px;
+    height: 50px;
+    font-size: 1.5em;
+    top:175px;
+    left:325px;
+    z-index: 200;
+}
+
+.exit-btn{
+
+    background-color: white;
+    margin-bottom: 8px;
+    font-size: 1em;
+    width: 75%;
+    color:black;
+
+}
+
+.sign{
+
+    background-color: black;
+    color: white;
+    position: absolute;
+    width: 300px;
+    font-size: 1.5em;
+    top:175px;
+    left:250px;
+    border-radius: 15px;
+    text-align: center;
+    z-index: 205;
 
 }
 
@@ -209,11 +262,13 @@ text-align: center;
 }
 .mini-card1{
     transform: rotate(-10deg);
-    right:15px;
+    right:18px;
+    z-index: 30;
 }
 .mini-card2{
     transform: rotate(10deg);
     right:10px;
+    z-index: 29;
 }
 
 .button, .sb, .bb{
@@ -376,8 +431,7 @@ div[class^='sits'] {
 
 
     position: absolute;
-    top: -3px;
-    left: -3px;
+
     }
 
 

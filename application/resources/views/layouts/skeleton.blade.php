@@ -10,6 +10,10 @@
     </head>
     <body>
         @routes
+        <form method="POST" action="{{ route('logout') }}" class="logout">
+            @csrf
+            <button class="btn logout-btn" type="submit">Logout</button>
+        </form>
         <div id="app">
         @yield('content')
         </div>

@@ -1,16 +1,21 @@
 <template>
     <div class="container">
-        <div class="row justify-content-center">
-            <table class="table table-bordered">
-                <tr><th>Title</th><th>BB/SB</th><th>Initial stack</th><th>Buy in</th><th>players</th><th>join</th></tr>
-                <tr v-for="tournament in tournaments" v-bind:key="tournament.id">
+        <div class="row">
+            <h1 class="title">Tournaments</h1>
+            <table class="table table-dark table-hover">
+                <thead class="thead-light">
+                <tr><th style="width: 40%">Title</th><th>BB/SB</th><th>Initial stack</th><th>Buy in</th><th>Players</th></tr>
+                </thead>
+                <tbody>
+                <tr v-for="tournament in tournaments" v-bind:key="tournament.id" @click="join(tournament.id)">
                     <td>{{tournament.title}}</td>
                     <td>{{tournament.bb_start_value}} / {{tournament.bb_start_value / 2}}</td>
                     <td>{{tournament.initial_stack}}</td>
                     <td>{{tournament.buy_in}}</td>
                     <td>{{tournament.players_count}}/{{tournament.players_number}}</td>
-                    <td><button class="btn join-btn" @click="join(tournament.id)">Join</button></td>
+
                 </tr>
+                </tbody>
             </table>
             <button class="btn create-btn" @click="newTournament() ">New Tournament</button>
         </div>
