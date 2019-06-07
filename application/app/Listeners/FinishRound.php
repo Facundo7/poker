@@ -49,7 +49,6 @@ class FinishRound
             Evaluation::evaluateCards($tournament, $players);
         }
 
-
         $event->round->current=false;
         $event->round->save();
         Game::killPlayers($tournament);

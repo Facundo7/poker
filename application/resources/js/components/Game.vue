@@ -83,44 +83,8 @@
                 <p v-for="(message, index) in messages" :key="index" v-html="message"></p>
             </div>
         </div>
-
-        <!-- <div class="row">
-            <ul>
-                <li v-for="player in players" :key="player.id">
-                    {{player.user.nickname}}
-                </li>
-            </ul>
-        </div> -->
-        <!-- <div class="row">
-            <button @click="sit(tournament_id)">Join</button>
-            <button @click="orderArray()">order</button>
-            <button @click="getData()">order</button>
-        </div> -->
-        <!-- <div class="row">
-            <ul>
-                <li>my turn: {{my_turn}}</li>
-                <li>players: {{players}}</li>
-                <li>players_show: {{players_show}}</li>
-                <li>player: {{player}}</li>
-                <li>tournament: {{tournament}}</li>
-                <li>round: {{round}}</li>
-                <li>betround: {{bet_round}}</li>
-                <li>board cards: {{board_cards}}</li>
-                <li>player cards:  {{player_cards}}</li>
-                <li>pot: {{pot}}</li>
-                <li>amount: {{amount}}</li>
-                <li>max: {{max_bet}}</li>
-                <li>bb: {{round.bb}}</li>
-                <li>min: {{minimum_bet}}</li>
-                <li>minamount: {{minAmount}}</li>
-            </ul>
-        </div> -->
     </div>
 </template>
-
-
-
-
 
 <script>
     export default {
@@ -331,15 +295,12 @@
                             allin=false;
                         }
                     }
-
                     if(allin){
                         return true;
                     }else {
                         return false;
                     }
-
                 }
-
             },
             sit(id){
                 var self = this;
@@ -348,7 +309,6 @@
                 })
                 .then(function (response) {
                 console.log(response);
-                //self.getData();
                 });
             },
             setClass(){
@@ -432,32 +392,22 @@
 
             },
             updateAmount(){
-                // if(this.max_bet!=0){
-                //         if(this.max_bet+this.minimum_bet<this.player.stack)
-                //             this.amount=this.max_bet+this.minimum_bet;
-                //             else this.amount=this.player.stack;
-                //         }else {
-                //             if(this.max_bet-this.player.betting+this.minimum_bet<this.player.tack)
-                //             this.amount=this.max_bet-this.player.betting+this.minimum_bet;
-                //             else this.amount=this.player.stack;
-                //         }
-                        this.amount=this.minAmount;
-                        this.input=this.amount;
+                this.amount=this.minAmount;
+                this.input=this.amount;
             },
             addAction(action, nickname){
 
                 if(action.action!=5){
 
-                var newRow=nickname+" "+this.verbs[action.action];
+                    var newRow=nickname+" "+this.verbs[action.action];
 
-                if(action.action==3){
+                    if(action.action==3){
                     newRow+=" "+action.player.betting;
-                }else if(action.action==1||action.action==2){
+                    }else if(action.action==1||action.action==2){
                     newRow+=" "+action.amount;
-                }
+                    }
 
-                this.messages.push(newRow);
-
+                    this.messages.push(newRow);
 
                 }else console.log('all in');
             },
@@ -465,14 +415,11 @@
 
                 var showdown="<div class='showdown'><p>";
 
-
                 for(var i=0; i<5; i++){
                     showdown+="<span class='lilcard'>"+this.values[this.board_cards[i].card.value-2]+
                               "<span style='color:"+this.colors[this.board_cards[i].card.suit-1]+"'>"+this.icons[this.board_cards[i].card.suit-1]+"</span></span> ";
                 }
-
                 showdown+="</p>";
-
                 for (var i=0;i<players.length; i++) {
 
                     showdown+="<p>"+
@@ -481,38 +428,30 @@
                         "<span style='color:"+this.colors[players[i].cards[0].card.suit-1]+"'>"+this.icons[players[i].cards[0].card.suit-1]+"</span></span> <span class='lilcard'>"+
                         this.values[players[i].cards[1].card.value-2]+
                         "<span style='color:"+this.colors[players[i].cards[1].card.suit-1]+"'>"+this.icons[players[i].cards[1].card.suit-1]+"</span></span></p>";
-
                 }
 
                 var self=this;
                 setTimeout(function(){
                     self.messages.push(showdown);
                 },1000);
-
             },
             automaticAction(){
-
                 if(this.max_bet==this.player.betting)
                     this.act(0,0);
                 else
                     this.act(4,0);
-
             },
             updatePlayers(players){
                 this.players=players;
             },
             updateRound(round){
-
                 this.round=round;
             },
             updateBetRound(bet_round){
-
                 this.bet_round=bet_round;
             },
             updatePlayer(players){
-
                 for(var i=0; i<players.length;i++){
-
                     if(players[i].id==this.player.id){
                         this.player.betting=players[i].betting;
                         this.player.stack=players[i].stack;
@@ -523,9 +462,7 @@
                 }
             },
             exit(){
-
                 window.location.href=(route('home'));
-
             },
             listen(){
                 Echo.channel('tournament.'+this.tournament_id)
@@ -577,7 +514,6 @@
                     this.round='';
                     this.getData();
                 });
-
             }
         }
     }

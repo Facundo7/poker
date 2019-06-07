@@ -22,16 +22,8 @@ class ActionObserver
 
         $tournament=$action->betRound->round->tournament;
         $bet_round=$action->betRound;
-
-
-
-
         BetRoundTool::nextTurn($tournament);
         Game::updatePlayer($action);
-
-
-
-
         //check if bet round finished
 
         if($tournament->playingPlayers()->count()>1){

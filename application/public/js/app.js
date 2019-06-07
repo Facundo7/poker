@@ -1851,42 +1851,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "game",
   props: ['tournament_id'],
@@ -2095,7 +2059,7 @@ __webpack_require__.r(__webpack_exports__);
       axios.post(route('api.players.store'), {
         tournament_id: this.tournament_id
       }).then(function (response) {
-        console.log(response); //self.getData();
+        console.log(response);
       });
     },
     setClass: function setClass() {
@@ -2186,15 +2150,6 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     updateAmount: function updateAmount() {
-      // if(this.max_bet!=0){
-      //         if(this.max_bet+this.minimum_bet<this.player.stack)
-      //             this.amount=this.max_bet+this.minimum_bet;
-      //             else this.amount=this.player.stack;
-      //         }else {
-      //             if(this.max_bet-this.player.betting+this.minimum_bet<this.player.tack)
-      //             this.amount=this.max_bet-this.player.betting+this.minimum_bet;
-      //             else this.amount=this.player.stack;
-      //         }
       this.amount = this.minAmount;
       this.input = this.amount;
     },
@@ -2338,7 +2293,6 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-//
 //
 //
 //

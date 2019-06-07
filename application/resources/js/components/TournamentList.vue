@@ -13,7 +13,6 @@
                     <td>{{tournament.initial_stack}}</td>
                     <td>{{tournament.buy_in}}</td>
                     <td>{{tournament.players_count}}/{{tournament.players_number}}</td>
-
                 </tr>
                 </tbody>
             </table>
@@ -43,9 +42,7 @@
                 window.location.href=(route('tournaments.show',id));
             },
             newTournament(){
-
                 window.location.href=(route('tournaments.create'));
-
             }
         }
     }

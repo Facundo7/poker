@@ -64,7 +64,6 @@ class BetRoundTool
         }
     }
 
-
     public function nextTurn(Tournament $tournament){
 
         $players=$tournament->playingPlayers()->orderBy('sit')->get();

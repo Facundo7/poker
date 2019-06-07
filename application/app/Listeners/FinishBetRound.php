@@ -37,9 +37,7 @@ class FinishBetRound
 
         if($tournament->playingPlayers()->count()==1)
         {
-
             event(new RoundFinished($tournament->currentRound));
-
         }else if($bet_round->bet_phase<3){
             //not river
             BetRoundTool::createBetRound($bet_round->round, $bet_round->bet_phase+1);
