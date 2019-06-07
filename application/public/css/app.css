@@ -10896,7 +10896,7 @@ body {
 .mini-card1 {
   -webkit-transform: rotate(-10deg);
           transform: rotate(-10deg);
-  right: 18px;
+  right: 15px;
   z-index: 30;
 }
 
@@ -10904,7 +10904,7 @@ body {
   -webkit-transform: rotate(10deg);
           transform: rotate(10deg);
   right: 10px;
-  z-index: 29;
+  z-index: 31;
 }
 
 .button,
